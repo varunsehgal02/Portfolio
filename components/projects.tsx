@@ -22,14 +22,7 @@ export default function Projects() {
 
   // EDIT: Update your projects here
   const projects = [
-    {
-      title: "Figma ",
-      description: "Design created in Figma with modern UI elements and responsive layouts.",
-      image: "figam_p.jpg",
-      tags: ["Figma"],
-      // liveUrl: "https://github.com/varunsehgal02/Figma-Portfolio",
-      githubUrl: "https://github.com/varunsehgal02/Figma-Portfolio",
-    },
+    
     {
       title: "ThreeJs",
       description: "Interactive 3D web experience built with Three.js and JavaScript.",
