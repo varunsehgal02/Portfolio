@@ -85,15 +85,15 @@ export default function Hero() {
     controls.dampingFactor = 0.05
     controls.enableZoom = false
     controls.autoRotate = true
-    controls.autoRotateSpeed = 0.5
+    controls.autoRotateSpeed =1.7
 
     // Mouse movement effect for particles
     let mouseX = 0
     let mouseY = 0
 
     function onDocumentMouseMove(event: MouseEvent) {
-      mouseX = (event.clientX - window.innerWidth / 2) / 5000
-      mouseY = (event.clientY - window.innerHeight / 2) / 5000
+      mouseX = (event.clientX - window.innerWidth / 2) / 70000
+      mouseY = (event.clientY - window.innerHeight / 2) / 70000
     }
 
     document.addEventListener("mousemove", onDocumentMouseMove)
