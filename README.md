@@ -62,7 +62,7 @@ Just place your `resume.pdf` inside the `public/` folder.
 git clone https://github.com/varunsehgal02/Portfolio.git
 cd your-repo-name
 2. Install dependencies
-\
+
 npm install
 # or
 yarn install
@@ -71,24 +71,4 @@ yarn install
 npm run dev
 Then open http://localhost:3000 in your browser.
 
-📦 Production Build
 
-npm run build
-npm start
-📤 Deployment
-🚀 Netlify (used)
-Connect your GitHub repo to Netlify
-
-Set build command: npm run build
-
-Set publish directory: .next
-
-🚀 Vercel (alternative)
-Go to vercel.com
-
-Import your repo and deploy
-
-✨ Author
-Made with ❤️ by Varun Sehgal
-
-🌐 Portfolio Website
