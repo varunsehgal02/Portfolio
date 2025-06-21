@@ -44,16 +44,6 @@ portfolio-update-with-resume/
 
 ---
 
-## 📄 Resume Download Feature
-
-Your resume is accessible at:
-
-📄 [https://varun-sehgal.netlify.app/resume.pdf](https://varun-sehgal.netlify.app/resume.pdf)
-
-Just place your `resume.pdf` inside the `public/` folder.
-
----
-
 ## 🧪 Getting Started Locally
 
 ### 1. Clone the repository
