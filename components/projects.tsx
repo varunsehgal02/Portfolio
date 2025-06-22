@@ -30,38 +30,10 @@ export default function Projects() {
       // liveUrl: "https://github.com/varunsehgal02/Figma-Portfolio",
       githubUrl: "https://github.com/varunsehgal02/Figma-Projects",
     },
-    {
-      title: "ThreeJs",
-      description: "Interactive 3D web experience built with Three.js and JavaScript.",
-      image: "three_w.png",
-      tags: ["JavaScript", "Three.js"],
-      // liveUrl: "https://github.com/varunsehgal02/ThreeJs",
-      githubUrl: "https://github.com/varunsehgal02/ThreeJs",
-    },
-    {
-      title: "Open Source",
-      description: "Contributions to open source projects and community initiatives.",
-      image: "open_s.png",
-      tags: ["JavaScript", "HTML", "Css","React.js"],
-      // liveUrl: "https://github.com/varunsehgal02/Open_Source",
-      githubUrl: "https://github.com/varunsehgal02/Open_Source",
-    },
-    {
-      title: "DALLE Clone",
-      description: "A clone of the DALLE image generation platform with custom UI and features.",
-      image: "image_ai.png",
-      tags: ["React.js", "JavaScript","Tailwind"],
-      // liveUrl: "https://github.com/varunsehgal02/Dalle_clone",
-      githubUrl: "https://github.com/varunsehgal02/Dalle_clone",
-    },
-    {
-      title: "Weather Web",
-      description: "A responsive weather application with real-time data and interactive UI.",
-      image: "clould.jpg",
-      tags: ["HTML","Css","JavaScript"],
-      // liveUrl: "https://github.com/varunsehgal02/Weather_Web",
-      githubUrl: "https://github.com/varunsehgal02/Weather_Web",
-    },
+    
+    
+    
+   
 
     {
       title: "Full Stack Web Development Python",
@@ -71,14 +43,7 @@ export default function Projects() {
       // liveUrl: "https://github.com/varunsehgal02/Full-Stack-Web-Development-Python",
       githubUrl: "https://github.com/varunsehgal02/Full-Stack-Web-Development-Python",
     },
-    {
-      title: "Simple Chatbot",
-      description: "A simple chatbot implementation with natural language processing capabilities.",
-      image: "chatbot.jpg",
-      tags: ["JavaScript"],
-      // liveUrl: "https://github.com/varunsehgal02/Simple-Chatbot",
-      githubUrl: "https://github.com/varunsehgal02/Simple-Chatbot",
-    },
+   
     {
       title: "Pokemon Image Generator",
       description: "An application that generates Pokemon images based on user input.",
@@ -95,22 +60,8 @@ export default function Projects() {
       // liveUrl: "https://github.com/varunsehgal02/TheOdinProject",
       githubUrl: "https://github.com/varunsehgal02/TheOdinProject",
     },
-    {
-      title: "GitHub Login Clone",
-      description: "A clone of the GitHub login page with responsive design.",
-      image: "git.jpg",
-      tags: ["HTML","Css","JavaScript"],
-      // liveUrl: "https://github.com/varunsehgal02/Github_login_clone",
-      githubUrl: "https://github.com/varunsehgal02/Github_login_clone",
-    },
-    {
-      title: "Calculator",
-      description: "A simple calculator application with basic arithmetic operations.",
-      image: "ca.jpg",
-      tags: ["HTML","Css","JavaScript"],
-      // liveUrl: "https://github.com/varunsehgal02/CALCULATOR",
-      githubUrl: "https://github.com/varunsehgal02/CALCULATOR",
-    },
+   
+   
   ]
 
   const filteredProjects =
