@@ -15,23 +15,19 @@ export default function About() {
           <div className="order-2 md:order-1">
             <AnimateIn delay={0.2}>
               <p className="text-gray-300 mb-6">
-                I'm a passionate Frontend and UI/UX Developer with expertise in creating visually appealing and
-                user-friendly interfaces. My technical skills include proficiency in React, Next.js, Three.js, and
-                various frontend frameworks, allowing me to build responsive and interactive web applications.
+              I’m a passionate Full Stack Developer with a strong focus on UI/UX, skilled in creating visually appealing, user-friendly web and mobile applications. My expertise spans responsive frontend development with React, Next.js, and Three.js, along with backend development to ensure performance, scalability, and seamless user experiences.
               </p>
             </AnimateIn>
             <AnimateIn delay={0.3}>
               <p className="text-gray-300 mb-6">
-                With a strong foundation in both design and development, I bridge the gap between aesthetics and
-                functionality. I'm experienced in translating Figma designs into pixel-perfect code, optimizing user
-                experiences, and implementing modern UI patterns that enhance usability and engagement.
+              With a solid foundation in both design and development, I bridge the gap between aesthetics and functionality across the full stack. I translate Figma designs into pixel-perfect code, optimize user experiences end to end, and implement modern UI patterns that enhance usability, engagement, and performance.
+
+
               </p>
             </AnimateIn>
             <AnimateIn delay={0.4}>
               <p className="text-gray-300 mb-6">
-                I'm constantly exploring new technologies and design trends to stay at the cutting edge of web
-                development, and I'm passionate about creating solutions that are not only visually stunning but also
-                performant and accessible.
+              Constantly exploring new technologies, frameworks, and design trends, I stay at the forefront of full stack development. I’m passionate about creating solutions that are not only visually stunning but also performant, scalable, and accessible—delivering smooth, impactful user experiences from frontend to backend.
               </p>
             </AnimateIn>
 
