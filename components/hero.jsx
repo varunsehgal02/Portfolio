@@ -1,8 +1,155 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import MouseFollowingModel from "./mouse-following-model"
 
 export default function Hero({ userName }) {
+  const canvasRef = useRef(null)
+  const particlesRef = useRef([])
+  const mouseRef = useRef({ x: 0, y: 0 })
+  const animationRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    // Set canvas size
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resizeCanvas()
+
+    // Create floating particles
+    const createParticles = () => {
+      const particles = []
+      const particleCount = 30
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: Math.random() * 3 + 1,
+          opacity: Math.random() * 0.5 + 0.2,
+          color: Math.random() > 0.5 ? '#ef4444' : '#3b82f6'
+        })
+      }
+
+      return particles
+    }
+
+    particlesRef.current = createParticles()
+
+    // Mouse tracking
+    const handleMouseMove = (event) => {
+      mouseRef.current.x = event.clientX
+      mouseRef.current.y = event.clientY
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("resize", resizeCanvas)
+
+    // Animation loop
+    const animate = () => {
+      animationRef.current = requestAnimationFrame(animate)
+
+      // Clear canvas with fade effect
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const particles = particlesRef.current
+
+      // Update and draw particles
+      particles.forEach((particle) => {
+        // Update position
+        particle.x += particle.vx
+        particle.y += particle.vy
+
+        // Mouse interaction
+        const dx = mouseRef.current.x - particle.x
+        const dy = mouseRef.current.y - particle.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < 100) {
+          const force = (100 - distance) / 100
+          particle.vx += (dx / distance) * force * 0.01
+          particle.vy += (dy / distance) * force * 0.01
+        }
+
+        // Bounce off walls
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
+
+        // Keep in bounds
+        particle.x = Math.max(0, Math.min(canvas.width, particle.x))
+        particle.y = Math.max(0, Math.min(canvas.height, particle.y))
+
+        // Draw particle with glow effect
+        ctx.save()
+        ctx.shadowColor = particle.color
+        ctx.shadowBlur = 10
+        ctx.fillStyle = particle.color
+        ctx.globalAlpha = particle.opacity
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.restore()
+      })
+
+      // Draw connections
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.2)"
+      ctx.lineWidth = 1
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+
+          if (distance < 120) {
+            ctx.globalAlpha = 1 - distance / 120
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.stroke()
+            ctx.globalAlpha = 1
+          }
+        }
+      }
+
+      // Draw connections to mouse
+      particles.forEach((particle) => {
+        const dx = particle.x - mouseRef.current.x
+        const dy = particle.y - mouseRef.current.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < 150) {
+          ctx.strokeStyle = `rgba(239, 68, 68, ${0.6 - distance / 150})`
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(particle.x, particle.y)
+          ctx.lineTo(mouseRef.current.x, mouseRef.current.y)
+          ctx.stroke()
+        }
+      })
+    }
+
+    animate()
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("resize", resizeCanvas)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [])
+
   const handleScroll = (href) => {
     const element = document.querySelector(href)
     if (element) {
@@ -15,21 +162,49 @@ export default function Hero({ userName }) {
       id="home"
       className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center relative overflow-hidden"
     >
+      {/* Interactive Particle Canvas */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{ background: "transparent" }}
+      />
+
+      {/* Enhanced Background Effects */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse" />
       <div
-        className="absolute bottom-20 right-10 w-72 h-72 bg-red-600/5 rounded-full blur-3xl animate-pulse"
+        className="absolute bottom-20 right-10 w-72 h-72 bg-blue-600/5 rounded-full blur-3xl animate-pulse"
         style={{ animationDelay: "1s" }}
       />
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-red-600/5 to-blue-600/5 rounded-full blur-3xl animate-pulse"
+        style={{ animationDelay: "2s" }}
+      />
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-red-500/30 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${4 + Math.random() * 6}s`,
+            }}
+          />
+        ))}
+      </div>
 
       <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center relative z-10">
         {/* Left Content */}
         <div className="flex flex-col gap-6 animate-fade-in-up">
           <div>
-            <p className="text-red-500 font-semibold mb-2 text-lg">Hi, I’m Varun Sehgal 👋</p>
+            <p className="text-red-500 font-semibold mb-2 text-lg animate-text-glow">Hi, I'm Varun Sehgal 👋</p>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 text-balance leading-tight">
-              Frontend & <span className="text-red-500">UI/UX</span> Developer
+              Frontend & <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-blue-500 animate-gradient-text">UI/UX</span> Developer
             </h1>
-            <p className="text-xl text-gray-300 mb-6 text-balance leading-relaxed">
+            <p className="text-xl text-gray-300 mb-6 text-balance leading-relaxed hover:text-white transition-colors duration-300">
               I craft modern, responsive web applications with a focus on user experience and clean design. Specializing
               in React, Tailwind CSS, and Three.js.
             </p>
@@ -38,44 +213,37 @@ export default function Hero({ userName }) {
           <div className="flex gap-4 flex-wrap">
             <button
               onClick={() => handleScroll("#projects")}
-              className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-red-600/50"
+              className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-red-600/50 hover:shadow-2xl group"
             >
-              View My Work
+              <span className="relative z-10">View My Work</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
             </button>
             <button
               onClick={() => handleScroll("#contact")}
-              className="px-8 py-3 border-2 border-red-600 text-white hover:bg-red-600/10 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+              className="px-8 py-3 border-2 border-red-600 text-white hover:bg-red-600/10 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 hover:border-red-500 hover:shadow-lg hover:shadow-red-600/25"
             >
               Get In Touch
             </button>
           </div>
 
-          {/* Social Links */}
+          {/* Enhanced Social Links */}
           <div className="flex gap-6 pt-4">
-            <a
-              href="https://github.com/varunsehgal02"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-red-500 transition-colors duration-300 font-medium"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://linkedin.com/in/varunsehgal02"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-red-500 transition-colors duration-300 font-medium"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://x.com/varunsehgal02"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-red-500 transition-colors duration-300 font-medium"
-            >
-              X
-            </a>
+            {[
+              { name: "GitHub", href: "https://github.com/varunsehgal02", icon: "🐙" },
+              { name: "LinkedIn", href: "https://linkedin.com/in/varunsehgal02", icon: "💼" },
+              { name: "X", href: "https://x.com/varunsehgal02", icon: "🐦" }
+            ].map((social, index) => (
+              <a
+                key={index}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-red-500 transition-all duration-300 font-medium group flex items-center gap-2 hover:scale-110 transform"
+              >
+                <span className="text-lg group-hover:animate-bounce">{social.icon}</span>
+                {social.name}
+              </a>
+            ))}
           </div>
         </div>
 
@@ -107,12 +275,54 @@ export default function Hero({ userName }) {
           }
         }
 
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+            opacity: 0.8;
+          }
+        }
+
+        @keyframes gradient-text {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        @keyframes text-glow {
+          0%, 100% {
+            text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+          }
+          50% {
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.6);
+          }
+        }
+
         .animate-fade-in-up {
           animation: fade-in-up 0.8s ease-out;
         }
 
         .animate-fade-in-right {
           animation: fade-in-right 0.8s ease-out 0.2s both;
+        }
+
+        .animate-float {
+          animation: float linear infinite;
+        }
+
+        .animate-gradient-text {
+          background-size: 200% 200%;
+          animation: gradient-text 3s ease-in-out infinite;
+        }
+
+        .animate-text-glow {
+          animation: text-glow 2s ease-in-out infinite;
         }
       `}</style>
     </section>

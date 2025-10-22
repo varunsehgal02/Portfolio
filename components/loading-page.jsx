@@ -45,7 +45,18 @@ export default function LoadingPage({ onComplete }) {
     rendererRef.current = renderer
     mountRef.current.appendChild(renderer.domElement)
 
-    // Create floating geometric shapes
+    // Mouse tracking
+    const mouse = new THREE.Vector2()
+    const mouseTarget = new THREE.Vector2()
+    let mouseX = 0, mouseY = 0
+
+    const handleMouseMove = (event) => {
+      mouseX = (event.clientX / window.innerWidth) * 2 - 1
+      mouseY = -(event.clientY / window.innerHeight) * 2 + 1
+      mouseTarget.set(mouseX * 10, mouseY * 10, 0)
+    }
+
+    // Create floating geometric shapes with mouse interaction
     const geometries = [
       new THREE.BoxGeometry(0.5, 0.5, 0.5),
       new THREE.SphereGeometry(0.3, 16, 16),
@@ -63,42 +74,78 @@ export default function LoadingPage({ onComplete }) {
     ]
 
     const meshes = []
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) {
       const geometry = geometries[Math.floor(Math.random() * geometries.length)]
       const material = materials[Math.floor(Math.random() * materials.length)]
       const mesh = new THREE.Mesh(geometry, material)
       
-      mesh.position.x = (Math.random() - 0.5) * 20
-      mesh.position.y = (Math.random() - 0.5) * 20
-      mesh.position.z = (Math.random() - 0.5) * 10
+      mesh.position.x = (Math.random() - 0.5) * 25
+      mesh.position.y = (Math.random() - 0.5) * 25
+      mesh.position.z = (Math.random() - 0.5) * 15
       
       mesh.rotation.x = Math.random() * Math.PI
       mesh.rotation.y = Math.random() * Math.PI
+      
+      // Store original position for mouse interaction
+      mesh.userData = {
+        originalX: mesh.position.x,
+        originalY: mesh.position.y,
+        originalZ: mesh.position.z,
+        speed: Math.random() * 0.02 + 0.01
+      }
       
       scene.add(mesh)
       meshes.push(mesh)
     }
 
-    // Create particle system
+    // Create interactive particle system
     const particleGeometry = new THREE.BufferGeometry()
-    const particleCount = 200
+    const particleCount = 300
     const positions = new Float32Array(particleCount * 3)
+    const colors = new Float32Array(particleCount * 3)
 
-    for (let i = 0; i < particleCount * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 50
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3
+      positions[i3] = (Math.random() - 0.5) * 60
+      positions[i3 + 1] = (Math.random() - 0.5) * 60
+      positions[i3 + 2] = (Math.random() - 0.5) * 30
+      
+      // Random colors
+      colors[i3] = Math.random()
+      colors[i3 + 1] = Math.random()
+      colors[i3 + 2] = Math.random()
     }
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
     const particleMaterial = new THREE.PointsMaterial({
-      color: 0xff4444,
-      size: 0.1,
+      size: 0.15,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
+      vertexColors: true,
+      blending: THREE.AdditiveBlending
     })
 
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial)
     scene.add(particleSystem)
+
+    // Create mouse trail particles
+    const trailGeometry = new THREE.BufferGeometry()
+    const trailCount = 50
+    const trailPositions = new Float32Array(trailCount * 3)
+    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3))
+
+    const trailMaterial = new THREE.PointsMaterial({
+      color: 0xff4444,
+      size: 0.3,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending
+    })
+
+    const trailSystem = new THREE.Points(trailGeometry, trailMaterial)
+    scene.add(trailSystem)
 
     // Animation loop
     const animate = () => {
@@ -106,31 +153,78 @@ export default function LoadingPage({ onComplete }) {
 
       const time = Date.now() * 0.001
 
-      // Rotate meshes
+      // Mouse interaction with meshes
       meshes.forEach((mesh, index) => {
-        mesh.rotation.x += 0.01 * (index % 3 + 1)
-        mesh.rotation.y += 0.01 * (index % 2 + 1)
-        mesh.position.y += Math.sin(time + index) * 0.01
+        const distance = Math.sqrt(
+          Math.pow(mesh.position.x - mouseTarget.x, 2) + 
+          Math.pow(mesh.position.y - mouseTarget.y, 2)
+        )
+        
+        if (distance < 8) {
+          const force = (8 - distance) / 8
+          mesh.position.x += (mouseTarget.x - mesh.position.x) * force * 0.02
+          mesh.position.y += (mouseTarget.y - mesh.position.y) * force * 0.02
+          mesh.scale.setScalar(1 + force * 0.5)
+        } else {
+          // Return to original position
+          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.01
+          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.01
+          mesh.scale.setScalar(1)
+        }
+
+        mesh.rotation.x += mesh.userData.speed
+        mesh.rotation.y += mesh.userData.speed * 0.7
+        mesh.position.z += Math.sin(time + index) * 0.005
       })
 
-      // Rotate particle system
-      particleSystem.rotation.y += 0.002
-
-      // Update particle positions
-      const positions = particleGeometry.attributes.position.array
+      // Mouse interaction with particles
+      const particlePositions = particleGeometry.attributes.position.array
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3
-        positions[i3 + 1] += Math.sin(time + i) * 0.01
-        if (positions[i3 + 1] > 25) positions[i3 + 1] = -25
+        const distance = Math.sqrt(
+          Math.pow(particlePositions[i3] - mouseTarget.x, 2) + 
+          Math.pow(particlePositions[i3 + 1] - mouseTarget.y, 2)
+        )
+        
+        if (distance < 15) {
+          const force = (15 - distance) / 15
+          particlePositions[i3] += (mouseTarget.x - particlePositions[i3]) * force * 0.01
+          particlePositions[i3 + 1] += (mouseTarget.y - particlePositions[i3 + 1]) * force * 0.01
+        }
+        
+        particlePositions[i3 + 2] += Math.sin(time + i) * 0.01
+        if (particlePositions[i3 + 2] > 15) particlePositions[i3 + 2] = -15
       }
       particleGeometry.attributes.position.needsUpdate = true
+
+      // Update trail system
+      const trailPositions = trailGeometry.attributes.position.array
+      for (let i = trailCount - 1; i > 0; i--) {
+        const i3 = i * 3
+        const prevI3 = (i - 1) * 3
+        trailPositions[i3] = trailPositions[prevI3]
+        trailPositions[i3 + 1] = trailPositions[prevI3 + 1]
+        trailPositions[i3 + 2] = trailPositions[prevI3 + 2]
+      }
+      
+      // Add new trail point at mouse position
+      trailPositions[0] = mouseTarget.x
+      trailPositions[1] = mouseTarget.y
+      trailPositions[2] = 0
+      
+      trailGeometry.attributes.position.needsUpdate = true
+
+      // Rotate particle system
+      particleSystem.rotation.y += 0.001
 
       renderer.render(scene, camera)
     }
 
     animate()
 
-    // Handle resize
+    // Event listeners
+    window.addEventListener('mousemove', handleMouseMove)
+    
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
@@ -140,6 +234,7 @@ export default function LoadingPage({ onComplete }) {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
