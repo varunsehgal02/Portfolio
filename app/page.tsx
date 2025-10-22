@@ -10,7 +10,7 @@ import Projects from "@/components/projects"
 import Contact from "@/components/contact"
 import LoadingPage from "@/components/loading-page"
 import NetworkEffect from "@/components/network-effect"
-import Fixed3DModel from "@/components/fixed-3d-model"
+import Collapsible3DModel from "@/components/collapsible-3d-model"
 
 export default function Home() {
   const [showLoading, setShowLoading] = useState(true)
@@ -96,8 +96,8 @@ export default function Home() {
             <Contact />
           </div>
 
-          {/* Fixed 3D Model */}
-          <Fixed3DModel />
+          {/* Collapsible 3D Model */}
+          <Collapsible3DModel />
 
           <style jsx>{`
             @keyframes gradient-shift {

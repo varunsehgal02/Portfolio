@@ -107,27 +107,37 @@ export default function LoadingPage({ onComplete }) {
     ]
 
     const meshes = []
-    for (let i = 0; i < 12; i++) {
-      const geometry = geometries[Math.floor(Math.random() * geometries.length)]
-      const material = materials[Math.floor(Math.random() * materials.length)]
+    // Create exactly 4 models with strategic positioning
+    const positions = [
+      { x: -8, y: -5, z: 0 },
+      { x: 8, y: -5, z: 0 },
+      { x: -8, y: 5, z: 0 },
+      { x: 8, y: 5, z: 0 }
+    ]
+    
+    for (let i = 0; i < 4; i++) {
+      const geometry = geometries[i % geometries.length] // Use different geometries
+      const material = materials[i % materials.length] // Use different materials
       const mesh = new THREE.Mesh(geometry, material)
       
-      mesh.position.x = (Math.random() - 0.5) * 25
-      mesh.position.y = (Math.random() - 0.5) * 25
-      mesh.position.z = (Math.random() - 0.5) * 15
+      mesh.position.x = positions[i].x
+      mesh.position.y = positions[i].y
+      mesh.position.z = positions[i].z
       
       mesh.rotation.x = Math.random() * Math.PI
       mesh.rotation.y = Math.random() * Math.PI
       
-      // Store original position and enhanced properties for mouse interaction
+      // Enhanced properties for better mouse interaction
       mesh.userData = {
         originalX: mesh.position.x,
         originalY: mesh.position.y,
         originalZ: mesh.position.z,
-        speed: Math.random() * 0.015 + 0.008,
-        hoverIntensity: Math.random() * 0.5 + 0.5,
-        pulsePhase: Math.random() * Math.PI * 2,
-        scale: Math.random() * 0.3 + 0.7
+        speed: 0.01 + i * 0.005,
+        hoverIntensity: 0.8,
+        pulsePhase: i * Math.PI / 2,
+        scale: 1.2,
+        followMouse: false,
+        mouseInfluence: 0.3
       }
       
       mesh.scale.setScalar(mesh.userData.scale)
@@ -138,15 +148,15 @@ export default function LoadingPage({ onComplete }) {
     // Create optimized interactive particle system
     const particleGeometry = new THREE.BufferGeometry()
     const particleCount = 200
-    const positions = new Float32Array(particleCount * 3)
+    const particlePositions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
     const sizes = new Float32Array(particleCount)
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3
-      positions[i3] = (Math.random() - 0.5) * 80
-      positions[i3 + 1] = (Math.random() - 0.5) * 80
-      positions[i3 + 2] = (Math.random() - 0.5) * 40
+      particlePositions[i3] = (Math.random() - 0.5) * 80
+      particlePositions[i3 + 1] = (Math.random() - 0.5) * 80
+      particlePositions[i3 + 2] = (Math.random() - 0.5) * 40
       
       // Enhanced color palette
       const colorChoice = Math.random()
@@ -161,7 +171,7 @@ export default function LoadingPage({ onComplete }) {
       sizes[i] = Math.random() * 0.2 + 0.1
     }
 
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
     particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
 
@@ -200,48 +210,75 @@ export default function LoadingPage({ onComplete }) {
 
       const time = Date.now() * 0.001
 
-      // Enhanced mouse interaction with meshes
+      // Enhanced mouse interaction with collision prevention
       meshes.forEach((mesh, index) => {
         const distance = Math.sqrt(
           Math.pow(mesh.position.x - mouseTarget.x, 2) + 
           Math.pow(mesh.position.y - mouseTarget.y, 2)
         )
         
-        // Enhanced hover effect with multiple zones
-        if (distance < 12) {
-          const force = (12 - distance) / 12
+        // Store original position for collision detection
+        const originalX = mesh.position.x
+        const originalY = mesh.position.y
+        
+        // Stronger hover effect for better interaction
+        if (distance < 15) {
+          const force = (15 - distance) / 15
           const attractionForce = force * mesh.userData.hoverIntensity
           
-          // Smooth attraction to mouse
-          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.03
-          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.03
+          // Smooth attraction to mouse with stronger influence
+          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.05
+          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.05
           
-          // Dynamic scaling with pulse effect
-          const pulseScale = 1 + force * 0.8 + Math.sin(time * 2 + mesh.userData.pulsePhase) * 0.1
+          // Collision detection with other meshes
+          meshes.forEach((otherMesh, otherIndex) => {
+            if (index !== otherIndex) {
+              const meshDistance = Math.sqrt(
+                Math.pow(mesh.position.x - otherMesh.position.x, 2) + 
+                Math.pow(mesh.position.y - otherMesh.position.y, 2)
+              )
+              
+              // Minimum distance to prevent touching
+              const minDistance = 3.0
+              if (meshDistance < minDistance) {
+                const pushForce = (minDistance - meshDistance) / minDistance
+                const dx = mesh.position.x - otherMesh.position.x
+                const dy = mesh.position.y - otherMesh.position.y
+                const angle = Math.atan2(dy, dx)
+                
+                // Push meshes apart
+                mesh.position.x += Math.cos(angle) * pushForce * 0.1
+                mesh.position.y += Math.sin(angle) * pushForce * 0.1
+              }
+            }
+          })
+          
+          // Dynamic scaling with enhanced pulse effect
+          const pulseScale = 1 + force * 1.2 + Math.sin(time * 3 + mesh.userData.pulsePhase) * 0.2
           mesh.scale.setScalar(mesh.userData.scale * pulseScale)
           
-          // Enhanced rotation speed
-          mesh.rotation.x += mesh.userData.speed * (1 + force * 2)
-          mesh.rotation.y += mesh.userData.speed * 0.7 * (1 + force * 2)
-          mesh.rotation.z += mesh.userData.speed * 0.3 * force
+          // Enhanced rotation with all axes
+          mesh.rotation.x += mesh.userData.speed * (1 + force * 3)
+          mesh.rotation.y += mesh.userData.speed * 0.8 * (1 + force * 3)
+          mesh.rotation.z += mesh.userData.speed * 0.5 * force
           
-          // Color intensity based on distance
-          mesh.material.opacity = 0.8 + force * 0.2
+          // Enhanced color intensity
+          mesh.material.opacity = 0.8 + force * 0.3
         } else {
           // Smooth return to original position
-          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.008
-          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.008
+          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.01
+          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.01
           mesh.scale.setScalar(mesh.userData.scale)
           mesh.material.opacity = 0.8
           
           // Normal rotation
           mesh.rotation.x += mesh.userData.speed
-          mesh.rotation.y += mesh.userData.speed * 0.7
+          mesh.rotation.y += mesh.userData.speed * 0.8
         }
 
-        // Floating motion
-        mesh.position.z += Math.sin(time + index) * 0.008
-        mesh.position.z += Math.cos(time * 0.7 + index) * 0.003
+        // Enhanced floating motion
+        mesh.position.z += Math.sin(time + index * 0.5) * 0.01
+        mesh.position.z += Math.cos(time * 0.8 + index * 0.3) * 0.005
       })
 
       // Enhanced mouse interaction with particles
