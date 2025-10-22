@@ -56,25 +56,58 @@ export default function LoadingPage({ onComplete }) {
       mouseTarget.set(mouseX * 10, mouseY * 10, 0)
     }
 
-    // Create floating geometric shapes with mouse interaction
+    // Create optimized floating geometric shapes with enhanced materials
     const geometries = [
-      new THREE.BoxGeometry(0.5, 0.5, 0.5),
-      new THREE.SphereGeometry(0.3, 16, 16),
-      new THREE.ConeGeometry(0.3, 0.8, 8),
-      new THREE.TorusGeometry(0.3, 0.1, 8, 16),
-      new THREE.OctahedronGeometry(0.4),
+      new THREE.BoxGeometry(0.6, 0.6, 0.6),
+      new THREE.SphereGeometry(0.4, 12, 12),
+      new THREE.ConeGeometry(0.4, 1.0, 6),
+      new THREE.TorusGeometry(0.4, 0.15, 6, 12),
+      new THREE.OctahedronGeometry(0.5),
+      new THREE.TetrahedronGeometry(0.5),
     ]
 
+    // Enhanced materials with better colors and effects
     const materials = [
-      new THREE.MeshBasicMaterial({ color: 0xff4444, wireframe: true }),
-      new THREE.MeshBasicMaterial({ color: 0x44ff44, wireframe: true }),
-      new THREE.MeshBasicMaterial({ color: 0x4444ff, wireframe: true }),
-      new THREE.MeshBasicMaterial({ color: 0xffff44, wireframe: true }),
-      new THREE.MeshBasicMaterial({ color: 0xff44ff, wireframe: true }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0xff4444, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0x00ff88, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0x4488ff, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0xffaa00, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0xff44ff, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
+      new THREE.MeshBasicMaterial({ 
+        color: 0x00ffff, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      }),
     ]
 
     const meshes = []
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 12; i++) {
       const geometry = geometries[Math.floor(Math.random() * geometries.length)]
       const material = materials[Math.floor(Math.random() * materials.length)]
       const mesh = new THREE.Mesh(geometry, material)
@@ -86,45 +119,59 @@ export default function LoadingPage({ onComplete }) {
       mesh.rotation.x = Math.random() * Math.PI
       mesh.rotation.y = Math.random() * Math.PI
       
-      // Store original position for mouse interaction
+      // Store original position and enhanced properties for mouse interaction
       mesh.userData = {
         originalX: mesh.position.x,
         originalY: mesh.position.y,
         originalZ: mesh.position.z,
-        speed: Math.random() * 0.02 + 0.01
+        speed: Math.random() * 0.015 + 0.008,
+        hoverIntensity: Math.random() * 0.5 + 0.5,
+        pulsePhase: Math.random() * Math.PI * 2,
+        scale: Math.random() * 0.3 + 0.7
       }
       
+      mesh.scale.setScalar(mesh.userData.scale)
       scene.add(mesh)
       meshes.push(mesh)
     }
 
-    // Create interactive particle system
+    // Create optimized interactive particle system
     const particleGeometry = new THREE.BufferGeometry()
-    const particleCount = 300
+    const particleCount = 200
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
+    const sizes = new Float32Array(particleCount)
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3
-      positions[i3] = (Math.random() - 0.5) * 60
-      positions[i3 + 1] = (Math.random() - 0.5) * 60
-      positions[i3 + 2] = (Math.random() - 0.5) * 30
+      positions[i3] = (Math.random() - 0.5) * 80
+      positions[i3 + 1] = (Math.random() - 0.5) * 80
+      positions[i3 + 2] = (Math.random() - 0.5) * 40
       
-      // Random colors
-      colors[i3] = Math.random()
-      colors[i3 + 1] = Math.random()
-      colors[i3 + 2] = Math.random()
+      // Enhanced color palette
+      const colorChoice = Math.random()
+      if (colorChoice < 0.3) {
+        colors[i3] = 1.0; colors[i3 + 1] = 0.27; colors[i3 + 2] = 0.27 // Red
+      } else if (colorChoice < 0.6) {
+        colors[i3] = 0.0; colors[i3 + 1] = 0.53; colors[i3 + 2] = 1.0 // Blue
+      } else {
+        colors[i3] = 0.0; colors[i3 + 1] = 1.0; colors[i3 + 2] = 0.53 // Green
+      }
+      
+      sizes[i] = Math.random() * 0.2 + 0.1
     }
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.15,
+      size: 0.2,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       vertexColors: true,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true
     })
 
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial)
@@ -153,32 +200,54 @@ export default function LoadingPage({ onComplete }) {
 
       const time = Date.now() * 0.001
 
-      // Mouse interaction with meshes
+      // Enhanced mouse interaction with meshes
       meshes.forEach((mesh, index) => {
         const distance = Math.sqrt(
           Math.pow(mesh.position.x - mouseTarget.x, 2) + 
           Math.pow(mesh.position.y - mouseTarget.y, 2)
         )
         
-        if (distance < 8) {
-          const force = (8 - distance) / 8
-          mesh.position.x += (mouseTarget.x - mesh.position.x) * force * 0.02
-          mesh.position.y += (mouseTarget.y - mesh.position.y) * force * 0.02
-          mesh.scale.setScalar(1 + force * 0.5)
+        // Enhanced hover effect with multiple zones
+        if (distance < 12) {
+          const force = (12 - distance) / 12
+          const attractionForce = force * mesh.userData.hoverIntensity
+          
+          // Smooth attraction to mouse
+          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.03
+          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.03
+          
+          // Dynamic scaling with pulse effect
+          const pulseScale = 1 + force * 0.8 + Math.sin(time * 2 + mesh.userData.pulsePhase) * 0.1
+          mesh.scale.setScalar(mesh.userData.scale * pulseScale)
+          
+          // Enhanced rotation speed
+          mesh.rotation.x += mesh.userData.speed * (1 + force * 2)
+          mesh.rotation.y += mesh.userData.speed * 0.7 * (1 + force * 2)
+          mesh.rotation.z += mesh.userData.speed * 0.3 * force
+          
+          // Color intensity based on distance
+          mesh.material.opacity = 0.8 + force * 0.2
         } else {
-          // Return to original position
-          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.01
-          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.01
-          mesh.scale.setScalar(1)
+          // Smooth return to original position
+          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.008
+          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.008
+          mesh.scale.setScalar(mesh.userData.scale)
+          mesh.material.opacity = 0.8
+          
+          // Normal rotation
+          mesh.rotation.x += mesh.userData.speed
+          mesh.rotation.y += mesh.userData.speed * 0.7
         }
 
-        mesh.rotation.x += mesh.userData.speed
-        mesh.rotation.y += mesh.userData.speed * 0.7
-        mesh.position.z += Math.sin(time + index) * 0.005
+        // Floating motion
+        mesh.position.z += Math.sin(time + index) * 0.008
+        mesh.position.z += Math.cos(time * 0.7 + index) * 0.003
       })
 
-      // Mouse interaction with particles
+      // Enhanced mouse interaction with particles
       const particlePositions = particleGeometry.attributes.position.array
+      const particleColors = particleGeometry.attributes.color.array
+      
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3
         const distance = Math.sqrt(
@@ -186,16 +255,39 @@ export default function LoadingPage({ onComplete }) {
           Math.pow(particlePositions[i3 + 1] - mouseTarget.y, 2)
         )
         
-        if (distance < 15) {
-          const force = (15 - distance) / 15
-          particlePositions[i3] += (mouseTarget.x - particlePositions[i3]) * force * 0.01
-          particlePositions[i3 + 1] += (mouseTarget.y - particlePositions[i3 + 1]) * force * 0.01
+        // Enhanced particle attraction with multiple zones
+        if (distance < 20) {
+          const force = (20 - distance) / 20
+          const attractionForce = force * 0.015
+          
+          // Smooth attraction to mouse
+          particlePositions[i3] += (mouseTarget.x - particlePositions[i3]) * attractionForce
+          particlePositions[i3 + 1] += (mouseTarget.y - particlePositions[i3 + 1]) * attractionForce
+          
+          // Color intensity based on distance
+          const intensity = 0.5 + force * 0.5
+          particleColors[i3] *= intensity
+          particleColors[i3 + 1] *= intensity
+          particleColors[i3 + 2] *= intensity
+        } else {
+          // Reset color intensity
+          const originalIntensity = 0.7
+          particleColors[i3] = originalIntensity
+          particleColors[i3 + 1] = originalIntensity
+          particleColors[i3 + 2] = originalIntensity
         }
         
-        particlePositions[i3 + 2] += Math.sin(time + i) * 0.01
-        if (particlePositions[i3 + 2] > 15) particlePositions[i3 + 2] = -15
+        // Enhanced floating motion
+        particlePositions[i3 + 2] += Math.sin(time + i * 0.1) * 0.012
+        particlePositions[i3 + 2] += Math.cos(time * 0.8 + i * 0.05) * 0.005
+        
+        // Boundary wrapping
+        if (particlePositions[i3 + 2] > 20) particlePositions[i3 + 2] = -20
+        if (particlePositions[i3 + 2] < -20) particlePositions[i3 + 2] = 20
       }
+      
       particleGeometry.attributes.position.needsUpdate = true
+      particleGeometry.attributes.color.needsUpdate = true
 
       // Update trail system
       const trailPositions = trailGeometry.attributes.position.array

@@ -23,20 +23,24 @@ export default function Hero({ userName }) {
     }
     resizeCanvas()
 
-    // Create floating particles
+    // Create enhanced floating particles with better properties
     const createParticles = () => {
       const particles = []
-      const particleCount = 30
+      const particleCount = 50
 
       for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
-          radius: Math.random() * 3 + 1,
-          opacity: Math.random() * 0.5 + 0.2,
-          color: Math.random() > 0.5 ? '#ef4444' : '#3b82f6'
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          radius: Math.random() * 4 + 1,
+          opacity: Math.random() * 0.7 + 0.3,
+          color: Math.random() > 0.5 ? '#ef4444' : '#3b82f6',
+          pulse: Math.random() * Math.PI * 2,
+          originalRadius: Math.random() * 4 + 1,
+          hoverIntensity: Math.random() * 0.5 + 0.5,
+          trail: []
         })
       }
 
@@ -64,35 +68,78 @@ export default function Hero({ userName }) {
 
       const particles = particlesRef.current
 
-      // Update and draw particles
-      particles.forEach((particle) => {
+      // Enhanced particle update and drawing
+      particles.forEach((particle, index) => {
+        // Update pulse
+        particle.pulse += 0.02
+        
         // Update position
         particle.x += particle.vx
         particle.y += particle.vy
 
-        // Mouse interaction
+        // Enhanced mouse interaction with multiple zones
         const dx = mouseRef.current.x - particle.x
         const dy = mouseRef.current.y - particle.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
-        if (distance < 100) {
-          const force = (100 - distance) / 100
-          particle.vx += (dx / distance) * force * 0.01
-          particle.vy += (dy / distance) * force * 0.01
+        if (distance < 150) {
+          const force = (150 - distance) / 150
+          const attractionForce = force * particle.hoverIntensity * 0.02
+          
+          // Smooth attraction to mouse
+          particle.vx += (dx / distance) * attractionForce
+          particle.vy += (dy / distance) * attractionForce
+          
+          // Dynamic radius based on distance
+          particle.radius = particle.originalRadius + force * 3 + Math.sin(particle.pulse) * 1
+          
+          // Enhanced opacity
+          particle.opacity = Math.min(1, particle.opacity + force * 0.3)
+          
+          // Add to trail
+          particle.trail.push({ x: particle.x, y: particle.y, opacity: force })
+          if (particle.trail.length > 8) particle.trail.shift()
+        } else {
+          // Reset properties
+          particle.radius = particle.originalRadius + Math.sin(particle.pulse) * 0.5
+          particle.opacity = Math.max(0.3, particle.opacity - 0.01)
+          
+          // Clear trail
+          if (particle.trail.length > 0) particle.trail.shift()
         }
 
-        // Bounce off walls
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
+        // Velocity damping
+        particle.vx *= 0.98
+        particle.vy *= 0.98
 
-        // Keep in bounds
-        particle.x = Math.max(0, Math.min(canvas.width, particle.x))
-        particle.y = Math.max(0, Math.min(canvas.height, particle.y))
+        // Bounce off walls with energy loss
+        if (particle.x < 0 || particle.x > canvas.width) {
+          particle.vx *= -0.8
+          particle.x = Math.max(0, Math.min(canvas.width, particle.x))
+        }
+        if (particle.y < 0 || particle.y > canvas.height) {
+          particle.vy *= -0.8
+          particle.y = Math.max(0, Math.min(canvas.height, particle.y))
+        }
 
-        // Draw particle with glow effect
+        // Draw particle trail
+        particle.trail.forEach((point, i) => {
+          const trailOpacity = point.opacity * (i / particle.trail.length) * 0.3
+          ctx.save()
+          ctx.shadowColor = particle.color
+          ctx.shadowBlur = 5
+          ctx.fillStyle = particle.color
+          ctx.globalAlpha = trailOpacity
+          ctx.beginPath()
+          ctx.arc(point.x, point.y, particle.radius * 0.5, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.restore()
+        })
+
+        // Draw main particle with enhanced glow
         ctx.save()
         ctx.shadowColor = particle.color
-        ctx.shadowBlur = 10
+        ctx.shadowBlur = 15 + Math.sin(particle.pulse) * 5
         ctx.fillStyle = particle.color
         ctx.globalAlpha = particle.opacity
         ctx.beginPath()
@@ -101,9 +148,9 @@ export default function Hero({ userName }) {
         ctx.restore()
       })
 
-      // Draw connections
-      ctx.strokeStyle = "rgba(239, 68, 68, 0.2)"
-      ctx.lineWidth = 1
+      // Enhanced connections with dynamic styling
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.15)"
+      ctx.lineWidth = 1.5
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -111,8 +158,9 @@ export default function Hero({ userName }) {
           const dy = particles[i].y - particles[j].y
           const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 120) {
-            ctx.globalAlpha = 1 - distance / 120
+          if (distance < 140) {
+            const opacity = 1 - distance / 140
+            ctx.globalAlpha = opacity * 0.6
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
@@ -122,15 +170,20 @@ export default function Hero({ userName }) {
         }
       }
 
-      // Draw connections to mouse
+      // Enhanced connections to mouse with gradient effect
       particles.forEach((particle) => {
         const dx = particle.x - mouseRef.current.x
         const dy = particle.y - mouseRef.current.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
-        if (distance < 150) {
-          ctx.strokeStyle = `rgba(239, 68, 68, ${0.6 - distance / 150})`
-          ctx.lineWidth = 2
+        if (distance < 180) {
+          const opacity = 0.8 - distance / 180
+          const gradient = ctx.createLinearGradient(particle.x, particle.y, mouseRef.current.x, mouseRef.current.y)
+          gradient.addColorStop(0, `rgba(239, 68, 68, ${opacity})`)
+          gradient.addColorStop(1, `rgba(59, 130, 246, ${opacity * 0.5})`)
+          
+          ctx.strokeStyle = gradient
+          ctx.lineWidth = 2 + opacity * 2
           ctx.beginPath()
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(mouseRef.current.x, mouseRef.current.y)
