@@ -18,13 +18,10 @@ export default function Collapsible3DModel() {
 
   const colors = {
     white: 0xffffff,
-    gray: 0x808080,
-    darkGray: 0x404040,
-    lightGray: 0xc0c0c0,
-    black: 0x000000,
-    silver: 0xc0c0c0,
-    charcoal: 0x36454f,
-    platinum: 0xe5e4e2
+    blue: 0x4488ff,
+    yellow: 0xffff44,
+    green: 0x44ff44,
+    red: 0xff4444
   }
 
   useEffect(() => {
@@ -34,11 +31,11 @@ export default function Collapsible3DModel() {
     const scene = new THREE.Scene()
     sceneRef.current = scene
 
-    const camera = new THREE.PerspectiveCamera(75, 300 / 400, 0.1, 1000)
-    camera.position.z = 5
+    const camera = new THREE.PerspectiveCamera(75, 200 / 250, 0.1, 1000)
+    camera.position.z = 4
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-    renderer.setSize(300, 400)
+    renderer.setSize(200, 250)
     renderer.setClearColor(0x000000, 0)
     rendererRef.current = renderer
     mountRef.current.appendChild(renderer.domElement)
@@ -47,7 +44,7 @@ export default function Collapsible3DModel() {
     const group = new THREE.Group()
     
     // Main central sphere with gradient material
-    const sphereGeometry = new THREE.SphereGeometry(1.2, 32, 32)
+    const sphereGeometry = new THREE.SphereGeometry(0.8, 24, 24)
     const sphereMaterial = new THREE.MeshPhongMaterial({ 
       color: colors[selectedColor],
       shininess: 150,
@@ -59,7 +56,7 @@ export default function Collapsible3DModel() {
 
     // Inner rotating rings
     for (let i = 0; i < 4; i++) {
-      const ringGeometry = new THREE.TorusGeometry(1.8 + i * 0.2, 0.08, 8, 32)
+      const ringGeometry = new THREE.TorusGeometry(1.2 + i * 0.15, 0.05, 6, 24)
       const ringMaterial = new THREE.MeshBasicMaterial({ 
         color: colors[selectedColor],
         transparent: true,
@@ -77,16 +74,16 @@ export default function Collapsible3DModel() {
     }
 
     // Orbiting satellites
-    for (let i = 0; i < 8; i++) {
-      const satelliteGeometry = new THREE.OctahedronGeometry(0.15, 0)
+    for (let i = 0; i < 6; i++) {
+      const satelliteGeometry = new THREE.OctahedronGeometry(0.1, 0)
       const satelliteMaterial = new THREE.MeshPhongMaterial({ 
         color: colors[selectedColor],
         shininess: 100
       })
       const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial)
       
-      const radius = 2.8
-      const angle = (i / 8) * Math.PI * 2
+      const radius = 1.8
+      const angle = (i / 6) * Math.PI * 2
       satellite.position.x = Math.cos(angle) * radius
       satellite.position.y = Math.sin(angle) * radius
       satellite.position.z = Math.sin(angle * 2) * 0.5
@@ -130,8 +127,8 @@ export default function Collapsible3DModel() {
       // Update follow position for follow mode
       if (isFollowing) {
         setFollowPosition({
-          x: event.clientX - 150, // Center the model
-          y: event.clientY - 200
+          x: event.clientX - 100, // Center the smaller model
+          y: event.clientY - 125
         })
       }
     }
@@ -241,25 +238,48 @@ export default function Collapsible3DModel() {
           style={{
             left: followPosition.x,
             top: followPosition.y,
-            width: '300px',
-            height: '400px'
+            width: '200px',
+            height: '250px'
           }}
         >
           <div ref={mountRef} className="w-full h-full" />
         </div>
       )}
 
-      {/* Collapsed state - bottom right corner */}
-      {!isExpanded && !isFollowing && (
-        <div className="fixed bottom-4 right-4 z-30">
-          <button
-            onClick={toggleExpanded}
-            className="w-16 h-16 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center group border border-gray-500"
-          >
-            <div className="w-8 h-8 bg-white rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
+      {/* Model options - always visible on home page */}
+      <div className="fixed bottom-4 right-4 z-30">
+        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 border border-gray-600/50">
+          <div className="flex items-center space-x-2 mb-2">
+            <span className="text-white text-xs">Model Colors:</span>
+            <button
+              onClick={() => setIsFollowing(!isFollowing)}
+              className={`px-2 py-1 text-xs rounded transition-all duration-300 ${
+                isFollowing 
+                  ? 'bg-white text-black' 
+                  : 'bg-gray-600 text-white'
+              }`}
+            >
+              {isFollowing ? 'Following' : 'Follow'}
+            </button>
+          </div>
+          <div className="grid grid-cols-5 gap-1">
+            {Object.keys(colors).map((color) => (
+              <button
+                key={color}
+                onClick={() => handleColorChange(color)}
+                className={`w-6 h-6 rounded-full border transition-all duration-300 hover:scale-110 ${
+                  selectedColor === color 
+                    ? 'border-white shadow-lg' 
+                    : 'border-gray-600 hover:border-gray-400'
+                }`}
+                style={{ backgroundColor: `#${colors[color].toString(16).padStart(6, '0')}` }}
+                title={color}
+              />
+            ))}
+          </div>
         </div>
-      )}
+      </div>
+
 
       {/* Expanded state - popup window */}
       {isExpanded && (

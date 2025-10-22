@@ -6,6 +6,7 @@ export default function About() {
   const canvasRef = useRef(null)
   const particlesRef = useRef([])
   const animationRef = useRef(null)
+  const mouseRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -44,7 +45,14 @@ export default function About() {
 
     particlesRef.current = createParticles()
 
+    // Mouse tracking
+    const handleMouseMove = (event) => {
+      mouseRef.current.x = event.clientX
+      mouseRef.current.y = event.clientY
+    }
+
     window.addEventListener("resize", resizeCanvas)
+    window.addEventListener("mousemove", handleMouseMove)
 
     // Animation loop
     const animate = () => {
@@ -62,6 +70,17 @@ export default function About() {
         particle.x += particle.vx
         particle.y += particle.vy
         particle.pulse += 0.02
+
+        // Slow mouse interaction
+        const dx = mouseRef.current.x - particle.x
+        const dy = mouseRef.current.y - particle.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < 120) {
+          const force = (120 - distance) / 120
+          particle.vx += (dx / distance) * force * 0.003
+          particle.vy += (dy / distance) * force * 0.003
+        }
 
         // Bounce off walls
         if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
@@ -110,6 +129,7 @@ export default function About() {
 
     return () => {
       window.removeEventListener("resize", resizeCanvas)
+      window.removeEventListener("mousemove", handleMouseMove)
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }

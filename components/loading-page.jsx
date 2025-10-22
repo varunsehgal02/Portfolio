@@ -226,9 +226,9 @@ export default function LoadingPage({ onComplete }) {
           const force = (15 - distance) / 15
           const attractionForce = force * mesh.userData.hoverIntensity
           
-          // Smooth attraction to mouse with stronger influence
-          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.05
-          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.05
+          // Smooth attraction to mouse with slower influence
+          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.02
+          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.02
           
           // Collision detection with other meshes
           meshes.forEach((otherMesh, otherIndex) => {

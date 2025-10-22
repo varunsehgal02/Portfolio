@@ -96,9 +96,9 @@ export default function NetworkEffect() {
           const force = (120 - distance) / 120
           const attractionForce = force * particle.hoverIntensity * 0.015
           
-          // Smooth attraction to mouse
-          particle.vx += (dx / distance) * attractionForce
-          particle.vy += (dy / distance) * attractionForce
+          // Smooth attraction to mouse (slower)
+          particle.vx += (dx / distance) * attractionForce * 0.6
+          particle.vy += (dy / distance) * attractionForce * 0.6
           
           // Dynamic radius based on distance
           particle.radius = particle.originalRadius + force * 2 + Math.sin(particle.pulse) * 0.5

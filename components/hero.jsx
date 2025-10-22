@@ -86,9 +86,9 @@ export default function Hero({ userName }) {
           const force = (150 - distance) / 150
           const attractionForce = force * particle.hoverIntensity * 0.02
           
-          // Smooth attraction to mouse
-          particle.vx += (dx / distance) * attractionForce
-          particle.vy += (dy / distance) * attractionForce
+          // Smooth attraction to mouse (slower)
+          particle.vx += (dx / distance) * attractionForce * 0.5
+          particle.vy += (dy / distance) * attractionForce * 0.5
           
           // Dynamic radius based on distance
           particle.radius = particle.originalRadius + force * 3 + Math.sin(particle.pulse) * 1

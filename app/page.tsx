@@ -77,13 +77,9 @@ export default function Home() {
 
       {!showLoading && (
         <main className={`bg-black text-white relative transition-all duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-          <NetworkEffect />
-
-          {/* Enhanced background effects */}
+          {/* Network effect background only */}
           <div className="fixed inset-0 pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-900/5 via-transparent to-blue-900/5 animate-gradient-shift"></div>
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/3 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+            <NetworkEffect />
           </div>
 
           <div className="relative z-10">
