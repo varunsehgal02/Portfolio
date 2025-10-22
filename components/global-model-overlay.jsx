@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useModelContext } from "./model-context"
 
-export default function MouseFollowingModel({ isFollowing, modelColor = "red" }) {
+export default function GlobalModelOverlay() {
   const canvasRef = useRef(null)
-  const mouseRef = useRef({ x: 0, y: 0 })
   const rotationRef = useRef({ x: 0, y: 0 })
   const modelPosRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 })
+  const { isFollowing, modelColor, globalMousePos } = useModelContext()
 
   const colorMap = {
     red: "#ef4444",
@@ -24,24 +25,10 @@ export default function MouseFollowingModel({ isFollowing, modelColor = "red" })
     if (!ctx) return
 
     const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
     }
     resizeCanvas()
-
-    const handleMouseMove = (event) => {
-      const rect = canvas.getBoundingClientRect()
-      mouseRef.current.x = (event.clientX - rect.left) / rect.width
-      mouseRef.current.y = (event.clientY - rect.top) / rect.height
-
-      if (isFollowing) {
-        modelPosRef.current.targetX = (event.clientX - rect.left) / rect.width
-        modelPosRef.current.targetY = (event.clientY - rect.top) / rect.height
-      }
-    }
-
-    window.addEventListener("mousemove", handleMouseMove)
     window.addEventListener("resize", resizeCanvas)
 
     const createSphere = (radius, segments) => {
@@ -88,20 +75,19 @@ export default function MouseFollowingModel({ isFollowing, modelColor = "red" })
 
     const animate = () => {
       if (isFollowing) {
-        modelPosRef.current.x += (modelPosRef.current.targetX - modelPosRef.current.x) * 0.1
-        modelPosRef.current.y += (modelPosRef.current.targetY - modelPosRef.current.y) * 0.1
+        modelPosRef.current.targetX = globalMousePos.x
+        modelPosRef.current.targetY = globalMousePos.y
+        modelPosRef.current.x += (modelPosRef.current.targetX - modelPosRef.current.x) * 0.08
+        modelPosRef.current.y += (modelPosRef.current.targetY - modelPosRef.current.y) * 0.08
       } else {
-        // Return to center when not following
-        modelPosRef.current.x += (0.5 - modelPosRef.current.x) * 0.05
-        modelPosRef.current.y += (0.5 - modelPosRef.current.y) * 0.05
+        modelPosRef.current.x += (0.5 - modelPosRef.current.x) * 0.03
+        modelPosRef.current.y += (0.5 - modelPosRef.current.y) * 0.03
       }
 
-      // Update rotation based on mouse position
-      rotationRef.current.x += (mouseRef.current.y * 2 - rotationRef.current.x) * 0.05
-      rotationRef.current.y += (mouseRef.current.x * 2 - rotationRef.current.y) * 0.05
+      rotationRef.current.x += (globalMousePos.y * 2 - rotationRef.current.x) * 0.05
+      rotationRef.current.y += (globalMousePos.x * 2 - rotationRef.current.y) * 0.05
 
-      ctx.fillStyle = "#000000"
-      ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       const transformedVertices = sphereVertices.map((vertex) => {
         let point = [...vertex]
@@ -112,21 +98,18 @@ export default function MouseFollowingModel({ isFollowing, modelColor = "red" })
         return point
       })
 
-      const centerX = canvas.offsetWidth / 2 + (modelPosRef.current.x - 0.5) * canvas.offsetWidth * 0.3
-      const centerY = canvas.offsetHeight / 2 + (modelPosRef.current.y - 0.5) * canvas.offsetHeight * 0.3
+      const centerX = canvas.width / 2 + (modelPosRef.current.x - 0.5) * canvas.width * 0.4
+      const centerY = canvas.height / 2 + (modelPosRef.current.y - 0.5) * canvas.height * 0.4
 
-      transformedVertices.forEach((vertex, index) => {
+      transformedVertices.forEach((vertex) => {
         const p = project(vertex)
         const depth = (vertex[2] - 2) / 4.5
         const size = 3 + depth * 4
 
-        const hue = ((index / sphereVertices.length) * 360 + Date.now() * 0.05) % 360
-        const brightness = 40 + depth * 60
-
         const selectedColor = colorMap[modelColor] || colorMap.red
         ctx.fillStyle = selectedColor
         ctx.shadowColor = selectedColor
-        ctx.shadowBlur = 12
+        ctx.shadowBlur = 15
 
         ctx.beginPath()
         ctx.arc(p[0] + centerX, p[1] + centerY, size, 0, Math.PI * 2)
@@ -134,22 +117,22 @@ export default function MouseFollowingModel({ isFollowing, modelColor = "red" })
       })
 
       ctx.shadowColor = "transparent"
-
       requestAnimationFrame(animate)
     }
 
     animate()
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
       window.removeEventListener("resize", resizeCanvas)
     }
-  }, [isFollowing, modelColor])
+  }, [isFollowing, modelColor, globalMousePos])
 
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full rounded-lg overflow-hidden border-2 border-red-600 shadow-2xl shadow-red-600/50"
+      className={`fixed top-0 left-0 w-full h-full pointer-events-none z-30 ${
+        isFollowing ? "opacity-100" : "opacity-0"
+      } transition-opacity duration-300`}
     />
   )
 }

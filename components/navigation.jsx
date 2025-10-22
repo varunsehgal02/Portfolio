@@ -12,25 +12,13 @@ export default function Navigation({ userName }) {
     { label: "Education", href: "#education" },
     { label: "Projects", href: "#projects" },
     { label: "Contact", href: "#contact" },
-    { label: "Resume", href: "/resume.pdf", isDownload: true },
   ]
 
-  const handleScroll = (href, isDownload = false) => {
+  const handleScroll = (href) => {
     setIsOpen(false)
-    
-    if (isDownload) {
-      // Create a temporary link element to trigger download
-      const link = document.createElement('a')
-      link.href = href
-      link.download = 'Varun_Sehgal_Resume.pdf'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } else {
-      const element = document.querySelector(href)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
-      }
+    const element = document.querySelector(href)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
     }
   }
 
@@ -47,7 +35,7 @@ export default function Navigation({ userName }) {
             {navItems.map((item) => (
               <button
                 key={item.href}
-                onClick={() => handleScroll(item.href, item.isDownload)}
+                onClick={() => handleScroll(item.href)}
                 className="text-white hover:text-red-500 transition-colors duration-300 font-medium relative group"
               >
                 {item.label}
@@ -74,7 +62,7 @@ export default function Navigation({ userName }) {
             {navItems.map((item) => (
               <button
                 key={item.href}
-                onClick={() => handleScroll(item.href, item.isDownload)}
+                onClick={() => handleScroll(item.href)}
                 className="text-white hover:text-red-500 transition-colors duration-300 font-medium py-2 text-left"
               >
                 {item.label}

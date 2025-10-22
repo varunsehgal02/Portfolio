@@ -23,24 +23,18 @@ export default function NetworkEffect() {
     }
     resizeCanvas()
 
-    // Create enhanced particles with mouse interaction
+    // Create particles
     const createParticles = () => {
       const particles = []
-      const particleCount = 80
+      const particleCount = 50
 
       for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 2.0,
-          vy: (Math.random() - 0.5) * 2.0,
-          radius: Math.random() * 3.5 + 1.5,
-          opacity: Math.random() * 0.8 + 0.5,
-          pulse: Math.random() * Math.PI * 2,
-          hoverIntensity: Math.random() * 0.8 + 0.6,
-          originalRadius: Math.random() * 3.5 + 1.5,
-          color: Math.random() * 360,
-          energy: Math.random() * 0.7 + 0.3
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          radius: Math.random() * 2 + 1,
         })
       }
 
@@ -80,67 +74,30 @@ export default function NetworkEffect() {
       const particles = particlesRef.current
       const color = colorRef.current
 
-      // Enhanced particle update and drawing
-      particles.forEach((particle, index) => {
-        // Update pulse
-        particle.pulse += 0.02
-        
+      // Update and draw particles
+      particles.forEach((particle) => {
         // Update position
         particle.x += particle.vx
         particle.y += particle.vy
 
-        // Enhanced mouse interaction
-        const dx = mouseRef.current.x - particle.x
-        const dy = mouseRef.current.y - particle.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
+        // Bounce off walls
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
 
-        if (distance < 120) {
-          const force = (120 - distance) / 120
-          const attractionForce = force * particle.hoverIntensity * 0.015
-          
-          // Smooth attraction to mouse (slower)
-          particle.vx += (dx / distance) * attractionForce * 0.6
-          particle.vy += (dy / distance) * attractionForce * 0.6
-          
-          // Dynamic radius based on distance
-          particle.radius = particle.originalRadius + force * 2 + Math.sin(particle.pulse) * 0.5
-          
-          // Enhanced opacity
-          particle.opacity = Math.min(1, particle.opacity + force * 0.2)
-        } else {
-          // Reset properties
-          particle.radius = particle.originalRadius + Math.sin(particle.pulse) * 0.3
-          particle.opacity = Math.max(0.4, particle.opacity - 0.005)
-        }
+        // Keep in bounds
+        particle.x = Math.max(0, Math.min(canvas.width, particle.x))
+        particle.y = Math.max(0, Math.min(canvas.height, particle.y))
 
-        // Velocity damping
-        particle.vx *= 0.99
-        particle.vy *= 0.99
-
-        // Bounce off walls with energy loss
-        if (particle.x < 0 || particle.x > canvas.width) {
-          particle.vx *= -0.9
-          particle.x = Math.max(0, Math.min(canvas.width, particle.x))
-        }
-        if (particle.y < 0 || particle.y > canvas.height) {
-          particle.vy *= -0.9
-          particle.y = Math.max(0, Math.min(canvas.height, particle.y))
-        }
-
-        // Draw particle with enhanced glow
-        ctx.save()
-        ctx.shadowColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.8)`
-        ctx.shadowBlur = 8 + Math.sin(particle.pulse) * 3
-        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.opacity})`
+        // Draw particle with dynamic color
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.6)`
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
         ctx.fill()
-        ctx.restore()
       })
 
-      // Enhanced connections with dynamic styling
-      ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.2)`
-      ctx.lineWidth = 1.5
+      // Draw connections with dynamic color
+      ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.3)`
+      ctx.lineWidth = 1
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -148,9 +105,8 @@ export default function NetworkEffect() {
           const dy = particles[i].y - particles[j].y
           const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 160) {
-            const opacity = 1 - distance / 160
-            ctx.globalAlpha = opacity * 0.7
+          if (distance < 150) {
+            ctx.globalAlpha = 1 - distance / 150
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
@@ -160,24 +116,23 @@ export default function NetworkEffect() {
         }
       }
 
-      // Enhanced connections to mouse with gradient effect
+      // Draw connections to mouse with dynamic color
       particles.forEach((particle) => {
         const dx = particle.x - mouseRef.current.x
         const dy = particle.y - mouseRef.current.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
-        if (distance < 180) {
-          const opacity = 0.9 - distance / 180
-          const gradient = ctx.createLinearGradient(particle.x, particle.y, mouseRef.current.x, mouseRef.current.y)
-          gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`)
-          gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity * 0.3})`)
-          
-          ctx.strokeStyle = gradient
-          ctx.lineWidth = 2 + opacity * 2
+        if (distance < 200) {
+          ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.8 - distance / 200})`
+          ctx.lineWidth = 2
           ctx.beginPath()
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(mouseRef.current.x, mouseRef.current.y)
           ctx.stroke()
+
+          // Attract particle to mouse
+          particle.vx += (mouseRef.current.x - particle.x) * 0.0001
+          particle.vy += (mouseRef.current.y - particle.y) * 0.0001
         }
       })
 
