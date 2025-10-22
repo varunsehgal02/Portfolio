@@ -1,207 +1,9 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import MouseFollowingModel from "./mouse-following-model"
+import HeroHumanModel from "./hero-human-model"
 
 export default function Hero({ userName }) {
-  const canvasRef = useRef(null)
-  const particlesRef = useRef([])
-  const mouseRef = useRef({ x: 0, y: 0 })
-  const animationRef = useRef(null)
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resizeCanvas()
-
-    // Create enhanced floating particles with better properties
-    const createParticles = () => {
-      const particles = []
-      const particleCount = 50
-
-      for (let i = 0; i < particleCount; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: (Math.random() - 0.5) * 0.8,
-          radius: Math.random() * 4 + 1,
-          opacity: Math.random() * 0.7 + 0.3,
-          color: Math.random() > 0.5 ? '#ef4444' : '#3b82f6',
-          pulse: Math.random() * Math.PI * 2,
-          originalRadius: Math.random() * 4 + 1,
-          hoverIntensity: Math.random() * 0.5 + 0.5,
-          trail: []
-        })
-      }
-
-      return particles
-    }
-
-    particlesRef.current = createParticles()
-
-    // Mouse tracking
-    const handleMouseMove = (event) => {
-      mouseRef.current.x = event.clientX
-      mouseRef.current.y = event.clientY
-    }
-
-    window.addEventListener("mousemove", handleMouseMove)
-    window.addEventListener("resize", resizeCanvas)
-
-    // Animation loop
-    const animate = () => {
-      animationRef.current = requestAnimationFrame(animate)
-
-      // Clear canvas with fade effect
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)"
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      const particles = particlesRef.current
-
-      // Enhanced particle update and drawing
-      particles.forEach((particle, index) => {
-        // Update pulse
-        particle.pulse += 0.02
-        
-        // Update position
-        particle.x += particle.vx
-        particle.y += particle.vy
-
-        // Enhanced mouse interaction with multiple zones
-        const dx = mouseRef.current.x - particle.x
-        const dy = mouseRef.current.y - particle.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
-
-        if (distance < 150) {
-          const force = (150 - distance) / 150
-          const attractionForce = force * particle.hoverIntensity * 0.02
-          
-          // Smooth attraction to mouse (slower)
-          particle.vx += (dx / distance) * attractionForce * 0.5
-          particle.vy += (dy / distance) * attractionForce * 0.5
-          
-          // Dynamic radius based on distance
-          particle.radius = particle.originalRadius + force * 3 + Math.sin(particle.pulse) * 1
-          
-          // Enhanced opacity
-          particle.opacity = Math.min(1, particle.opacity + force * 0.3)
-          
-          // Add to trail
-          particle.trail.push({ x: particle.x, y: particle.y, opacity: force })
-          if (particle.trail.length > 8) particle.trail.shift()
-        } else {
-          // Reset properties
-          particle.radius = particle.originalRadius + Math.sin(particle.pulse) * 0.5
-          particle.opacity = Math.max(0.3, particle.opacity - 0.01)
-          
-          // Clear trail
-          if (particle.trail.length > 0) particle.trail.shift()
-        }
-
-        // Velocity damping
-        particle.vx *= 0.98
-        particle.vy *= 0.98
-
-        // Bounce off walls with energy loss
-        if (particle.x < 0 || particle.x > canvas.width) {
-          particle.vx *= -0.8
-          particle.x = Math.max(0, Math.min(canvas.width, particle.x))
-        }
-        if (particle.y < 0 || particle.y > canvas.height) {
-          particle.vy *= -0.8
-          particle.y = Math.max(0, Math.min(canvas.height, particle.y))
-        }
-
-        // Draw particle trail
-        particle.trail.forEach((point, i) => {
-          const trailOpacity = point.opacity * (i / particle.trail.length) * 0.3
-          ctx.save()
-          ctx.shadowColor = particle.color
-          ctx.shadowBlur = 5
-          ctx.fillStyle = particle.color
-          ctx.globalAlpha = trailOpacity
-          ctx.beginPath()
-          ctx.arc(point.x, point.y, particle.radius * 0.5, 0, Math.PI * 2)
-          ctx.fill()
-          ctx.restore()
-        })
-
-        // Draw main particle with enhanced glow
-        ctx.save()
-        ctx.shadowColor = particle.color
-        ctx.shadowBlur = 15 + Math.sin(particle.pulse) * 5
-        ctx.fillStyle = particle.color
-        ctx.globalAlpha = particle.opacity
-        ctx.beginPath()
-        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.restore()
-      })
-
-      // Enhanced connections with dynamic styling
-      ctx.strokeStyle = "rgba(239, 68, 68, 0.15)"
-      ctx.lineWidth = 1.5
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 140) {
-            const opacity = 1 - distance / 140
-            ctx.globalAlpha = opacity * 0.6
-            ctx.beginPath()
-            ctx.moveTo(particles[i].x, particles[i].y)
-            ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.stroke()
-            ctx.globalAlpha = 1
-          }
-        }
-      }
-
-      // Enhanced connections to mouse with gradient effect
-      particles.forEach((particle) => {
-        const dx = particle.x - mouseRef.current.x
-        const dy = particle.y - mouseRef.current.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
-
-        if (distance < 180) {
-          const opacity = 0.8 - distance / 180
-          const gradient = ctx.createLinearGradient(particle.x, particle.y, mouseRef.current.x, mouseRef.current.y)
-          gradient.addColorStop(0, `rgba(239, 68, 68, ${opacity})`)
-          gradient.addColorStop(1, `rgba(59, 130, 246, ${opacity * 0.5})`)
-          
-          ctx.strokeStyle = gradient
-          ctx.lineWidth = 2 + opacity * 2
-          ctx.beginPath()
-          ctx.moveTo(particle.x, particle.y)
-          ctx.lineTo(mouseRef.current.x, mouseRef.current.y)
-          ctx.stroke()
-        }
-      })
-    }
-
-    animate()
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("resize", resizeCanvas)
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-    }
-  }, [])
 
   const handleScroll = (href) => {
     const element = document.querySelector(href)
@@ -215,39 +17,6 @@ export default function Hero({ userName }) {
       id="home"
       className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center relative overflow-hidden"
     >
-      {/* Interactive Particle Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{ background: "transparent" }}
-      />
-
-      {/* Enhanced Background Effects */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse" />
-      <div
-        className="absolute bottom-20 right-10 w-72 h-72 bg-blue-600/5 rounded-full blur-3xl animate-pulse"
-        style={{ animationDelay: "1s" }}
-      />
-      <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-red-600/5 to-blue-600/5 rounded-full blur-3xl animate-pulse"
-        style={{ animationDelay: "2s" }}
-      />
-
-      {/* Floating Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-red-500/30 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${4 + Math.random() * 6}s`,
-            }}
-          />
-        ))}
-      </div>
 
       <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center relative z-10">
         {/* Left Content */}
@@ -300,8 +69,8 @@ export default function Hero({ userName }) {
           </div>
         </div>
 
-        <div className="hidden md:block h-screen md:h-96 lg:h-[500px] animate-fade-in-right">
-          <MouseFollowingModel />
+        <div className="block h-screen md:h-96 lg:h-[500px] animate-fade-in-right">
+          <HeroHumanModel />
         </div>
       </div>
 

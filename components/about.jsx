@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import NetworkEffect from "./network-effect"
 
 export default function About() {
   const canvasRef = useRef(null)
@@ -141,33 +142,12 @@ export default function About() {
       id="about"
       className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-gray-900/50 relative overflow-hidden"
     >
-      {/* Interactive Particle Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{ background: "transparent" }}
-      />
-
-      {/* Enhanced Background Effects */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-      <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-r from-red-600/3 to-blue-600/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-
-      {/* Floating Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-red-500/20 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 8}s`,
-            }}
-          />
-        ))}
+      {/* Network Effect Background */}
+      <div className="absolute inset-0 w-full h-full opacity-30">
+        <NetworkEffect />
       </div>
+
+
 
       <div className="max-w-7xl mx-auto relative z-10">
         <h2 className="text-4xl md:text-5xl font-bold mb-12 text-balance text-white animate-fade-in-up">

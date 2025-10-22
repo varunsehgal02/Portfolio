@@ -37,7 +37,7 @@ export default function LoadingPage({ onComplete }) {
     sceneRef.current = scene
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.z = 5
+    camera.position.z = 15
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -56,119 +56,223 @@ export default function LoadingPage({ onComplete }) {
       mouseTarget.set(mouseX * 10, mouseY * 10, 0)
     }
 
-    // Create optimized floating geometric shapes with enhanced materials
-    const geometries = [
-      new THREE.BoxGeometry(0.6, 0.6, 0.6),
-      new THREE.SphereGeometry(0.4, 12, 12),
-      new THREE.ConeGeometry(0.4, 1.0, 6),
-      new THREE.TorusGeometry(0.4, 0.15, 6, 12),
-      new THREE.OctahedronGeometry(0.5),
-      new THREE.TetrahedronGeometry(0.5),
-    ]
-
-    // Enhanced materials with better colors and effects
-    const materials = [
-      new THREE.MeshBasicMaterial({ 
-        color: 0xff4444, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-      new THREE.MeshBasicMaterial({ 
-        color: 0x00ff88, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-      new THREE.MeshBasicMaterial({ 
-        color: 0x4488ff, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-      new THREE.MeshBasicMaterial({ 
-        color: 0xffaa00, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-      new THREE.MeshBasicMaterial({ 
-        color: 0xff44ff, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-      new THREE.MeshBasicMaterial({ 
-        color: 0x00ffff, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      }),
-    ]
-
+    // Create 4 distinct interactive models
     const meshes = []
-    // Create exactly 4 models with strategic positioning
-    const positions = [
-      { x: -8, y: -5, z: 0 },
-      { x: 8, y: -5, z: 0 },
-      { x: -8, y: 5, z: 0 },
-      { x: 8, y: 5, z: 0 }
-    ]
     
-    for (let i = 0; i < 4; i++) {
-      const geometry = geometries[i % geometries.length] // Use different geometries
-      const material = materials[i % materials.length] // Use different materials
-      const mesh = new THREE.Mesh(geometry, material)
-      
-      mesh.position.x = positions[i].x
-      mesh.position.y = positions[i].y
-      mesh.position.z = positions[i].z
-      
-      mesh.rotation.x = Math.random() * Math.PI
-      mesh.rotation.y = Math.random() * Math.PI
-      
-      // Enhanced properties for better mouse interaction
-      mesh.userData = {
-        originalX: mesh.position.x,
-        originalY: mesh.position.y,
-        originalZ: mesh.position.z,
-        speed: 0.01 + i * 0.005,
-        hoverIntensity: 0.8,
+    // Model 1: Central Icosahedron with rings
+    const coreGeometry = new THREE.IcosahedronGeometry(1.0, 1)
+    const coreMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0x00ff88,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.9,
+      shininess: 100
+    })
+    const core = new THREE.Mesh(coreGeometry, coreMaterial)
+    core.position.set(-4, 0, 0)
+    core.userData = {
+      originalX: -4,
+      originalY: 0,
+      originalZ: 0,
+      speed: 0.01,
+      hoverIntensity: 1.5,
+      pulsePhase: 0,
+      scale: 1.2,
+      followMouse: true,
+      mouseInfluence: 0.8,
+      type: 'core'
+    }
+    scene.add(core)
+    meshes.push(core)
+
+    // Add rings around core
+    for (let i = 0; i < 3; i++) {
+      const ringGeometry = new THREE.TorusGeometry(1.5 + i * 0.3, 0.1, 8, 32)
+      const ringMaterial = new THREE.MeshBasicMaterial({ 
+        color: new THREE.Color().setHSL(0.3 + i * 0.2, 0.8, 0.6),
+        transparent: true,
+        opacity: 0.6 - i * 0.15
+      })
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial)
+      ring.position.set(-4, 0, 0)
+      ring.rotation.x = Math.PI / 2 + i * 0.5
+      ring.rotation.y = i * Math.PI / 3
+      ring.userData = {
+        originalX: -4,
+        originalY: 0,
+        originalZ: 0,
+        speed: 0.005 + i * 0.002,
+        hoverIntensity: 1.0,
         pulsePhase: i * Math.PI / 2,
-        scale: 1.2,
-        followMouse: false,
-        mouseInfluence: 0.3
+        scale: 1.0,
+        followMouse: true,
+        mouseInfluence: 0.6,
+        type: 'ring',
+        parent: core
       }
-      
-      mesh.scale.setScalar(mesh.userData.scale)
-      scene.add(mesh)
-      meshes.push(mesh)
+      scene.add(ring)
+      meshes.push(ring)
     }
 
-    // Create optimized interactive particle system
+    // Model 2: Orbiting satellites
+    const satelliteGroup = new THREE.Group()
+    satelliteGroup.position.set(4, 0, 0)
+    
+    for (let i = 0; i < 6; i++) {
+      const satelliteGeometry = new THREE.OctahedronGeometry(0.3)
+      const satelliteMaterial = new THREE.MeshPhongMaterial({ 
+        color: new THREE.Color().setHSL(i / 6, 0.8, 0.7),
+        shininess: 50,
+        transparent: true,
+        opacity: 0.9
+      })
+      const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial)
+      
+      const angle = (i / 6) * Math.PI * 2
+      const radius = 2
+      satellite.position.x = Math.cos(angle) * radius
+      satellite.position.y = Math.sin(angle) * radius
+      satellite.position.z = Math.sin(angle * 2) * 0.5
+      
+      satellite.userData = {
+        originalX: satellite.position.x,
+        originalY: satellite.position.y,
+        originalZ: satellite.position.z,
+        speed: 0.01 + i * 0.003,
+        radius: radius,
+        angle: angle,
+        type: 'satellite'
+      }
+      
+      satelliteGroup.add(satellite)
+    }
+    
+    satelliteGroup.userData = {
+      originalX: 4,
+      originalY: 0,
+      originalZ: 0,
+      speed: 0.008,
+      hoverIntensity: 1.2,
+      pulsePhase: Math.PI,
+      scale: 1.0,
+      followMouse: true,
+      mouseInfluence: 0.7,
+      type: 'group'
+    }
+    scene.add(satelliteGroup)
+    meshes.push(satelliteGroup)
+
+    // Model 3: Spiral structure
+    const spiralGroup = new THREE.Group()
+    spiralGroup.position.set(0, -3, 0)
+    
+    for (let i = 0; i < 8; i++) {
+      const spiralGeometry = new THREE.ConeGeometry(0.2, 0.8, 6)
+      const spiralMaterial = new THREE.MeshPhongMaterial({ 
+        color: new THREE.Color().setHSL(0.1 + i * 0.1, 0.9, 0.6),
+        shininess: 80
+      })
+      const spiral = new THREE.Mesh(spiralGeometry, spiralMaterial)
+      
+      const angle = (i / 8) * Math.PI * 4
+      const radius = 1.5
+      spiral.position.x = Math.cos(angle) * radius
+      spiral.position.y = Math.sin(angle) * radius * 0.3
+      spiral.position.z = i * 0.2
+      spiral.rotation.z = angle
+      
+      spiralGroup.add(spiral)
+    }
+    
+    spiralGroup.userData = {
+      originalX: 0,
+      originalY: -3,
+      originalZ: 0,
+      speed: 0.012,
+      hoverIntensity: 1.3,
+      pulsePhase: Math.PI * 1.5,
+      scale: 1.1,
+      followMouse: true,
+      mouseInfluence: 0.9,
+      type: 'spiral'
+    }
+    scene.add(spiralGroup)
+    meshes.push(spiralGroup)
+
+    // Model 4: Floating crystals
+    const crystalGroup = new THREE.Group()
+    crystalGroup.position.set(0, 3, 0)
+    
+    for (let i = 0; i < 5; i++) {
+      const crystalGeometry = new THREE.TetrahedronGeometry(0.4)
+      const crystalMaterial = new THREE.MeshPhongMaterial({ 
+        color: new THREE.Color().setHSL(0.6 + i * 0.08, 0.8, 0.7),
+        shininess: 100,
+        transparent: true,
+        opacity: 0.8
+      })
+      const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial)
+      
+      const angle = (i / 5) * Math.PI * 2
+      const radius = 1.8
+      crystal.position.x = Math.cos(angle) * radius
+      crystal.position.y = Math.sin(angle) * radius * 0.5
+      crystal.position.z = Math.sin(angle * 3) * 0.3
+      
+      crystal.userData = {
+        originalX: crystal.position.x,
+        originalY: crystal.position.y,
+        originalZ: crystal.position.z,
+        speed: 0.008 + i * 0.002,
+        radius: radius,
+        angle: angle,
+        type: 'crystal'
+      }
+      
+      crystalGroup.add(crystal)
+    }
+    
+    crystalGroup.userData = {
+      originalX: 0,
+      originalY: 3,
+      originalZ: 0,
+      speed: 0.01,
+      hoverIntensity: 1.4,
+      pulsePhase: Math.PI * 2,
+      scale: 1.0,
+      followMouse: true,
+      mouseInfluence: 0.8,
+      type: 'crystal-group'
+    }
+    scene.add(crystalGroup)
+    meshes.push(crystalGroup)
+
+    // Create enhanced particle system for background
     const particleGeometry = new THREE.BufferGeometry()
-    const particleCount = 200
+    const particleCount = 300
     const particlePositions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
     const sizes = new Float32Array(particleCount)
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3
-      particlePositions[i3] = (Math.random() - 0.5) * 80
-      particlePositions[i3 + 1] = (Math.random() - 0.5) * 80
-      particlePositions[i3 + 2] = (Math.random() - 0.5) * 40
+      particlePositions[i3] = (Math.random() - 0.5) * 100
+      particlePositions[i3 + 1] = (Math.random() - 0.5) * 100
+      particlePositions[i3 + 2] = (Math.random() - 0.5) * 50
       
       // Enhanced color palette
       const colorChoice = Math.random()
-      if (colorChoice < 0.3) {
+      if (colorChoice < 0.25) {
         colors[i3] = 1.0; colors[i3 + 1] = 0.27; colors[i3 + 2] = 0.27 // Red
-      } else if (colorChoice < 0.6) {
+      } else if (colorChoice < 0.5) {
         colors[i3] = 0.0; colors[i3 + 1] = 0.53; colors[i3 + 2] = 1.0 // Blue
-      } else {
+      } else if (colorChoice < 0.75) {
         colors[i3] = 0.0; colors[i3 + 1] = 1.0; colors[i3 + 2] = 0.53 // Green
+      } else {
+        colors[i3] = 1.0; colors[i3 + 1] = 0.8; colors[i3 + 2] = 0.0 // Yellow
       }
       
-      sizes[i] = Math.random() * 0.2 + 0.1
+      sizes[i] = Math.random() * 0.3 + 0.1
     }
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
@@ -176,9 +280,9 @@ export default function LoadingPage({ onComplete }) {
     particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.2,
+      size: 0.3,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.8,
       vertexColors: true,
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true
@@ -189,13 +293,26 @@ export default function LoadingPage({ onComplete }) {
 
     // Create mouse trail particles
     const trailGeometry = new THREE.BufferGeometry()
-    const trailCount = 50
+    const trailCount = 100
     const trailPositions = new Float32Array(trailCount * 3)
+    const trailColors = new Float32Array(trailCount * 3)
+
+    for (let i = 0; i < trailCount; i++) {
+      const i3 = i * 3
+      trailPositions[i3] = 0
+      trailPositions[i3 + 1] = 0
+      trailPositions[i3 + 2] = 0
+      
+      trailColors[i3] = 1.0
+      trailColors[i3 + 1] = 0.5
+      trailColors[i3 + 2] = 0.0
+    }
+
     trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3))
+    trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3))
 
     const trailMaterial = new THREE.PointsMaterial({
-      color: 0xff4444,
-      size: 0.3,
+      size: 0.2,
       transparent: true,
       opacity: 0.6,
       blending: THREE.AdditiveBlending
@@ -204,81 +321,135 @@ export default function LoadingPage({ onComplete }) {
     const trailSystem = new THREE.Points(trailGeometry, trailMaterial)
     scene.add(trailSystem)
 
+    // Add proper lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6)
+    scene.add(ambientLight)
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    directionalLight.position.set(5, 5, 5)
+    scene.add(directionalLight)
+
+    const pointLight = new THREE.PointLight(0x00ff88, 0.5, 20)
+    pointLight.position.set(0, 0, 10)
+    scene.add(pointLight)
+
     // Animation loop
     const animate = () => {
       animationRef.current = requestAnimationFrame(animate)
 
       const time = Date.now() * 0.001
 
-      // Enhanced mouse interaction with collision prevention
+      // Advanced mouse interaction with perfect collision prevention
       meshes.forEach((mesh, index) => {
+        if (!mesh.userData.followMouse) return
+        
         const distance = Math.sqrt(
           Math.pow(mesh.position.x - mouseTarget.x, 2) + 
           Math.pow(mesh.position.y - mouseTarget.y, 2)
         )
         
-        // Store original position for collision detection
-        const originalX = mesh.position.x
-        const originalY = mesh.position.y
-        
-        // Stronger hover effect for better interaction
-        if (distance < 15) {
-          const force = (15 - distance) / 15
-          const attractionForce = force * mesh.userData.hoverIntensity
+        // Mouse attraction with smooth following
+        if (distance < 25) {
+          const force = (25 - distance) / 25
+          const attractionForce = force * mesh.userData.hoverIntensity * mesh.userData.mouseInfluence
           
-          // Smooth attraction to mouse with slower influence
-          mesh.position.x += (mouseTarget.x - mesh.position.x) * attractionForce * 0.02
-          mesh.position.y += (mouseTarget.y - mesh.position.y) * attractionForce * 0.02
+          // Calculate target position
+          const targetX = mouseTarget.x + (mesh.userData.originalX - mouseTarget.x) * 0.3
+          const targetY = mouseTarget.y + (mesh.userData.originalY - mouseTarget.y) * 0.3
           
-          // Collision detection with other meshes
+          // Smooth movement towards target
+          mesh.position.x += (targetX - mesh.position.x) * attractionForce * 0.08
+          mesh.position.y += (targetY - mesh.position.y) * attractionForce * 0.08
+          
+          // Advanced collision detection with all other meshes
           meshes.forEach((otherMesh, otherIndex) => {
-            if (index !== otherIndex) {
+            if (index !== otherIndex && otherMesh.userData.followMouse) {
               const meshDistance = Math.sqrt(
                 Math.pow(mesh.position.x - otherMesh.position.x, 2) + 
                 Math.pow(mesh.position.y - otherMesh.position.y, 2)
               )
               
-              // Minimum distance to prevent touching
-              const minDistance = 3.0
+              // Dynamic minimum distance based on model type
+              const minDistance = mesh.userData.type === 'group' ? 4.0 : 3.5
+              
               if (meshDistance < minDistance) {
                 const pushForce = (minDistance - meshDistance) / minDistance
                 const dx = mesh.position.x - otherMesh.position.x
                 const dy = mesh.position.y - otherMesh.position.y
                 const angle = Math.atan2(dy, dx)
                 
-                // Push meshes apart
-                mesh.position.x += Math.cos(angle) * pushForce * 0.1
-                mesh.position.y += Math.sin(angle) * pushForce * 0.1
+                // Strong push force to prevent touching
+                const pushStrength = pushForce * 0.3
+                mesh.position.x += Math.cos(angle) * pushStrength
+                mesh.position.y += Math.sin(angle) * pushStrength
+                otherMesh.position.x -= Math.cos(angle) * pushStrength * 0.5
+                otherMesh.position.y -= Math.sin(angle) * pushStrength * 0.5
               }
             }
           })
           
-          // Dynamic scaling with enhanced pulse effect
-          const pulseScale = 1 + force * 1.2 + Math.sin(time * 3 + mesh.userData.pulsePhase) * 0.2
+          // Enhanced scaling with type-specific effects
+          let scaleMultiplier = 1 + force * 1.5
+          if (mesh.userData.type === 'core') scaleMultiplier += 0.5
+          if (mesh.userData.type === 'group') scaleMultiplier += 0.3
+          
+          const pulseScale = scaleMultiplier + Math.sin(time * 2 + mesh.userData.pulsePhase) * 0.2
           mesh.scale.setScalar(mesh.userData.scale * pulseScale)
           
-          // Enhanced rotation with all axes
-          mesh.rotation.x += mesh.userData.speed * (1 + force * 3)
-          mesh.rotation.y += mesh.userData.speed * 0.8 * (1 + force * 3)
-          mesh.rotation.z += mesh.userData.speed * 0.5 * force
+          // Enhanced rotation with type-specific patterns
+          const rotationMultiplier = 1 + force * 2
+          mesh.rotation.x += mesh.userData.speed * rotationMultiplier
+          mesh.rotation.y += mesh.userData.speed * 0.8 * rotationMultiplier
+          mesh.rotation.z += mesh.userData.speed * 0.4 * force
           
-          // Enhanced color intensity
-          mesh.material.opacity = 0.8 + force * 0.3
+          // Enhanced material effects
+          if (mesh.material && mesh.material.opacity !== undefined) {
+            mesh.material.opacity = Math.min(1.0, 0.7 + force * 0.4)
+          }
+          
+          // Special effects for different model types
+          if (mesh.userData.type === 'core') {
+            // Core pulses with energy
+            const energyPulse = Math.sin(time * 4) * 0.1
+            mesh.scale.setScalar(mesh.userData.scale * (1 + force * 1.5 + energyPulse))
+          }
+          
         } else {
           // Smooth return to original position
-          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * 0.01
-          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * 0.01
+          const returnSpeed = 0.02
+          mesh.position.x += (mesh.userData.originalX - mesh.position.x) * returnSpeed
+          mesh.position.y += (mesh.userData.originalY - mesh.position.y) * returnSpeed
           mesh.scale.setScalar(mesh.userData.scale)
-          mesh.material.opacity = 0.8
+          
+          if (mesh.material && mesh.material.opacity !== undefined) {
+            mesh.material.opacity = 0.7
+          }
           
           // Normal rotation
           mesh.rotation.x += mesh.userData.speed
           mesh.rotation.y += mesh.userData.speed * 0.8
         }
 
-        // Enhanced floating motion
-        mesh.position.z += Math.sin(time + index * 0.5) * 0.01
-        mesh.position.z += Math.cos(time * 0.8 + index * 0.3) * 0.005
+        // Enhanced floating motion with type-specific patterns
+        const floatIntensity = mesh.userData.type === 'crystal-group' ? 0.02 : 0.01
+        mesh.position.z += Math.sin(time + index * 0.5) * floatIntensity
+        mesh.position.z += Math.cos(time * 0.8 + index * 0.3) * floatIntensity * 0.5
+        
+        // Animate child elements for groups
+        if (mesh.userData.type === 'group' || mesh.userData.type === 'spiral' || mesh.userData.type === 'crystal-group') {
+          mesh.children.forEach((child, childIndex) => {
+            if (child.userData && child.userData.speed) {
+              child.userData.angle += child.userData.speed
+              child.position.x = Math.cos(child.userData.angle) * child.userData.radius
+              child.position.y = Math.sin(child.userData.angle) * child.userData.radius
+              if (child.userData.type === 'satellite') {
+                child.position.z = Math.sin(child.userData.angle * 2) * 0.5
+              }
+              child.rotation.x += child.userData.speed * 2
+              child.rotation.y += child.userData.speed * 1.5
+            }
+          })
+        }
       })
 
       // Enhanced mouse interaction with particles
@@ -295,39 +466,31 @@ export default function LoadingPage({ onComplete }) {
         // Enhanced particle attraction with multiple zones
         if (distance < 20) {
           const force = (20 - distance) / 20
-          const attractionForce = force * 0.015
+          const attractionForce = force * 0.02
           
-          // Smooth attraction to mouse
           particlePositions[i3] += (mouseTarget.x - particlePositions[i3]) * attractionForce
           particlePositions[i3 + 1] += (mouseTarget.y - particlePositions[i3 + 1]) * attractionForce
           
-          // Color intensity based on distance
-          const intensity = 0.5 + force * 0.5
-          particleColors[i3] *= intensity
-          particleColors[i3 + 1] *= intensity
-          particleColors[i3 + 2] *= intensity
+          // Enhanced color intensity
+          particleColors[i3] = Math.min(1.0, particleColors[i3] + force * 0.3)
+          particleColors[i3 + 1] = Math.min(1.0, particleColors[i3 + 1] + force * 0.2)
+          particleColors[i3 + 2] = Math.min(1.0, particleColors[i3 + 2] + force * 0.1)
         } else {
-          // Reset color intensity
-          const originalIntensity = 0.7
-          particleColors[i3] = originalIntensity
-          particleColors[i3 + 1] = originalIntensity
-          particleColors[i3 + 2] = originalIntensity
+          // Smooth return to original position
+          particlePositions[i3] += (particlePositions[i3] * 0.95 - particlePositions[i3]) * 0.01
+          particlePositions[i3 + 1] += (particlePositions[i3 + 1] * 0.95 - particlePositions[i3 + 1]) * 0.01
         }
         
         // Enhanced floating motion
-        particlePositions[i3 + 2] += Math.sin(time + i * 0.1) * 0.012
-        particlePositions[i3 + 2] += Math.cos(time * 0.8 + i * 0.05) * 0.005
-        
-        // Boundary wrapping
-        if (particlePositions[i3 + 2] > 20) particlePositions[i3 + 2] = -20
-        if (particlePositions[i3 + 2] < -20) particlePositions[i3 + 2] = 20
+        particlePositions[i3] += Math.sin(time + i * 0.1) * 0.05
+        particlePositions[i3 + 1] += Math.cos(time * 0.8 + i * 0.15) * 0.03
+        particlePositions[i3 + 2] += Math.sin(time * 1.2 + i * 0.2) * 0.02
       }
       
       particleGeometry.attributes.position.needsUpdate = true
       particleGeometry.attributes.color.needsUpdate = true
 
-      // Update trail system
-      const trailPositions = trailGeometry.attributes.position.array
+      // Update mouse trail
       for (let i = trailCount - 1; i > 0; i--) {
         const i3 = i * 3
         const prevI3 = (i - 1) * 3
@@ -378,43 +541,81 @@ export default function LoadingPage({ onComplete }) {
   const handleEnter = () => {
     setIsLoading(true)
     
-    // Simulate loading progress
-    let progress = 0
     const progressInterval = setInterval(() => {
-      progress += Math.random() * 15
-      if (progress >= 100) {
-        progress = 100
-        clearInterval(progressInterval)
-        setTimeout(() => {
-          onComplete("Varun Sehgal")
-        }, 500)
-      }
-      setLoadingProgress(progress)
-    }, 100)
+      setLoadingProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval)
+          setTimeout(() => {
+            onComplete()
+          }, 500)
+          return 100
+        }
+        return prev + 2
+      })
+    }, 50)
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center z-50 overflow-hidden">
-      {/* 3D Background */}
+    <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+      {/* Three.js Canvas */}
       <div ref={mountRef} className="absolute inset-0" />
       
+      {/* Content Overlay */}
+      <div className="relative z-10 text-center">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-pulse">
+          {displayText}
+        </h1>
+        
+        <p className="text-xl md:text-2xl text-white mb-8 animate-fade-in-up">
+          Let's explore my work
+        </p>
+        
+        {!isLoading ? (
+          <button
+            onClick={handleEnter}
+            className="px-8 py-4 bg-gradient-to-r from-red-500 to-blue-500 text-white font-semibold rounded-lg hover:from-red-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 animate-bounce"
+          >
+            Enter Portfolio
+          </button>
+        ) : (
+          <div className="w-64 mx-auto">
+            <div className="bg-gray-700 rounded-full h-4 mb-4">
+              <div 
+                className="bg-gradient-to-r from-red-500 to-blue-500 h-4 rounded-full transition-all duration-300"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+            <p className="text-white text-lg">
+              Loading... {loadingProgress}%
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-transparent to-blue-900/20 animate-gradient-shift" />
       
       {/* Floating particles */}
       <div className="absolute inset-0">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-red-500 rounded-full opacity-60 animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-            }}
-          />
-        ))}
+        {typeof window !== 'undefined' && [...Array(50)].map((_, i) => {
+          const left = Math.random() * 100
+          const top = Math.random() * 100
+          const delay = Math.random() * 5
+          const duration = 3 + Math.random() * 4
+          
+          return (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-red-500 rounded-full opacity-60 animate-float"
+              style={{
+                left: `${left}%`,
+                top: `${top}%`,
+                animationDelay: `${delay}s`,
+                animationDuration: `${duration}s`,
+              }}
+            />
+          )
+        })}
       </div>
 
       {/* Grid pattern */}
@@ -422,76 +623,16 @@ export default function LoadingPage({ onComplete }) {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage:
-              "linear-gradient(0deg, transparent 24%, rgba(255, 0, 0, 0.1) 25%, rgba(255, 0, 0, 0.1) 26%, transparent 27%, transparent 74%, rgba(255, 0, 0, 0.1) 75%, rgba(255, 0, 0, 0.1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 0, 0, 0.1) 25%, rgba(255, 0, 0, 0.1) 26%, transparent 27%, transparent 74%, rgba(255, 0, 0, 0.1) 75%, rgba(255, 0, 0, 0.1) 76%, transparent 77%, transparent)",
-            backgroundSize: "50px 50px",
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
           }}
         />
       </div>
 
-      <div className="relative z-10 text-center max-w-md mx-auto px-4">
-        <div className="space-y-8 animate-fade-in">
-          <h1 className="text-5xl font-bold text-white h-16 flex items-center justify-center">
-            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-blue-400 animate-text-glow">
-              {displayText}
-              <span className="animate-pulse text-red-400">|</span>
-            </span>
-          </h1>
-
-          <p className="text-gray-300 text-lg animate-fade-in-delay mt-10 drop-shadow-lg">
-            Let's explore my work
-          </p>
-
-          {/* Loading Progress Bar */}
-          {isLoading && (
-            <div className="w-full bg-gray-700 rounded-full h-2 animate-fade-in">
-              <div
-                className="bg-gradient-to-r from-red-500 to-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${loadingProgress}%` }}
-              />
-            </div>
-          )}
-
-          <button
-            onClick={handleEnter}
-            disabled={isLoading}
-            className="px-8 py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 disabled:from-gray-700 disabled:to-gray-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed shadow-lg hover:shadow-red-500/25 disabled:shadow-none"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin">⚙️</span> Loading...
-              </span>
-            ) : (
-              "Enter Portfolio"
-            )}
-          </button>
-        </div>
-      </div>
-
       <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fade-in-delay {
-          0% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-
         @keyframes gradient-shift {
           0%, 100% {
             background-position: 0% 50%;
@@ -500,7 +641,18 @@ export default function LoadingPage({ onComplete }) {
             background-position: 100% 50%;
           }
         }
-
+        
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
         @keyframes float {
           0%, 100% {
             transform: translateY(0px) rotate(0deg);
@@ -511,34 +663,17 @@ export default function LoadingPage({ onComplete }) {
             opacity: 1;
           }
         }
-
-        @keyframes text-glow {
-          0%, 100% {
-            text-shadow: 0 0 5px rgba(239, 68, 68, 0.5), 0 0 10px rgba(239, 68, 68, 0.3), 0 0 15px rgba(239, 68, 68, 0.2);
-          }
-          50% {
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out;
-        }
-
-        .animate-fade-in-delay {
-          animation: fade-in-delay 1.5s ease-out;
-        }
-
+        
         .animate-gradient-shift {
           animation: gradient-shift 8s ease-in-out infinite;
         }
-
-        .animate-float {
-          animation: float linear infinite;
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 1s ease-out;
         }
-
-        .animate-text-glow {
-          animation: text-glow 3s ease-in-out infinite;
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
       `}</style>
     </div>

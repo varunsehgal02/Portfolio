@@ -1,121 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
+import NetworkEffect from "./network-effect"
 
 export default function Skills() {
-  const canvasRef = useRef(null)
-  const particlesRef = useRef([])
-  const animationRef = useRef(null)
   const [hoveredSkill, setHoveredSkill] = useState(null)
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resizeCanvas()
-
-    // Create floating particles
-    const createParticles = () => {
-      const particles = []
-      const particleCount = 20
-
-      for (let i = 0; i < particleCount; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.2,
-          vy: (Math.random() - 0.5) * 0.2,
-          radius: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.3 + 0.1,
-          color: Math.random() > 0.5 ? '#ef4444' : '#3b82f6',
-          pulse: Math.random() * Math.PI * 2
-        })
-      }
-
-      return particles
-    }
-
-    particlesRef.current = createParticles()
-
-    window.addEventListener("resize", resizeCanvas)
-
-    // Animation loop
-    const animate = () => {
-      animationRef.current = requestAnimationFrame(animate)
-
-      // Clear canvas with fade effect
-      ctx.fillStyle = "rgba(0, 0, 0, 0.02)"
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      const particles = particlesRef.current
-
-      // Update and draw particles
-      particles.forEach((particle) => {
-        // Update position
-        particle.x += particle.vx
-        particle.y += particle.vy
-        particle.pulse += 0.01
-
-        // Bounce off walls
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
-
-        // Keep in bounds
-        particle.x = Math.max(0, Math.min(canvas.width, particle.x))
-        particle.y = Math.max(0, Math.min(canvas.height, particle.y))
-
-        // Draw particle with pulsing effect
-        const pulseSize = particle.radius + Math.sin(particle.pulse) * 0.3
-        ctx.save()
-        ctx.shadowColor = particle.color
-        ctx.shadowBlur = 6
-        ctx.fillStyle = particle.color
-        ctx.globalAlpha = particle.opacity + Math.sin(particle.pulse) * 0.1
-        ctx.beginPath()
-        ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.restore()
-      })
-
-      // Draw connections
-      ctx.strokeStyle = "rgba(239, 68, 68, 0.08)"
-      ctx.lineWidth = 1
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 80) {
-            ctx.globalAlpha = 1 - distance / 80
-            ctx.beginPath()
-            ctx.moveTo(particles[i].x, particles[i].y)
-            ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.stroke()
-            ctx.globalAlpha = 1
-          }
-        }
-      }
-    }
-
-    animate()
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas)
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-    }
-  }, [])
 
   const languageInfo = {
     React: "A JavaScript library for building user interfaces with reusable components and efficient rendering.",
@@ -237,33 +127,12 @@ export default function Skills() {
 
   return (
     <section id="skills" className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
-      {/* Interactive Particle Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{ background: "transparent" }}
-      />
-
-      {/* Enhanced Background Effects */}
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-600/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-red-600/3 to-blue-600/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-
-      {/* Floating Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-red-500/20 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${6 + Math.random() * 8}s`,
-            }}
-          />
-        ))}
+      {/* Network Effect Background */}
+      <div className="absolute inset-0 w-full h-full opacity-30">
+        <NetworkEffect />
       </div>
+
+
 
       <div className="max-w-7xl mx-auto relative z-10">
         <h2 className="text-4xl md:text-5xl font-bold mb-12 text-balance text-white animate-fade-in-up">

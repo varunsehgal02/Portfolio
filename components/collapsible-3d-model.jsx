@@ -66,7 +66,7 @@ export default function Collapsible3DModel() {
       ring.rotation.x = Math.PI / 2 + i * 0.3
       ring.rotation.y = i * Math.PI / 4
       ring.userData = { 
-        speed: 0.008 + i * 0.003, 
+        speed: 0.001 + i * 0.0005, 
         direction: i % 2 === 0 ? 1 : -1,
         axis: i % 3
       }
@@ -92,7 +92,7 @@ export default function Collapsible3DModel() {
         originalX: satellite.position.x,
         originalY: satellite.position.y,
         originalZ: satellite.position.z,
-        speed: 0.015 + i * 0.002,
+        speed: 0.002 + i * 0.0005,
         radius: radius,
         angle: angle
       }
@@ -141,9 +141,9 @@ export default function Collapsible3DModel() {
 
       const time = Date.now() * 0.001
 
-      // Rotate main sphere
-      sphere.rotation.x += 0.008
-      sphere.rotation.y += 0.012
+      // Rotate main sphere (extremely slow)
+      sphere.rotation.x += 0.0005
+      sphere.rotation.y += 0.001
 
       // Rotate rings with different patterns
       group.children.forEach((child, index) => {
@@ -177,10 +177,10 @@ export default function Collapsible3DModel() {
         }
       })
 
-      // Mouse interaction with main model
+      // Mouse interaction with main model (slower)
       if (isFollowing) {
-        group.rotation.x += mouseRef.current.y * 0.05
-        group.rotation.y += mouseRef.current.x * 0.05
+        group.rotation.x += mouseRef.current.y * 0.02
+        group.rotation.y += mouseRef.current.x * 0.02
       }
 
       // Update lights color
