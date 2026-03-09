@@ -1,0 +1,251 @@
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { personalInfo } from "@/data/personal";
+import SectionHeading from "@/components/SectionHeading";
+import LightRays from "@/components/LightRays";
+
+export default function ContactPage() {
+    const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setIsSubmitted(true);
+        setTimeout(() => setIsSubmitted(false), 4000);
+        setFormData({ name: "", email: "", message: "" });
+    };
+
+    const contactDetails = [
+        {
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            ),
+            label: "Email",
+            value: personalInfo.email,
+            href: `mailto:${personalInfo.email}`,
+        },
+        {
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+            ),
+            label: "Phone",
+            value: personalInfo.phone,
+            href: `tel:${personalInfo.phone}`,
+        },
+        {
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            ),
+            label: "Location",
+            value: personalInfo.location,
+            href: null,
+        },
+    ];
+
+    const socialLinks = [
+        {
+            name: "Behance",
+            href: personalInfo.socials.behance,
+            icon: (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z" />
+                </svg>
+            ),
+        },
+        {
+            name: "LinkedIn",
+            href: personalInfo.socials.linkedin,
+            icon: (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+            ),
+        },
+    ];
+
+    return (
+        <div className="relative pt-28 pb-20">
+            {/* LightRays Full Page Background */}
+            <div className="fixed inset-0 z-0">
+                <LightRays
+                    raysOrigin="top-center"
+                    raysColor="#ffffff"
+                    raysSpeed={1}
+                    lightSpread={0.5}
+                    rayLength={3}
+                    followMouse={true}
+                    mouseInfluence={0.1}
+                    noiseAmount={0}
+                    distortion={0}
+                    pulsating={false}
+                    fadeDistance={1}
+                    saturation={1}
+                />
+            </div>
+
+            <section className="relative z-[1] max-w-7xl mx-auto px-6">
+                <SectionHeading
+                    title="Get in Touch"
+                    subtitle="Have a project in mind or just want to say hello? I'd love to hear from you."
+                />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+                    {/* Left: Contact Info */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="space-y-8"
+                    >
+                        <div>
+                            <h3 className="font-display font-bold text-2xl text-text-primary mb-4">
+                                Let&apos;s work <span className="gradient-text">together</span>
+                            </h3>
+                            <p className="text-text-secondary leading-relaxed">
+                                Whether you need a brand new website, a mobile app redesign, motion graphics for your brand, or any creative project — I&apos;m here to help bring your vision to life.
+                            </p>
+                        </div>
+
+                        {/* Contact Details */}
+                        <div className="space-y-4">
+                            {contactDetails.map((detail, i) => (
+                                <motion.div
+                                    key={detail.label}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 + i * 0.1 }}
+                                >
+                                    {detail.href ? (
+                                        <a
+                                            href={detail.href}
+                                            className="flex items-center gap-4 glass rounded-xl p-4 card-hover group"
+                                        >
+                                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary-light group-hover:bg-primary/20 transition-colors">
+                                                {detail.icon}
+                                            </div>
+                                            <div>
+                                                <p className="text-text-muted text-xs">{detail.label}</p>
+                                                <p className="text-text-primary text-sm font-medium">{detail.value}</p>
+                                            </div>
+                                        </a>
+                                    ) : (
+                                        <div className="flex items-center gap-4 glass rounded-xl p-4">
+                                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary-light">
+                                                {detail.icon}
+                                            </div>
+                                            <div>
+                                                <p className="text-text-muted text-xs">{detail.label}</p>
+                                                <p className="text-text-primary text-sm font-medium">{detail.value}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Social Links */}
+                        <div>
+                            <p className="text-text-muted text-sm mb-4">Find me on</p>
+                            <div className="flex gap-3">
+                                {socialLinks.map((social) => (
+                                    <a
+                                        key={social.name}
+                                        href={social.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-12 h-12 rounded-xl glass flex items-center justify-center text-text-secondary hover:text-primary-light hover:border-primary/30 transition-all duration-300 hover:scale-110"
+                                        aria-label={social.name}
+                                    >
+                                        {social.icon}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Right: Contact Form */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        <form onSubmit={handleSubmit} className="glass rounded-2xl p-8 space-y-6">
+                            <div>
+                                <label htmlFor="name" className="block text-text-secondary text-sm font-medium mb-2">
+                                    Your Name
+                                </label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+                                    placeholder="John Doe"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="email" className="block text-text-secondary text-sm font-medium mb-2">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    required
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+                                    placeholder="john@example.com"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="message" className="block text-text-secondary text-sm font-medium mb-2">
+                                    Your Message
+                                </label>
+                                <textarea
+                                    id="message"
+                                    required
+                                    rows={5}
+                                    value={formData.message}
+                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 resize-none"
+                                    placeholder="Tell me about your project..."
+                                />
+                            </div>
+
+                            <motion.button
+                                type="submit"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${isSubmitted
+                                    ? "bg-green-500"
+                                    : "bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25"
+                                    }`}
+                            >
+                                {isSubmitted ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Message Sent!
+                                    </span>
+                                ) : (
+                                    "Send Message"
+                                )}
+                            </motion.button>
+                        </form>
+                    </motion.div>
+                </div>
+            </section>
+        </div>
+    );
+}

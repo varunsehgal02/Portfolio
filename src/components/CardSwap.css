@@ -1,0 +1,25 @@
+.card-swap-container {
+    position: relative;
+    perspective: 900px;
+    overflow: visible;
+}
+
+.card-swap-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 16px;
+    border: 1px solid rgba(30, 75, 189, 0.25);
+    background: linear-gradient(145deg, rgba(15, 18, 37, 0.97) 0%, rgba(22, 26, 53, 0.97) 100%);
+    transform-style: preserve-3d;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(30, 75, 189, 0.08);
+    transition: border-color 0.3s ease;
+}
+
+.card-swap-card:hover {
+    border-color: rgba(59, 109, 224, 0.5);
+}
