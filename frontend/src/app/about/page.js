@@ -1,0 +1,393 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { personalInfo, skills, experience, education, certifications } from "@/data/personal";
+import { aboutPageContent, aboutBentoCards as defaultAboutBentoCards } from "@/data/pageContent";
+import { useEditableData } from "@/lib/useEditableData";
+
+const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
+const LightPillar = dynamic(() => import("@/components/LightPillar/LightPillar"), { ssr: false });
+const ShinyText = dynamic(() => import("@/components/ShinyText/ShinyText"), { ssr: false });
+const RotatingText = dynamic(() => import("@/components/RotatingText/RotatingText"), { ssr: false });
+const MagicBento = dynamic(() => import("@/components/MagicBento/MagicBento"), { ssr: false });
+
+/* ── animation helpers ── */
+const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: { delay: i * 0.12, duration: 0.6, ease: "easeOut" },
+    }),
+};
+
+const fadeLeft = {
+    hidden: { opacity: 0, x: -40 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        x: 0,
+        transition: { delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 120 },
+    }),
+};
+
+const scaleIn = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        scale: 1,
+        transition: { delay: i * 0.08, duration: 0.45, type: "spring", stiffness: 200 },
+    }),
+};
+
+const popIn = {
+    hidden: { opacity: 0, scale: 0.7 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        scale: 1,
+        transition: { delay: i * 0.04, duration: 0.3 },
+    }),
+};
+
+/* ── glassy card style reusable ── */
+const glassCard = {
+    background: "rgba(10, 12, 30, 0.75)",
+    border: "1px solid rgba(59, 109, 224, 0.1)",
+    backdropFilter: "blur(8px)",
+};
+
+const glassCardAccent = {
+    ...glassCard,
+    borderLeft: "3px solid rgba(59, 109, 224, 0.4)",
+};
+
+/* ── divider style ── */
+const dividerGradient = "linear-gradient(to right, transparent, rgba(59, 109, 224, 0.3), transparent)";
+
+// Auto-sliding image carousel component
+const AutoSlideImages = () => {
+    const images = [
+        "/projects/saas-dashboard.png",
+        "/projects/mobile-app.png",
+        "/projects/social-media.png",
+    ];
+    const [idx, setIdx] = useState(0);
+
+    useEffect(() => {
+        const t = setInterval(() => setIdx((prev) => (prev + 1) % images.length), 3000);
+        return () => clearInterval(t);
+    }, [images.length]);
+
+    return (
+        <div className="relative w-full h-full overflow-hidden rounded-xl bg-surface-light">
+            <AnimatePresence mode="popLayout">
+                <motion.img
+                    key={idx}
+                    src={images[idx]}
+                    alt="Design showcase"
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+                <h4 className="font-display font-bold text-lg">Visual Design</h4>
+                <p className="text-white/70 text-sm">UI/UX & Branding</p>
+            </div>
+        </div>
+    );
+};
+
+// Auto-scrolling tools ticker
+const ToolTicker = () => {
+    const tools = [...skills["Design Tools"], "Wireframing", "Prototyping"];
+    return (
+        <div className="w-full h-full rounded-xl overflow-hidden flex flex-col justify-center relative bg-gradient-to-br from-[#0a0c1e] to-[#050610] border border-primary/10">
+            <h4 className="font-display font-bold text-lg text-white mb-6 px-6 relative z-10">Toolkit</h4>
+            <div className="relative overflow-hidden w-full flex select-none">
+                <motion.div
+                    animate={{ x: [0, -1000] }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                    className="flex whitespace-nowrap gap-4 px-4"
+                >
+                    {[...tools, ...tools, ...tools].map((tool, i) => (
+                        <div
+                            key={i}
+                            className="px-4 py-2 rounded-lg text-base font-medium glass"
+                            style={{ color: "#60A5FA", border: "1px solid rgba(59, 109, 224, 0.2)" }}
+                        >
+                            {tool}
+                        </div>
+                    ))}
+                </motion.div>
+                {/* Fade edges */}
+                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#0a0c1e] to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0c1e] to-transparent z-10 pointer-events-none" />
+            </div>
+        </div>
+    );
+};
+
+export default function AboutPage() {
+    const personal = useEditableData("personal", personalInfo);
+    const skillsData = useEditableData("skills", skills);
+    const experienceData = useEditableData("experience", experience);
+    const content = useEditableData("aboutContent", aboutPageContent);
+    const aboutBentoCards = useEditableData("aboutBentoCards", defaultAboutBentoCards);
+
+    return (
+        <div className="relative" style={{ background: "#050510" }}>
+            {/* ═══════ LIGHT PILLAR BACKGROUND ═══════ */}
+            <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+                <LightPillar
+                    topColor="#1E4BBD"
+                    bottomColor="#60A5FA"
+                    intensity={0.5}
+                    rotationSpeed={0.15}
+                    glowAmount={0.0015}
+                    pillarWidth={3}
+                    pillarHeight={0.4}
+                    noiseIntensity={0.4}
+                    pillarRotation={25}
+                    interactive={false}
+                    mixBlendMode="screen"
+                    quality="high"
+                />
+            </div>
+            <div
+                className="fixed inset-0 pointer-events-none"
+                style={{ zIndex: 0, background: "rgba(5, 5, 16, 0.35)" }}
+            />
+
+            {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
+            <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
+                <Lanyard position={[0, 0, 14]} gravity={[0, -40, 0]} fov={26} />
+                <div
+                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                    style={{ zIndex: 10 }}
+                >
+                    <span className="text-text-secondary text-sm font-medium animate-pulse">
+                        {content.lanyardHint}
+                    </span>
+                    <svg
+                        className="w-5 h-5 text-primary-light animate-bounce"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                </div>
+            </section>
+
+            {/* ═══════ SECTION 2 — ABOUT ME ═══════ */}
+            <section className="relative py-24 px-6" style={{ zIndex: 1 }}>
+                <div className="max-w-4xl mx-auto">
+                    {/* ── Hero: Name + Rotating Title ── */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeUp}
+                        className="mb-16 text-center"
+                    >
+                        <h1 className="font-display font-bold text-5xl sm:text-6xl md:text-7xl mb-4">
+                            <ShinyText
+                                text={personal.name}
+                                speed={3}
+                                delay={0}
+                                color="#94a3b8"
+                                shineColor="#ffffff"
+                                spread={120}
+                                direction="left"
+                                className="font-display font-bold"
+                            />
+                        </h1>
+
+                        <div className="flex items-center justify-center gap-3 text-2xl sm:text-3xl md:text-4xl font-display font-semibold text-text-secondary">
+                            <span>I&apos;m a</span>
+                            <RotatingText
+                                texts={["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"]}
+                                mainClassName="px-3 py-1 bg-primary/20 text-primary-light overflow-hidden rounded-lg"
+                                staggerFrom="last"
+                                initial={{ y: "100%" }}
+                                animate={{ y: 0 }}
+                                exit={{ y: "-120%" }}
+                                staggerDuration={0.025}
+                                splitLevelClassName="overflow-hidden pb-1"
+                                transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                                rotationInterval={2500}
+                            />
+                        </div>
+
+                        <p className="text-text-secondary text-xl leading-relaxed mt-8 max-w-2xl mx-auto">
+                            {personal.summary}
+                        </p>
+                    </motion.div>
+
+                    {/* ── Stats ── */}
+                    <div className="flex flex-wrap justify-center gap-6 mb-16">
+                        {personal.stats.map((stat, i) => (
+                            <motion.div
+                                key={stat.label}
+                                custom={i}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={scaleIn}
+                                className="rounded-xl px-8 py-5 text-center transition-all duration-300 hover:scale-105"
+                                style={glassCard}
+                            >
+                                <p className="text-primary-light font-bold text-3xl">{stat.value}</p>
+                                <p className="text-text-muted text-sm mt-1">{stat.label}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className="h-px w-full mb-16" style={{ background: dividerGradient }} />
+
+                    {/* ── Experience ── */}
+                    <div className="mb-16">
+                        <motion.h2
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={fadeLeft}
+                            className="font-display font-bold text-3xl sm:text-4xl text-text-primary mb-8 flex items-center gap-3"
+                        >
+                            <span className="text-3xl">💼</span> Experience
+                        </motion.h2>
+
+                        <div className="space-y-8">
+                            {experienceData.map((exp, i) => (
+                                <motion.div
+                                    key={i}
+                                    custom={i}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={fadeLeft}
+                                    className="relative rounded-xl p-6"
+                                    style={glassCardAccent}
+                                >
+                                    <h3 className="font-display font-bold text-xl text-text-primary">{exp.role}</h3>
+                                    <p className="text-primary-light text-base font-medium mt-1">
+                                        {exp.company} · {exp.period}
+                                    </p>
+                                    <ul className="mt-3 space-y-2">
+                                        {exp.highlights.map((h, j) => (
+                                            <li
+                                                key={j}
+                                                className="text-text-secondary text-base leading-relaxed flex items-start gap-2"
+                                            >
+                                                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                                {h}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="h-px w-full mb-16" style={{ background: dividerGradient }} />
+
+                    {/* ── Skills & Tools ── */}
+                    <div className="mb-16">
+                        <motion.h2
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={fadeLeft}
+                            className="font-display font-bold text-3xl sm:text-4xl text-text-primary mb-8 flex items-center gap-3"
+                        >
+                            <span className="text-3xl">🛠️</span> Skills &amp; Tools
+                        </motion.h2>
+
+                        <div className="space-y-6">
+                            {Object.entries(skillsData).map(([category, items], catIdx) => (
+                                <motion.div
+                                    key={category}
+                                    custom={catIdx}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={fadeUp}
+                                >
+                                    <h3 className="font-display font-semibold text-base text-text-primary mb-3 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-primary" />
+                                        {category}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {items.map((skill, skillIdx) => (
+                                            <motion.span
+                                                key={skill}
+                                                custom={catIdx * 4 + skillIdx}
+                                                initial="hidden"
+                                                whileInView="visible"
+                                                viewport={{ once: true }}
+                                                variants={popIn}
+                                                whileHover={{ scale: 1.1, y: -2 }}
+                                                className="px-4 py-2 rounded-lg text-base font-medium cursor-default transition-colors duration-300 hover:bg-primary/20 hover:text-white"
+                                                style={{
+                                                    background: "rgba(37, 99, 235, 0.1)",
+                                                    border: "1px solid rgba(59, 109, 224, 0.15)",
+                                                    color: "#60A5FA",
+                                                }}
+                                            >
+                                                {skill}
+                                            </motion.span>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════ SECTION 3 — SHOWCASE BENTO GRID ═══════ */}
+            <section className="relative py-20 px-6" style={{ zIndex: 1 }}>
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeUp}
+                    className="max-w-6xl mx-auto mb-12"
+                >
+                    <h2 className="font-display font-bold text-4xl sm:text-5xl text-text-primary text-center flex items-center justify-center gap-3">
+                        <span className="text-4xl drop-shadow-lg shadow-primary">✨</span> {content.sectionTitle}
+                    </h2>
+                    <p className="text-text-secondary text-center mt-4 text-lg max-w-2xl mx-auto">
+                        {content.sectionSubtitle}
+                    </p>
+                </motion.div>
+
+                <div className="max-w-6xl mx-auto">
+                    <MagicBento
+                        cards={aboutBentoCards}
+                        textAutoHide={true}
+                        enableStars
+                        enableSpotlight
+                        enableBorderGlow={true}
+                        enableTilt={false}
+                        enableMagnetism={false}
+                        clickEffect
+                        spotlightRadius={400}
+                        particleCount={12}
+                        glowColor="132, 0, 255"
+                        disableAnimations={false}
+                    />
+                </div>
+            </section>
+
+            <div className="h-20" />
+        </div>
+    );
+}
+

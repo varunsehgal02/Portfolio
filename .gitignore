@@ -1,1 +1,11 @@
 node_modules
+frontend/node_modules
+backend/node_modules
+
+.next
+frontend/.next
+
+.env
+backend/.env
+
+*.log

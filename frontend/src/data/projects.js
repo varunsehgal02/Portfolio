@@ -1,0 +1,123 @@
+export const projects = [
+    {
+        id: "saas-dashboard",
+        title: "SaaS Dashboard UI",
+        category: "uiux",
+        description:
+            "Designed a responsive dashboard with 5+ components and streamlined information architecture. Improved task completion time by 40% through user-centered UX and accessibility practices.",
+        highlights: [
+            "5+ responsive components",
+            "40% faster task completion",
+            "Streamlined info architecture",
+            "Accessibility-first approach",
+        ],
+        tools: ["Figma", "Prototyping", "Design Systems"],
+        gradient: "from-indigo-500 via-purple-500 to-pink-500",
+        icon: "📊",
+        link: "",
+        image: "/projects/saas-dashboard.png",
+        video: "https://cdn.coverr.co/videos/coverr-man-working-on-a-laptop-5174/1080p.mp4",
+    },
+    {
+        id: "mobile-app-redesign",
+        title: "Mobile App Redesign",
+        category: "uiux",
+        description:
+            "Conducted user research and created 10+ high-fidelity screens with optimized user flows. Increased conversions by 45% and reduced cart abandonment by 50% through improved UI design.",
+        highlights: [
+            "10+ high-fidelity screens",
+            "45% conversion increase",
+            "50% less cart abandonment",
+            "Optimized user flows",
+        ],
+        tools: ["Figma", "User Research", "Usability Testing"],
+        gradient: "from-cyan-500 via-blue-500 to-indigo-500",
+        icon: "📱",
+        link: "",
+        image: "/projects/mobile-app.png",
+        video: "https://cdn.coverr.co/videos/coverr-app-development-1579/1080p.mp4",
+    },
+    {
+        id: "social-media-campaign",
+        title: "Social Media Marketing Campaign",
+        category: "graphic",
+        description:
+            "Produced 8+ marketing creatives including posts, stories, and promotional graphics. Drove 75% engagement growth and attracted 500+ followers.",
+        highlights: [
+            "8+ marketing creatives",
+            "75% engagement growth",
+            "500+ new followers",
+            "Multi-platform campaign",
+        ],
+        tools: ["Photoshop", "Illustrator", "Canva"],
+        gradient: "from-orange-500 via-red-500 to-pink-500",
+        icon: "🎨",
+        link: "",
+        image: "/projects/social-media.png",
+        video: "https://cdn.coverr.co/videos/coverr-designers-brainstorming-1572/1080p.mp4",
+    },
+    {
+        id: "motion-graphics-content",
+        title: "Motion Graphics & Video Content",
+        category: "motion",
+        description:
+            "Created 7+ animated videos, logo animations, and promotional assets using After Effects. Generated 5K+ views with 85% watch-through rate across social platforms.",
+        highlights: [
+            "7+ animated videos",
+            "5K+ views generated",
+            "85% watch-through rate",
+            "Logo animations & promos",
+        ],
+        tools: ["After Effects", "Illustrator", "Photoshop"],
+        gradient: "from-green-500 via-emerald-500 to-teal-500",
+        icon: "🎬",
+        link: "",
+        image: "/projects/mobile-app.png",
+        video: "https://cdn.coverr.co/videos/coverr-video-editing-workflow-4894/1080p.mp4",
+    },
+    {
+        id: "brand-identity-design",
+        title: "Brand Identity & Collateral",
+        category: "graphic",
+        description:
+            "Developed comprehensive brand materials leveraging Photoshop, Illustrator to amplify brand visibility by 35% across multiple channels. Includes logos, business cards, and marketing assets.",
+        highlights: [
+            "35% brand visibility boost",
+            "Complete brand guidelines",
+            "Logo & collateral suite",
+            "Multi-channel assets",
+        ],
+        tools: ["Illustrator", "Photoshop", "Canva"],
+        gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
+        icon: "✨",
+        link: "",
+        image: "/projects/social-media.png",
+        video: "https://cdn.coverr.co/videos/coverr-brand-strategy-meeting-7856/1080p.mp4",
+    },
+    {
+        id: "social-media-animations",
+        title: "Social Media Animations",
+        category: "motion",
+        description:
+            "Launched engaging social media visuals and animations that accelerated user engagement by 45% across multiple digital channels. Animated posts, stories, and promotional content.",
+        highlights: [
+            "45% engagement boost",
+            "Animated stories & posts",
+            "Multi-channel delivery",
+            "Dynamic visual content",
+        ],
+        tools: ["After Effects", "Photoshop", "Canva"],
+        gradient: "from-yellow-500 via-orange-500 to-red-500",
+        icon: "🔥",
+        link: "",
+        image: "/projects/mobile-app.png",
+        video: "https://cdn.coverr.co/videos/coverr-neon-motion-graphics-loop-1608/1080p.mp4",
+    },
+];
+
+export const categories = [
+    { id: "all", label: "All Projects" },
+    { id: "uiux", label: "UI/UX Design" },
+    { id: "graphic", label: "Graphic Design" },
+    { id: "motion", label: "Motion Design" },
+];
