@@ -3,6 +3,7 @@ const { z } = require("zod");
 const { readStore, writeStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
 const { contactLimiter } = require("../middleware/rateLimit");
+const { sendContactNotification } = require("../lib/mailer");
 
 const router = express.Router();
 
@@ -30,7 +31,14 @@ router.post("/", contactLimiter, async (req, res) => {
   store.contacts.push(entry);
   await writeStore(store);
 
-  return res.json({ ok: true, id: entry.id });
+  let emailSent = false;
+  try {
+    emailSent = await sendContactNotification(entry);
+  } catch (err) {
+    console.error("Contact email notification failed:", err?.message || err);
+  }
+
+  return res.json({ ok: true, id: entry.id, emailSent });
 });
 
 router.get("/", requireAuth, async (_req, res) => {

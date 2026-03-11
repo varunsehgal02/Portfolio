@@ -3,6 +3,9 @@
 import { apiRequest } from "@/lib/api";
 import { getData, saveData } from "@/lib/editableData";
 
+const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+const ANALYTICS_CLICK_URL = `${RAW_API_BASE}/api/analytics/outbound-click`;
+
 export async function trackPageView(page) {
   try {
     await apiRequest("/analytics/page-view", {
@@ -97,6 +100,48 @@ export async function trackAboutPopupOpen(cardTitle = "Unknown") {
     });
   } catch {
     // Ignore tracking errors.
+  }
+}
+
+export function trackSocialOutboundClick(platform, url, sourcePath = "unknown") {
+  const payload = {
+    platform,
+    url,
+    sourcePath,
+    referrer: typeof document !== "undefined" ? document.referrer : "",
+    userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+  };
+
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    navigator.sendBeacon(ANALYTICS_CLICK_URL, blob);
+    return;
+  }
+
+  fetch(ANALYTICS_CLICK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {
+    // Ignore tracking errors.
+  });
+}
+
+export async function getOutboundClickSummary() {
+  try {
+    return await apiRequest("/analytics/outbound-summary");
+  } catch {
+    return { total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] };
+  }
+}
+
+export async function getOutboundClickHistory(platform = "") {
+  try {
+    const query = platform ? `?platform=${encodeURIComponent(platform)}` : "";
+    return await apiRequest(`/analytics/outbound-history${query}`);
+  } catch {
+    return [];
   }
 }
 

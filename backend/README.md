@@ -35,3 +35,4 @@ Server default: `http://localhost:4000`
    - `API_RATE_LIMIT_MAX=300` per 15 minutes
    - `AUTH_RATE_LIMIT_MAX=10` failed logins per 15 minutes
    - `CONTACT_RATE_LIMIT_MAX=6` submissions per 15 minutes
+- Contact form submissions are persisted and can also trigger email notifications when SMTP env vars are configured

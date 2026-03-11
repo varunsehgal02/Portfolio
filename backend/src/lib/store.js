@@ -9,6 +9,7 @@ const DEFAULT_STORE = {
   analytics: {
     pageViews: [],
     aboutPopupOpens: [],
+    outboundClicks: [],
   },
 };
 

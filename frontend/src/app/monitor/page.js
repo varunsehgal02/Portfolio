@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminLogin from "@/components/AdminLogin";
 import NetworkBackground from "@/components/NetworkBackground";
@@ -14,6 +14,8 @@ import {
     getBehanceStats,
     setBehanceStats,
     getAboutPopupStats,
+    getOutboundClickSummary,
+    getOutboundClickHistory,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -24,6 +26,8 @@ export default function MonitorPage() {
     const [linkedin, setLinkedin] = useState({ views: 0, clicks: 0, followers: 0 });
     const [behance, setBehance] = useState({ views: 0, appreciations: 0, followers: 0 });
     const [aboutPopupStats, setAboutPopupStats] = useState({ totalOpens: 0, byCard: {}, lastOpenedAt: null });
+    const [outboundSummary, setOutboundSummary] = useState({ total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] });
+    const [outboundHistory, setOutboundHistory] = useState([]);
     const [contactMessages, setContactMessages] = useState([]);
     const [activeTab, setActiveTab] = useState("overview");
     const [editingLinkedin, setEditingLinkedin] = useState(false);
@@ -44,12 +48,14 @@ export default function MonitorPage() {
     }, []);
 
     const loadData = async () => {
-        const [statsNext, historyNext, linkedinNext, behanceNext, popupNext] = await Promise.all([
+        const [statsNext, historyNext, linkedinNext, behanceNext, popupNext, outboundSummaryNext, outboundHistoryNext] = await Promise.all([
             getVisitStats(),
             getVisitHistory(),
             getLinkedInStats(),
             getBehanceStats(),
             getAboutPopupStats(),
+            getOutboundClickSummary(),
+            getOutboundClickHistory(),
         ]);
 
         const messagesNext = await getContactMessages();
@@ -59,11 +65,14 @@ export default function MonitorPage() {
         setLinkedin(linkedinNext);
         setBehance(behanceNext);
         setAboutPopupStats(popupNext);
+        setOutboundSummary(outboundSummaryNext);
+        setOutboundHistory(outboundHistoryNext);
         setContactMessages(messagesNext);
     };
 
     const handleLinkedinSave = async () => {
-        await setLinkedInStats(linkedin);
+        const { clicks: _trackedClicks, ...manualLinkedin } = linkedin;
+        await setLinkedInStats(manualLinkedin);
         setEditingLinkedin(false);
     };
 
@@ -97,6 +106,48 @@ export default function MonitorPage() {
         { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-purple-400", textColor: "text-secondary" },
         { label: "All Time", value: stats.total, icon: "🌟", color: "from-amber-500 to-orange-400", textColor: "text-amber-400" },
     ] : [];
+
+    const socialTrend = useMemo(() => {
+        const formatKey = (date) => {
+            const year = date.getFullYear();
+            const month = `${date.getMonth() + 1}`.padStart(2, "0");
+            const day = `${date.getDate()}`.padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        };
+
+        const days = [];
+        const now = new Date();
+
+        for (let offset = 6; offset >= 0; offset -= 1) {
+            const date = new Date(now);
+            date.setHours(0, 0, 0, 0);
+            date.setDate(now.getDate() - offset);
+            days.push({
+                key: formatKey(date),
+                label: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+                linkedin: 0,
+                behance: 0,
+            });
+        }
+
+        const dayMap = Object.fromEntries(days.map((day) => [day.key, day]));
+
+        outboundHistory.forEach((entry) => {
+            const date = new Date(entry.at);
+            const key = formatKey(date);
+            const day = dayMap[key];
+            if (!day) return;
+
+            if (entry.platform === "linkedin") day.linkedin += 1;
+            if (entry.platform === "behance") day.behance += 1;
+        });
+
+        const maxValue = Math.max(1, ...days.flatMap((day) => [day.linkedin, day.behance]));
+        return { days, maxValue };
+    }, [outboundHistory]);
+
+    const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
+    const trackedBehanceClicks = outboundSummary.byPlatform?.behance || 0;
 
     return (
         <div className="relative min-h-screen pt-28 pb-20">
@@ -425,7 +476,6 @@ export default function MonitorPage() {
                                         <div className="grid grid-cols-3 gap-4">
                                             {[
                                                 { label: "Profile Views", key: "views" },
-                                                { label: "Profile Clicks", key: "clicks" },
                                                 { label: "Followers", key: "followers" },
                                             ].map((field) => (
                                                 <div key={field.key}>
@@ -438,6 +488,15 @@ export default function MonitorPage() {
                                                     />
                                                 </div>
                                             ))}
+                                            <div>
+                                                <label className="block text-text-muted text-xs mb-1.5 font-medium">Profile Clicks (Auto)</label>
+                                                <input
+                                                    type="number"
+                                                    value={trackedLinkedinClicks}
+                                                    disabled
+                                                    className="w-full px-4 py-2.5 rounded-xl bg-surface-light/60 border border-surface-light text-text-muted text-sm cursor-not-allowed"
+                                                />
+                                            </div>
                                         </div>
                                         <button
                                             onClick={handleLinkedinSave}
@@ -450,7 +509,7 @@ export default function MonitorPage() {
                                     <motion.div key="view-li" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-3 gap-4">
                                         {[
                                             { label: "Profile Views", value: linkedin.views, icon: "👁️" },
-                                            { label: "Profile Clicks", value: linkedin.clicks, icon: "🖱️" },
+                                            { label: "Profile Clicks (Tracked)", value: trackedLinkedinClicks, icon: "🖱️" },
                                             { label: "Followers", value: linkedin.followers, icon: "👥" },
                                         ].map((stat) => (
                                             <div key={stat.label} className="bg-surface-light/50 rounded-xl p-5 text-center hover:bg-surface-light transition-colors">
@@ -510,6 +569,15 @@ export default function MonitorPage() {
                                                 </div>
                                             ))}
                                         </div>
+                                        <div>
+                                            <label className="block text-text-muted text-xs mb-1.5 font-medium">Outbound Clicks (Auto)</label>
+                                            <input
+                                                type="number"
+                                                value={trackedBehanceClicks}
+                                                disabled
+                                                className="w-full max-w-xs px-4 py-2.5 rounded-xl bg-surface-light/60 border border-surface-light text-text-muted text-sm cursor-not-allowed"
+                                            />
+                                        </div>
                                         <button
                                             onClick={handleBehanceSave}
                                             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
@@ -518,9 +586,10 @@ export default function MonitorPage() {
                                         </button>
                                     </motion.div>
                                 ) : (
-                                    <motion.div key="view-be" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-3 gap-4">
+                                    <motion.div key="view-be" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {[
                                             { label: "Project Views", value: behance.views, icon: "👁️" },
+                                            { label: "Outbound Clicks (Tracked)", value: trackedBehanceClicks, icon: "🖱️" },
                                             { label: "Appreciations", value: behance.appreciations, icon: "❤️" },
                                             { label: "Followers", value: behance.followers, icon: "👥" },
                                         ].map((stat) => (
@@ -538,8 +607,97 @@ export default function MonitorPage() {
                         <div className="glass rounded-xl p-4 text-center">
                             <p className="text-text-muted text-xs flex items-center justify-center gap-2">
                                 <span>💡</span>
-                                LinkedIn & Behance stats are manually entered. Update them from your platform dashboards.
+                                LinkedIn/Behance profile views are external platform data. This dashboard tracks outbound clicks from your portfolio links, not who viewed your LinkedIn profile.
                             </p>
+                        </div>
+
+                        <div className="glass rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">🧭</span>
+                                    Outbound Social Click Tracking
+                                </h3>
+                                <span className="text-text-muted text-xs">Total tracked: {outboundSummary.total || 0}</span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                                <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                    <p className="text-primary-light font-display font-bold text-3xl">{outboundSummary.total || 0}</p>
+                                    <p className="text-text-muted text-xs mt-1">All outbound clicks</p>
+                                </div>
+                                <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                    <p className="text-blue-400 font-display font-bold text-3xl">{outboundSummary.byPlatform?.linkedin || 0}</p>
+                                    <p className="text-text-muted text-xs mt-1">LinkedIn clicks</p>
+                                </div>
+                                <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                    <p className="text-blue-300 font-display font-bold text-3xl">{outboundSummary.byPlatform?.behance || 0}</p>
+                                    <p className="text-text-muted text-xs mt-1">Behance clicks</p>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-surface-light/60 bg-surface-light/20 p-4 mb-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h4 className="text-text-primary font-semibold">Last 7 days</h4>
+                                        <p className="text-text-muted text-xs">Tracked outbound clicks from your portfolio</p>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-xs">
+                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" />LinkedIn</span>
+                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-blue-300" />Behance</span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-7 gap-3 h-40 items-end">
+                                    {socialTrend.days.map((day, index) => (
+                                        <div key={day.key} className="flex flex-col items-center gap-2 h-full">
+                                            <div className="text-[10px] text-text-muted h-3">{day.linkedin + day.behance > 0 ? day.linkedin + day.behance : ""}</div>
+                                            <div className="flex items-end justify-center gap-1 w-full flex-1">
+                                                <motion.div
+                                                    initial={{ height: 0 }}
+                                                    animate={{ height: `${Math.max((day.linkedin / socialTrend.maxValue) * 100, day.linkedin ? 8 : 0)}%` }}
+                                                    transition={{ duration: 0.45, delay: index * 0.04 }}
+                                                    className="w-3 rounded-t-md bg-blue-400"
+                                                    title={`${day.label}: ${day.linkedin} LinkedIn clicks`}
+                                                />
+                                                <motion.div
+                                                    initial={{ height: 0 }}
+                                                    animate={{ height: `${Math.max((day.behance / socialTrend.maxValue) * 100, day.behance ? 8 : 0)}%` }}
+                                                    transition={{ duration: 0.45, delay: index * 0.04 + 0.05 }}
+                                                    className="w-3 rounded-t-md bg-blue-300"
+                                                    title={`${day.label}: ${day.behance} Behance clicks`}
+                                                />
+                                            </div>
+                                            <span className="text-[10px] text-text-muted whitespace-nowrap">{day.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="overflow-x-auto rounded-xl border border-surface-light/60">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-surface-light/40 border-b border-surface-light/60">
+                                            <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Platform</th>
+                                            <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Source</th>
+                                            <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {outboundHistory.slice(0, 20).map((entry) => (
+                                            <tr key={entry.id} className="border-b border-surface-light/40 last:border-0">
+                                                <td className="px-4 py-2.5 text-text-primary capitalize">{entry.platform}</td>
+                                                <td className="px-4 py-2.5 text-text-secondary">{entry.sourcePath || "unknown"}</td>
+                                                <td className="px-4 py-2.5 text-text-muted">{new Date(entry.at).toLocaleString()}</td>
+                                            </tr>
+                                        ))}
+                                        {outboundHistory.length === 0 && (
+                                            <tr>
+                                                <td colSpan={3} className="px-4 py-6 text-center text-text-muted">No outbound social clicks tracked yet.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </motion.div>
                 )}

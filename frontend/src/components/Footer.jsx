@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { personalInfo } from "@/data/personal";
+import { trackSocialOutboundClick } from "@/lib/analytics";
 
 export default function Footer() {
     return (
@@ -59,6 +62,7 @@ export default function Footer() {
                                 href={personalInfo.socials.behance}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => trackSocialOutboundClick("behance", personalInfo.socials.behance, "footer")}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -70,6 +74,7 @@ export default function Footer() {
                                 href={personalInfo.socials.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => trackSocialOutboundClick("linkedin", personalInfo.socials.linkedin, "footer")}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">

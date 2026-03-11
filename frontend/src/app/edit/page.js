@@ -67,6 +67,7 @@ export default function EditPage() {
     const [authed, setAuthed] = useState(false);
     const [activeTab, setActiveTab] = useState("personal");
     const [savedMessage, setSavedMessage] = useState("");
+    const [actionError, setActionError] = useState("");
 
     const [personal, setPersonal] = useState(defaultPersonal);
     const [skillsData, setSkillsData] = useState(defaultSkills);
@@ -109,6 +110,32 @@ export default function EditPage() {
     const announceSaved = (msg) => {
         setSavedMessage(msg);
         setTimeout(() => setSavedMessage(""), 2200);
+    };
+
+    const getFriendlyActionError = (err, fallback) => {
+        const message = err instanceof Error ? err.message : "";
+        const normalized = message.toLowerCase();
+
+        if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+            return "Unable to reach server. Please try again in a moment.";
+        }
+
+        if (normalized.includes("invalid") || normalized.includes("too many")) {
+            return message;
+        }
+
+        return message || fallback;
+    };
+
+    const runEditorAction = async (action, successMessage, fallbackError) => {
+        setActionError("");
+
+        try {
+            await action();
+            announceSaved(successMessage);
+        } catch (err) {
+            setActionError(getFriendlyActionError(err, fallbackError));
+        }
     };
 
     const loadSavedData = async () => {
@@ -211,11 +238,21 @@ export default function EditPage() {
                                 {savedMessage}
                             </div>
                         )}
+                        {actionError && (
+                            <div className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-xs max-w-xs">
+                                {actionError}
+                            </div>
+                        )}
                         <button
                             onClick={async () => {
-                                await resetAllData();
-                                await loadSavedData();
-                                announceSaved("All edits reset");
+                                await runEditorAction(
+                                    async () => {
+                                        await resetAllData();
+                                        await loadSavedData();
+                                    },
+                                    "All edits reset",
+                                    "Failed to reset all edits."
+                                );
                             }}
                             className="px-4 py-2 rounded-xl glass text-text-secondary text-sm hover:text-amber-400"
                         >
@@ -328,20 +365,24 @@ export default function EditPage() {
 
                                 <div className="flex gap-3">
                                     <button
-                                        onClick={() => {
-                                            saveData("personal", personal);
-                                            announceSaved("Personal saved");
-                                        }}
+                                        onClick={() => runEditorAction(
+                                            async () => saveData("personal", personal),
+                                            "Personal saved",
+                                            "Failed to save personal profile."
+                                        )}
                                         className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold"
                                     >
                                         Save Personal
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            resetData("personal");
-                                            setPersonal(defaultPersonal);
-                                            announceSaved("Personal reset");
-                                        }}
+                                        onClick={() => runEditorAction(
+                                            async () => {
+                                                await resetData("personal");
+                                                setPersonal(defaultPersonal);
+                                            },
+                                            "Personal reset",
+                                            "Failed to reset personal profile."
+                                        )}
                                         className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm"
                                     >
                                         Reset
@@ -436,20 +477,24 @@ export default function EditPage() {
 
                                 <div className="flex gap-3">
                                     <button
-                                        onClick={() => {
-                                            saveData("skills", skillsData);
-                                            announceSaved("Skills saved");
-                                        }}
+                                        onClick={() => runEditorAction(
+                                            async () => saveData("skills", skillsData),
+                                            "Skills saved",
+                                            "Failed to save skills."
+                                        )}
                                         className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold"
                                     >
                                         Save Skills
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            resetData("skills");
-                                            setSkillsData(defaultSkills);
-                                            announceSaved("Skills reset");
-                                        }}
+                                        onClick={() => runEditorAction(
+                                            async () => {
+                                                await resetData("skills");
+                                                setSkillsData(defaultSkills);
+                                            },
+                                            "Skills reset",
+                                            "Failed to reset skills."
+                                        )}
                                         className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm"
                                     >
                                         Reset
@@ -562,8 +607,8 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("experience", experienceData); announceSaved("Experience saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Experience</button>
-                                    <button onClick={() => { resetData("experience"); setExperienceData(defaultExperience); announceSaved("Experience reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("experience", experienceData), "Experience saved", "Failed to save experience.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Experience</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("experience"); setExperienceData(defaultExperience); }, "Experience reset", "Failed to reset experience.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -576,8 +621,8 @@ export default function EditPage() {
                                     <Field label="Period" value={education.period} onChange={(v) => setEducation({ ...education, period: v })} />
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("education", education); announceSaved("Education saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Education</button>
-                                    <button onClick={() => { resetData("education"); setEducation(defaultEducation); announceSaved("Education reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("education", education), "Education saved", "Failed to save education.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Education</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("education"); setEducation(defaultEducation); }, "Education reset", "Failed to reset education.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -608,8 +653,8 @@ export default function EditPage() {
                                 <button onClick={() => setCertifications([...certifications, "New certification"])} className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs">+ Add Certification</button>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("certifications", certifications); announceSaved("Certifications saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Certifications</button>
-                                    <button onClick={() => { resetData("certifications"); setCertifications(defaultCerts); announceSaved("Certifications reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("certifications", certifications), "Certifications saved", "Failed to save certifications.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Certifications</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("certifications"); setCertifications(defaultCerts); }, "Certifications reset", "Failed to reset certifications.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -849,8 +894,8 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("projects", projectsData); announceSaved("Projects saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects</button>
-                                    <button onClick={() => { resetData("projects"); setProjectsData(defaultProjects); announceSaved("Projects reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projects", projectsData), "Projects saved", "Failed to save projects.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("projects"); setProjectsData(defaultProjects); }, "Projects reset", "Failed to reset projects.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -891,8 +936,8 @@ export default function EditPage() {
                                 <button onClick={() => setProjectCategories([...projectCategories, { id: "new", label: "New Category" }])} className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs">+ Add Category</button>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("projectCategories", projectCategories); announceSaved("Categories saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Categories</button>
-                                    <button onClick={() => { resetData("projectCategories"); setProjectCategories(defaultCategories); announceSaved("Categories reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projectCategories", projectCategories), "Categories saved", "Failed to save categories.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Categories</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("projectCategories"); setProjectCategories(defaultCategories); }, "Categories reset", "Failed to reset categories.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -905,8 +950,8 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("homeContent", homeContent); announceSaved("Home content saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Home Content</button>
-                                    <button onClick={() => { resetData("homeContent"); setHomeContent(defaultHomeContent); announceSaved("Home content reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("homeContent", homeContent), "Home content saved", "Failed to save home content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Home Content</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("homeContent"); setHomeContent(defaultHomeContent); }, "Home content reset", "Failed to reset home content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -1095,10 +1140,10 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("aboutContent", aboutContent); announceSaved("About content saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Content</button>
-                                    <button onClick={() => { saveData("aboutBentoCards", aboutBentoCards); announceSaved("About cards saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Cards</button>
-                                    <button onClick={() => { resetData("aboutContent"); setAboutContent(defaultAboutContent); announceSaved("About content reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
-                                    <button onClick={() => { resetData("aboutBentoCards"); setAboutBentoCards(defaultAboutBentoCards); announceSaved("About cards reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset Cards</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("aboutContent", aboutContent), "About content saved", "Failed to save about content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Content</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("aboutBentoCards", aboutBentoCards), "About cards saved", "Failed to save about cards.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Cards</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("aboutContent"); setAboutContent(defaultAboutContent); }, "About content reset", "Failed to reset about content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("aboutBentoCards"); setAboutBentoCards(defaultAboutBentoCards); }, "About cards reset", "Failed to reset about cards.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset Cards</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -1111,8 +1156,8 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("projectsContent", projectsContent); announceSaved("Projects content saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects Content</button>
-                                    <button onClick={() => { resetData("projectsContent"); setProjectsContent(defaultProjectsContent); announceSaved("Projects content reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Projects content saved", "Failed to save projects content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects Content</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("projectsContent"); setProjectsContent(defaultProjectsContent); }, "Projects content reset", "Failed to reset projects content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}
@@ -1125,8 +1170,8 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => { saveData("contactContent", contactContent); announceSaved("Contact content saved"); }} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Contact Content</button>
-                                    <button onClick={() => { resetData("contactContent"); setContactContent(defaultContactContent); announceSaved("Contact content reset"); }} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("contactContent", contactContent), "Contact content saved", "Failed to save contact content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Contact Content</button>
+                                    <button onClick={() => runEditorAction(async () => { await resetData("contactContent"); setContactContent(defaultContactContent); }, "Contact content reset", "Failed to reset contact content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
                         )}

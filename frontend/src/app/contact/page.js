@@ -10,19 +10,88 @@ import LightRays from "@/components/LightRays";
 import StickerPeel from "@/components/StickerPeel/StickerPeel";
 import TargetCursor from "@/components/TargetCursor/TargetCursor";
 import { submitContactMessage } from "@/lib/contact";
+import { trackSocialOutboundClick } from "@/lib/analytics";
 
 export default function ContactPage() {
     const personal = useEditableData("personal", personalInfo);
     const content = useEditableData("contactContent", contactPageContent);
 
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+    const [touched, setTouched] = useState({ name: false, email: false, message: false });
+    const [fieldErrors, setFieldErrors] = useState({ name: "", email: "", message: "" });
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
+    const messageMaxLength = 4000;
+    const messageLength = formData.message.length;
+
+    const validateField = (field, value) => {
+        const text = value.trim();
+
+        if (field === "name") {
+            if (text.length < 2) return "Name must be at least 2 characters.";
+            if (text.length > 100) return "Name must be 100 characters or less.";
+            return "";
+        }
+
+        if (field === "email") {
+            if (!text) return "Email is required.";
+            if (!/^\S+@\S+\.\S+$/.test(text)) return "Please enter a valid email address.";
+            if (text.length > 200) return "Email must be 200 characters or less.";
+            return "";
+        }
+
+        if (field === "message") {
+            if (text.length < 5) return "Message must be at least 5 characters.";
+            if (text.length > messageMaxLength) return "Message must be 4000 characters or less.";
+            return "";
+        }
+
+        return "";
+    };
+
+    const validateForm = (nextData) => ({
+        name: validateField("name", nextData.name),
+        email: validateField("email", nextData.email),
+        message: validateField("message", nextData.message),
+    });
+
+    const hasFieldErrors = (errors) => Object.values(errors).some(Boolean);
+
+    const setFormField = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+
+        if (touched[field]) {
+            setFieldErrors((prev) => ({
+                ...prev,
+                [field]: validateField(field, value),
+            }));
+        }
+    };
+
+    const handleFieldBlur = (field) => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+        setFieldErrors((prev) => ({
+            ...prev,
+            [field]: validateField(field, formData[field]),
+        }));
+    };
+
+    const showFieldError = (field) => touched[field] && fieldErrors[field];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError("");
+
+        const nextErrors = validateForm(formData);
+        setFieldErrors(nextErrors);
+        setTouched({ name: true, email: true, message: true });
+
+        if (hasFieldErrors(nextErrors)) {
+            setSubmitError("Please fix the highlighted fields and try again.");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -30,8 +99,21 @@ export default function ContactPage() {
             setIsSubmitted(true);
             setTimeout(() => setIsSubmitted(false), 4000);
             setFormData({ name: "", email: "", message: "" });
-        } catch {
-            setSubmitError("Could not send message right now. Please try again.");
+            setTouched({ name: false, email: false, message: false });
+            setFieldErrors({ name: "", email: "", message: "" });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "";
+            const normalized = message.toLowerCase();
+
+            if (normalized.includes("too many contact requests")) {
+                setSubmitError(message);
+            } else if (normalized.includes("invalid contact payload")) {
+                setSubmitError("Please check your inputs and try again.");
+            } else if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+                setSubmitError("Unable to reach server. Please try again in a moment.");
+            } else {
+                setSubmitError(message || "Could not send message right now. Please try again.");
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -74,6 +156,7 @@ export default function ContactPage() {
     const socialLinks = [
         {
             name: "Behance",
+            platform: "behance",
             href: personal.socials.behance,
             icon: (
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -83,6 +166,7 @@ export default function ContactPage() {
         },
         {
             name: "LinkedIn",
+            platform: "linkedin",
             href: personal.socials.linkedin,
             icon: (
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -209,6 +293,7 @@ export default function ContactPage() {
                                         href={social.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={() => trackSocialOutboundClick(social.platform, social.href, "/contact")}
                                         className="w-12 h-12 rounded-xl glass flex items-center justify-center text-text-secondary hover:text-primary-light hover:border-primary/30 transition-all duration-300 hover:scale-110"
                                         aria-label={social.name}
                                     >
@@ -243,10 +328,13 @@ export default function ContactPage() {
                                     id="name"
                                     required
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+                                    onChange={(e) => setFormField("name", e.target.value)}
+                                    onBlur={() => handleFieldBlur("name")}
+                                    aria-invalid={Boolean(showFieldError("name"))}
+                                    className={`w-full px-4 py-3 rounded-xl bg-surface-light border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 ${showFieldError("name") ? "border-red-400/70" : "border-surface-light"}`}
                                     placeholder="John Doe"
                                 />
+                                {showFieldError("name") && <p className="text-red-400 text-xs mt-2">{fieldErrors.name}</p>}
                             </div>
                             <div>
                                 <label htmlFor="email" className="block text-text-secondary text-sm font-medium mb-2">
@@ -257,10 +345,13 @@ export default function ContactPage() {
                                     id="email"
                                     required
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+                                    onChange={(e) => setFormField("email", e.target.value)}
+                                    onBlur={() => handleFieldBlur("email")}
+                                    aria-invalid={Boolean(showFieldError("email"))}
+                                    className={`w-full px-4 py-3 rounded-xl bg-surface-light border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 ${showFieldError("email") ? "border-red-400/70" : "border-surface-light"}`}
                                     placeholder="john@example.com"
                                 />
+                                {showFieldError("email") && <p className="text-red-400 text-xs mt-2">{fieldErrors.email}</p>}
                             </div>
                             <div>
                                 <label htmlFor="message" className="block text-text-secondary text-sm font-medium mb-2">
@@ -270,11 +361,18 @@ export default function ContactPage() {
                                     id="message"
                                     required
                                     rows={5}
+                                    maxLength={messageMaxLength}
                                     value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-light text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 resize-none"
+                                    onChange={(e) => setFormField("message", e.target.value)}
+                                    onBlur={() => handleFieldBlur("message")}
+                                    aria-invalid={Boolean(showFieldError("message"))}
+                                    className={`w-full px-4 py-3 rounded-xl bg-surface-light border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 resize-none ${showFieldError("message") ? "border-red-400/70" : "border-surface-light"}`}
                                     placeholder="Tell me about your project..."
                                 />
+                                <p className={`text-xs mt-2 ${messageLength > messageMaxLength - 200 ? "text-amber-300" : "text-text-muted"}`}>
+                                    {messageLength} / {messageMaxLength}
+                                </p>
+                                {showFieldError("message") && <p className="text-red-400 text-xs mt-2">{fieldErrors.message}</p>}
                             </div>
 
                             <motion.button
