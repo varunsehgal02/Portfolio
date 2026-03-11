@@ -81,32 +81,6 @@ export default function MonitorPage() {
         setEditingBehance(false);
     };
 
-    if (!authed) {
-        return (
-            <AdminLogin
-                title="Monitor Dashboard"
-                onSuccess={() => {
-                    setAuthed(true);
-                    loadData().catch(() => {});
-                }}
-            />
-        );
-    }
-
-    const tabs = [
-        { id: "overview", label: "Overview", icon: "📊" },
-        { id: "history", label: "Visit Log", icon: "📋" },
-        { id: "social", label: "Social Stats", icon: "🔗" },
-        { id: "messages", label: "Messages", icon: "✉️" },
-    ];
-
-    const statCards = stats ? [
-        { label: "Today", value: stats.today, icon: "📅", color: "from-cyan-500 to-blue-500", textColor: "text-cyan-400" },
-        { label: "This Week", value: stats.thisWeek, icon: "📊", color: "from-primary to-blue-400", textColor: "text-primary-light" },
-        { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-purple-400", textColor: "text-secondary" },
-        { label: "All Time", value: stats.total, icon: "🌟", color: "from-amber-500 to-orange-400", textColor: "text-amber-400" },
-    ] : [];
-
     const socialTrend = useMemo(() => {
         const formatKey = (date) => {
             const year = date.getFullYear();
@@ -145,6 +119,32 @@ export default function MonitorPage() {
         const maxValue = Math.max(1, ...days.flatMap((day) => [day.linkedin, day.behance]));
         return { days, maxValue };
     }, [outboundHistory]);
+
+    if (!authed) {
+        return (
+            <AdminLogin
+                title="Monitor Dashboard"
+                onSuccess={() => {
+                    setAuthed(true);
+                    loadData().catch(() => {});
+                }}
+            />
+        );
+    }
+
+    const tabs = [
+        { id: "overview", label: "Overview", icon: "📊" },
+        { id: "history", label: "Visit Log", icon: "📋" },
+        { id: "social", label: "Social Stats", icon: "🔗" },
+        { id: "messages", label: "Messages", icon: "✉️" },
+    ];
+
+    const statCards = stats ? [
+        { label: "Today", value: stats.today, icon: "📅", color: "from-cyan-500 to-blue-500", textColor: "text-cyan-400" },
+        { label: "This Week", value: stats.thisWeek, icon: "📊", color: "from-primary to-blue-400", textColor: "text-primary-light" },
+        { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-purple-400", textColor: "text-secondary" },
+        { label: "All Time", value: stats.total, icon: "🌟", color: "from-amber-500 to-orange-400", textColor: "text-amber-400" },
+    ] : [];
 
     const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
     const trackedBehanceClicks = outboundSummary.byPlatform?.behance || 0;
