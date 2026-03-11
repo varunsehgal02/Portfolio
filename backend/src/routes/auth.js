@@ -16,7 +16,8 @@ router.post("/login", (req, res) => {
   }
 
   const { id, password } = parsed.data;
-  const expectedId = process.env.ADMIN_ID || "varun";
+  const expectedId =
+    process.env.ADMIN_USERNAME || process.env.ADMIN_ID || "varun";
   const expectedPassword = process.env.ADMIN_PASSWORD || "test";
 
   if (id !== expectedId || password !== expectedPassword) {
