@@ -2,6 +2,7 @@ const express = require("express");
 const { z } = require("zod");
 const { readStore, writeStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
+const { contactLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const contactSchema = z.object({
   message: z.string().min(5).max(4000),
 });
 
-router.post("/", async (req, res) => {
+router.post("/", contactLimiter, async (req, res) => {
   const parsed = contactSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid contact payload" });

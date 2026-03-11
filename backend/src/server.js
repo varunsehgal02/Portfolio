@@ -9,6 +9,7 @@ const authRouter = require("./routes/auth");
 const contentRouter = require("./routes/content");
 const analyticsRouter = require("./routes/analytics");
 const contactRouter = require("./routes/contact");
+const { apiLimiter } = require("./middleware/rateLimit");
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ const app = express();
 const port = Number(process.env.PORT || 4000);
 const rawOrigins = process.env.CORS_ORIGIN || "http://localhost:3000,http://localhost:3001";
 const allowedOrigins = rawOrigins.split(",").map((s) => s.trim()).filter(Boolean);
+
+app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(
@@ -26,6 +29,7 @@ app.use(
 );
 app.use(express.json({ limit: "2mb" }));
 app.use(morgan("dev"));
+app.use("/api", apiLimiter);
 
 app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);

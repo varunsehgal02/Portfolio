@@ -17,7 +17,7 @@ Server default: `http://localhost:4000`
 
 - `GET /api/health`
 - `POST /api/auth/login`
-  - body: `{ "id": "varun", "password": "test" }`
+   - body: `{ "id": "<ADMIN_USERNAME>", "password": "<ADMIN_PASSWORD>" }`
 - `GET /api/content`
 - `GET /api/content/:key`
 - `PUT /api/content/:key` (auth required)
@@ -29,3 +29,9 @@ Server default: `http://localhost:4000`
 
 - Auth token format: `Authorization: Bearer <token>`
 - Data persists to `backend/data/store.json`
+- Admin login credentials are controlled by `ADMIN_USERNAME` and `ADMIN_PASSWORD`
+- API rate limits are configurable via `*_RATE_LIMIT_*` environment variables
+- Default limits:
+   - `API_RATE_LIMIT_MAX=300` per 15 minutes
+   - `AUTH_RATE_LIMIT_MAX=10` failed logins per 15 minutes
+   - `CONTACT_RATE_LIMIT_MAX=6` submissions per 15 minutes

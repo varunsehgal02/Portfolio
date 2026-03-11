@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { z } = require("zod");
+const { authLoginLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", authLoginLimiter, (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid login payload" });

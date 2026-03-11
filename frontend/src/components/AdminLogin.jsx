@@ -18,8 +18,20 @@ export default function AdminLogin({ onSuccess, title = "Admin Access" }) {
         try {
             await login(id, password);
             onSuccess();
-        } catch {
-            setError("Invalid credentials. Access denied.");
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "";
+            const normalized = message.toLowerCase();
+
+            if (normalized.includes("invalid credentials")) {
+                setError("Invalid credentials. Access denied.");
+            } else if (normalized.includes("too many login attempts")) {
+                setError(message);
+            } else if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+                setError("Unable to reach server. Please try again in a moment.");
+            } else {
+                setError(message || "Login failed. Please try again.");
+            }
+        } finally {
             setIsLoading(false);
         }
     };
