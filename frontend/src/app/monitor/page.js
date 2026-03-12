@@ -172,6 +172,92 @@ export default function MonitorPage() {
         return "Desktop";
     };
 
+    const fetchBrowserGeo = async (ip) => {
+        const providers = [
+            async () => {
+                const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (!data || data.success === false) return null;
+                return {
+                    ip,
+                    city: data.city || "",
+                    region: data.region || "",
+                    country: data.country || "",
+                    countryCode: data.country_code || "",
+                    latitude: typeof data.latitude === "number" ? data.latitude : null,
+                    longitude: typeof data.longitude === "number" ? data.longitude : null,
+                    timezone: data.timezone?.id || "",
+                    isp: data.connection?.isp || data.connection?.org || "",
+                    source: "ipwho.is(browser)",
+                };
+            },
+            async () => {
+                const res = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`);
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (!data || data.error) return null;
+                return {
+                    ip,
+                    city: data.city || "",
+                    region: data.region || "",
+                    country: data.country_name || "",
+                    countryCode: data.country_code || "",
+                    latitude: Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : null,
+                    longitude: Number.isFinite(Number(data.longitude)) ? Number(data.longitude) : null,
+                    timezone: data.timezone || "",
+                    isp: data.org || "",
+                    source: "ipapi.co(browser)",
+                };
+            },
+        ];
+
+        for (const provider of providers) {
+            try {
+                const geo = await provider();
+                if (geo && (geo.city || geo.region || geo.country || geo.isp)) {
+                    return geo;
+                }
+            } catch {
+                // Try next provider.
+            }
+        }
+
+        return null;
+    };
+
+    const loadIpLocation = async (ip) => {
+        if (!ip || ip === "Unknown" || ipLocations[ip] || loadingIpLocations[ip]) {
+            return;
+        }
+
+        setLoadingIpLocations((prev) => ({ ...prev, [ip]: true }));
+
+        try {
+            const profile = await getVisitorProfile(ip);
+            let geo = profile?.geolocation || null;
+
+            if (!geo) {
+                geo = await fetchBrowserGeo(ip);
+            }
+
+            if (geo) {
+                setIpLocations((prev) => ({ ...prev, [ip]: geo }));
+            }
+        } catch {
+            try {
+                const geo = await fetchBrowserGeo(ip);
+                if (geo) {
+                    setIpLocations((prev) => ({ ...prev, [ip]: geo }));
+                }
+            } catch {
+                // Ignore geo fallback errors.
+            }
+        } finally {
+            setLoadingIpLocations((prev) => ({ ...prev, [ip]: false }));
+        }
+    };
+
     const groupedHistory = useMemo(() => {
         const grouped = {};
 
@@ -199,19 +285,7 @@ export default function MonitorPage() {
     }, [history]);
 
     const toggleIpFolder = (ip) => {
-        if (ip && ip !== "Unknown" && !ipLocations[ip] && !loadingIpLocations[ip]) {
-            setLoadingIpLocations((prev) => ({ ...prev, [ip]: true }));
-            getVisitorProfile(ip)
-                .then((profile) => {
-                    const geo = profile?.geolocation || null;
-                    if (!geo) return;
-                    setIpLocations((prev) => ({ ...prev, [ip]: geo }));
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setLoadingIpLocations((prev) => ({ ...prev, [ip]: false }));
-                });
-        }
+        loadIpLocation(ip).catch(() => {});
 
         setOpenIpFolders((prev) => ({
             ...prev,
@@ -249,19 +323,7 @@ export default function MonitorPage() {
     }, [contactMessages]);
 
     const toggleMessageFolder = (ip) => {
-        if (ip && ip !== "Unknown" && !ipLocations[ip] && !loadingIpLocations[ip]) {
-            setLoadingIpLocations((prev) => ({ ...prev, [ip]: true }));
-            getVisitorProfile(ip)
-                .then((profile) => {
-                    const geo = profile?.geolocation || null;
-                    if (!geo) return;
-                    setIpLocations((prev) => ({ ...prev, [ip]: geo }));
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setLoadingIpLocations((prev) => ({ ...prev, [ip]: false }));
-                });
-        }
+        loadIpLocation(ip).catch(() => {});
 
         setOpenMessageIpFolders((prev) => ({
             ...prev,
