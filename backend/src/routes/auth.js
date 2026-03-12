@@ -5,6 +5,8 @@ const { authLoginLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
+const jwtSecret = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
+
 const loginSchema = z.object({
   id: z.string().min(1),
   password: z.string().min(1),
@@ -25,7 +27,7 @@ router.post("/login", authLoginLimiter, (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const token = jwt.sign({ id, role: "admin" }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id, role: "admin" }, jwtSecret, {
     expiresIn: "8h",
   });
 

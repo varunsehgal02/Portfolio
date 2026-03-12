@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 
+const jwtSecret = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
+
 function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -9,7 +11,7 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, jwtSecret);
     req.user = payload;
     return next();
   } catch {

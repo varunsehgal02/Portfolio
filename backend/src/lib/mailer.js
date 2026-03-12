@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 
 let cachedTransporter = null;
+let warnedMissingMailerConfig = false;
 
 function parsePort(value, fallback) {
   const port = Number(value);
@@ -27,6 +28,9 @@ function getMailerConfig() {
     host,
     port,
     secure: toBool(process.env.SMTP_SECURE, port === 465),
+    connectionTimeout: parsePort(process.env.SMTP_CONNECTION_TIMEOUT_MS, 10000),
+    greetingTimeout: parsePort(process.env.SMTP_GREETING_TIMEOUT_MS, 10000),
+    socketTimeout: parsePort(process.env.SMTP_SOCKET_TIMEOUT_MS, 20000),
     auth: {
       user,
       pass,
@@ -38,7 +42,13 @@ function getTransporter() {
   if (cachedTransporter) return cachedTransporter;
 
   const config = getMailerConfig();
-  if (!config) return null;
+  if (!config) {
+    if (!warnedMissingMailerConfig) {
+      warnedMissingMailerConfig = true;
+      console.warn("[mailer] SMTP is not configured. Contact emails are disabled.");
+    }
+    return null;
+  }
 
   cachedTransporter = nodemailer.createTransport(config);
   return cachedTransporter;

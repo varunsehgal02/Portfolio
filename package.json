@@ -2,13 +2,12 @@
   "name": "portfolio-monorepo",
   "private": true,
   "scripts": {
+    "dev": "node scripts/dev-all.js",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
-    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:all": "node scripts/dev-all.js",
     "build:frontend": "npm --prefix frontend run build",
+    "start": "npm run start:backend",
     "start:backend": "npm --prefix backend run start"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
   }
 }
