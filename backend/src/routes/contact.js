@@ -51,14 +51,12 @@ router.post("/", contactLimiter, async (req, res) => {
   store.contacts.push(entry);
   await writeStore(store);
 
-  let emailSent = false;
-  try {
-    emailSent = await sendContactNotification(entry);
-  } catch (err) {
+  // Send email in background — do NOT await so the response is instant.
+  sendContactNotification(entry).catch((err) => {
     console.error("Contact email notification failed:", err?.message || err);
-  }
+  });
 
-  return res.json({ ok: true, id: entry.id, emailSent });
+  return res.json({ ok: true, id: entry.id });
 });
 
 router.get("/", requireAuth, async (_req, res) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { personalInfo } from "@/data/personal";
 import { contactPageContent } from "@/data/pageContent";
@@ -22,8 +22,42 @@ export default function ContactPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
+    const [isMobile, setIsMobile] = useState(true);
     const messageMaxLength = 4000;
     const messageLength = formData.message.length;
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const mediaQueries = [
+            window.matchMedia("(max-width: 768px)"),
+            window.matchMedia("(hover: none) and (pointer: coarse)"),
+        ];
+
+        const updateIsMobile = () => {
+            setIsMobile(mediaQueries.some((query) => query.matches));
+        };
+
+        updateIsMobile();
+
+        mediaQueries.forEach((query) => {
+            if (typeof query.addEventListener === "function") {
+                query.addEventListener("change", updateIsMobile);
+            } else {
+                query.addListener(updateIsMobile);
+            }
+        });
+
+        return () => {
+            mediaQueries.forEach((query) => {
+                if (typeof query.removeEventListener === "function") {
+                    query.removeEventListener("change", updateIsMobile);
+                } else {
+                    query.removeListener(updateIsMobile);
+                }
+            });
+        };
+    }, []);
 
     const validateField = (field, value) => {
         const text = value.trim();
@@ -109,6 +143,8 @@ export default function ContactPage() {
                 setSubmitError(message);
             } else if (normalized.includes("invalid contact payload")) {
                 setSubmitError("Please check your inputs and try again.");
+            } else if (normalized.includes("timed out") || normalized.includes("timeout")) {
+                setSubmitError("Sending is taking too long. Please try again.");
             } else if (normalized.includes("failed to fetch") || normalized.includes("network")) {
                 setSubmitError("Unable to reach server. Please try again in a moment.");
             } else {
@@ -204,24 +240,26 @@ export default function ContactPage() {
                 />
             </div>
 
-            {/* Draggable sticker overlay across full contact page */}
-            <div className="fixed inset-0 z-[2] pointer-events-none">
-                <div className="relative w-full h-full">
-                    <StickerPeel
-                        className="pointer-events-auto"
-                        imageSrc="/projects/social-media.png"
-                        dragHandleLabel="Pull & Move"
-                        width={190}
-                        rotate={0}
-                        peelBackHoverPct={30}
-                        peelBackActivePct={40}
-                        shadowIntensity={0.5}
-                        lightingIntensity={0.1}
-                        initialPosition={{ x: 26, y: 170 }}
-                        peelDirection={0}
-                    />
+            {/* Draggable sticker overlay across full contact page (desktop only) */}
+            {!isMobile && (
+                <div className="fixed inset-0 z-[2] pointer-events-none">
+                    <div className="relative w-full h-full">
+                        <StickerPeel
+                            className="pointer-events-auto"
+                            imageSrc="/projects/social-media.png"
+                            dragHandleLabel="Pull & Move"
+                            width={190}
+                            rotate={0}
+                            peelBackHoverPct={30}
+                            peelBackActivePct={40}
+                            shadowIntensity={0.5}
+                            lightingIntensity={0.1}
+                            initialPosition={{ x: 26, y: 170 }}
+                            peelDirection={0}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
 
             <section className="relative z-[1] max-w-7xl mx-auto px-6">
                 <SectionHeading

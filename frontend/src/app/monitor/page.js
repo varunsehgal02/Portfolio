@@ -16,6 +16,7 @@ import {
     getAboutPopupStats,
     getOutboundClickSummary,
     getOutboundClickHistory,
+    getVisitorProfile,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -31,6 +32,8 @@ export default function MonitorPage() {
     const [contactMessages, setContactMessages] = useState([]);
     const [openIpFolders, setOpenIpFolders] = useState({});
     const [openMessageIpFolders, setOpenMessageIpFolders] = useState({});
+    const [ipLocations, setIpLocations] = useState({});
+    const [loadingIpLocations, setLoadingIpLocations] = useState({});
     const [activeTab, setActiveTab] = useState("overview");
     const [editingLinkedin, setEditingLinkedin] = useState(false);
     const [editingBehance, setEditingBehance] = useState(false);
@@ -196,10 +199,33 @@ export default function MonitorPage() {
     }, [history]);
 
     const toggleIpFolder = (ip) => {
+        if (ip && ip !== "Unknown" && !ipLocations[ip] && !loadingIpLocations[ip]) {
+            setLoadingIpLocations((prev) => ({ ...prev, [ip]: true }));
+            getVisitorProfile(ip)
+                .then((profile) => {
+                    const geo = profile?.geolocation || null;
+                    if (!geo) return;
+                    setIpLocations((prev) => ({ ...prev, [ip]: geo }));
+                })
+                .catch(() => {})
+                .finally(() => {
+                    setLoadingIpLocations((prev) => ({ ...prev, [ip]: false }));
+                });
+        }
+
         setOpenIpFolders((prev) => ({
             ...prev,
             [ip]: !prev[ip],
         }));
+    };
+
+    const getLocationLabel = (ip) => {
+        const geo = ipLocations[ip];
+        if (!geo) return "Location unavailable";
+
+        const parts = [geo.city, geo.region, geo.country].filter(Boolean);
+        if (parts.length === 0) return "Location unavailable";
+        return parts.join(", ");
     };
 
     const groupedMessages = useMemo(() => {
@@ -223,6 +249,20 @@ export default function MonitorPage() {
     }, [contactMessages]);
 
     const toggleMessageFolder = (ip) => {
+        if (ip && ip !== "Unknown" && !ipLocations[ip] && !loadingIpLocations[ip]) {
+            setLoadingIpLocations((prev) => ({ ...prev, [ip]: true }));
+            getVisitorProfile(ip)
+                .then((profile) => {
+                    const geo = profile?.geolocation || null;
+                    if (!geo) return;
+                    setIpLocations((prev) => ({ ...prev, [ip]: geo }));
+                })
+                .catch(() => {})
+                .finally(() => {
+                    setLoadingIpLocations((prev) => ({ ...prev, [ip]: false }));
+                });
+        }
+
         setOpenMessageIpFolders((prev) => ({
             ...prev,
             [ip]: !prev[ip],
@@ -489,6 +529,9 @@ export default function MonitorPage() {
                                                     <span>Last: {folder.lastVisitAt ? new Date(folder.lastVisitAt).toLocaleString() : "Unknown"}</span>
                                                     <span>Browser: {folder.browsers.join(", ") || "Unknown"}</span>
                                                     <span>Device: {folder.devices.join(", ") || "Unknown"}</span>
+                                                    <span>
+                                                        Location: {loadingIpLocations[folder.ip] ? "Loading..." : getLocationLabel(folder.ip)}
+                                                    </span>
                                                 </div>
                                                 <div className="mt-1 text-[11px] text-text-muted truncate">
                                                     Pages: {folder.pages.join(", ") || "Unknown"}
@@ -862,6 +905,9 @@ export default function MonitorPage() {
                                                     <div className="mt-1.5 text-xs text-text-muted flex flex-wrap gap-x-4 gap-y-1">
                                                         <span>Last: {folder.lastMessageAt ? new Date(folder.lastMessageAt).toLocaleString() : "Unknown"}</span>
                                                         <span>Emails: {folder.senders.join(", ") || "Unknown"}</span>
+                                                        <span>
+                                                            Location: {loadingIpLocations[folder.ip] ? "Loading..." : getLocationLabel(folder.ip)}
+                                                        </span>
                                                     </div>
                                                 </div>
                                                 <span className="text-text-muted text-xs font-medium shrink-0">{expanded ? "Hide" : "Open"}</span>

@@ -2,6 +2,20 @@
 
 import { apiRequest } from "@/lib/api";
 
+function withTimeout(promise, timeoutMs = 15000) {
+  let timeoutId;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error("Request timed out"));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
 export async function submitContactMessage(payload) {
   const enrichedPayload = {
     ...payload,
@@ -10,10 +24,13 @@ export async function submitContactMessage(payload) {
     referrer: typeof document !== "undefined" ? document.referrer : "",
   };
 
-  return apiRequest("/contact", {
-    method: "POST",
-    body: JSON.stringify(enrichedPayload),
-  });
+  return withTimeout(
+    apiRequest("/contact", {
+      method: "POST",
+      body: JSON.stringify(enrichedPayload),
+    }),
+    15000
+  );
 }
 
 export async function getContactMessages() {
