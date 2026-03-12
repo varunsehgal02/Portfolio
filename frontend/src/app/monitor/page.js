@@ -869,6 +869,14 @@ export default function MonitorPage() {
                                     </div>
                                 )}
 
+                                {!visitorProfile.geolocation && (
+                                    <div className="rounded-xl border border-surface-light/60 bg-surface-light/20 p-4">
+                                        <p className="text-text-muted text-sm">
+                                            Location details are unavailable for this IP (common for private, masked, VPN, or unresolved addresses).
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div className="bg-surface-light/50 rounded-xl p-4 text-center">
                                         <p className="text-primary-light font-display font-bold text-3xl">{visitorProfile.summary?.pageViews || 0}</p>
