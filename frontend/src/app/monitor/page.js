@@ -16,7 +16,6 @@ import {
     getAboutPopupStats,
     getOutboundClickSummary,
     getOutboundClickHistory,
-    getVisitorProfile,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -30,9 +29,8 @@ export default function MonitorPage() {
     const [outboundSummary, setOutboundSummary] = useState({ total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] });
     const [outboundHistory, setOutboundHistory] = useState([]);
     const [contactMessages, setContactMessages] = useState([]);
-    const [selectedIp, setSelectedIp] = useState("");
-    const [visitorProfile, setVisitorProfile] = useState(null);
-    const [visitorLoading, setVisitorLoading] = useState(false);
+    const [openIpFolders, setOpenIpFolders] = useState({});
+    const [openMessageIpFolders, setOpenMessageIpFolders] = useState({});
     const [activeTab, setActiveTab] = useState("overview");
     const [editingLinkedin, setEditingLinkedin] = useState(false);
     const [editingBehance, setEditingBehance] = useState(false);
@@ -83,15 +81,6 @@ export default function MonitorPage() {
     const handleBehanceSave = async () => {
         await setBehanceStats(behance);
         setEditingBehance(false);
-    };
-
-    const openVisitorProfile = async (ip) => {
-        if (!ip) return;
-        setSelectedIp(ip);
-        setVisitorLoading(true);
-        const data = await getVisitorProfile(ip);
-        setVisitorProfile(data);
-        setVisitorLoading(false);
     };
 
     const socialTrend = useMemo(() => {
@@ -178,6 +167,66 @@ export default function MonitorPage() {
         if (ua.includes("ipad") || ua.includes("tablet")) return "Tablet";
         if (ua.includes("mobi") || Number(screenWidth) < 768) return "Mobile";
         return "Desktop";
+    };
+
+    const groupedHistory = useMemo(() => {
+        const grouped = {};
+
+        history.forEach((visit) => {
+            const ip = visit.ip || "Unknown";
+            if (!grouped[ip]) grouped[ip] = [];
+            grouped[ip].push(visit);
+        });
+
+        return Object.entries(grouped)
+            .map(([ip, visits]) => {
+                const lastVisit = visits[0];
+                const pageSet = Array.from(new Set(visits.map((v) => v.page).filter(Boolean))).slice(0, 5);
+                return {
+                    ip,
+                    visits,
+                    count: visits.length,
+                    lastVisitAt: lastVisit?.at || "",
+                    browsers: Array.from(new Set(visits.map((v) => getBrowserName(v.userAgent))).values()),
+                    devices: Array.from(new Set(visits.map((v) => getDeviceType(v.userAgent, v.screenWidth))).values()),
+                    pages: pageSet,
+                };
+            })
+            .sort((a, b) => new Date(b.lastVisitAt).getTime() - new Date(a.lastVisitAt).getTime());
+    }, [history]);
+
+    const toggleIpFolder = (ip) => {
+        setOpenIpFolders((prev) => ({
+            ...prev,
+            [ip]: !prev[ip],
+        }));
+    };
+
+    const groupedMessages = useMemo(() => {
+        const grouped = {};
+
+        contactMessages.forEach((msg) => {
+            const ip = msg.ip || "Unknown";
+            if (!grouped[ip]) grouped[ip] = [];
+            grouped[ip].push(msg);
+        });
+
+        return Object.entries(grouped)
+            .map(([ip, messages]) => ({
+                ip,
+                messages,
+                count: messages.length,
+                lastMessageAt: messages[0]?.createdAt || "",
+                senders: Array.from(new Set(messages.map((m) => m.email).filter(Boolean))).slice(0, 4),
+            }))
+            .sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+    }, [contactMessages]);
+
+    const toggleMessageFolder = (ip) => {
+        setOpenMessageIpFolders((prev) => ({
+            ...prev,
+            [ip]: !prev[ip],
+        }));
     };
 
     return (
@@ -411,78 +460,96 @@ export default function MonitorPage() {
                         <div className="p-6 border-b border-surface-light flex items-center justify-between">
                             <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
                                 <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">📋</span>
-                                Visitor History Log
+                                Visitor History Log (IP Folders)
                             </h3>
                             <div className="flex items-center gap-3">
                                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary-light text-xs font-medium">
-                                    {history.length} records
+                                    {groupedHistory.length} IP folders
                                 </span>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-surface-light bg-surface-light/30">
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">#</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Page</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Visit Time</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">IP</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Browser</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Device</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Referrer</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {history.slice(0, 100).map((visit, i) => (
-                                        <motion.tr
-                                            key={visit.id}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: i * 0.02 }}
-                                            className="border-b border-surface-light/50 hover:bg-primary/5 transition-colors group"
+                        <div className="p-4 sm:p-6 space-y-4">
+                            {groupedHistory.slice(0, 100).map((folder, i) => {
+                                const expanded = Boolean(openIpFolders[folder.ip]);
+                                return (
+                                    <div key={folder.ip} className="rounded-xl border border-surface-light/60 bg-surface-light/20 overflow-hidden">
+                                        <button
+                                            onClick={() => toggleIpFolder(folder.ip)}
+                                            className="w-full px-4 py-3 sm:px-5 sm:py-4 flex items-start sm:items-center justify-between gap-3 hover:bg-primary/5 transition-colors text-left"
                                         >
-                                            <td className="px-6 py-3.5 text-text-muted text-sm font-mono">{i + 1}</td>
-                                            <td className="px-6 py-3.5">
-                                                <span className="text-primary-light font-mono text-sm px-2 py-0.5 rounded bg-primary/5 group-hover:bg-primary/10 transition-colors">
-                                                    {visit.page}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-3.5 text-text-secondary text-sm">
-                                                {new Date(visit.at).toLocaleString()}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-text-muted text-sm font-mono">
-                                                {visit.ip ? (
-                                                    <button
-                                                        onClick={() => openVisitorProfile(visit.ip)}
-                                                        className="text-primary-light hover:text-primary underline underline-offset-2"
-                                                    >
-                                                        {visit.ip}
-                                                    </button>
-                                                ) : (
-                                                    "Unknown"
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-text-muted text-sm">
-                                                {getBrowserName(visit.userAgent)}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-text-muted text-sm">
-                                                {getDeviceType(visit.userAgent, visit.screenWidth)}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-text-muted text-sm max-w-[240px] truncate" title={visit.referrer || "Direct / Unknown"}>
-                                                {visit.referrer || "Direct / Unknown"}
-                                            </td>
-                                        </motion.tr>
-                                    ))}
-                                    {history.length === 0 && (
-                                        <tr>
-                                            <td colSpan={8} className="px-6 py-16 text-center">
-                                                <span className="text-5xl block mb-3">🔍</span>
-                                                <p className="text-text-muted">No visits recorded yet. Visit pages in the portfolio to see data here.</p>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-base">{expanded ? "📂" : "📁"}</span>
+                                                    <span className="text-text-primary font-mono text-sm break-all">{folder.ip}</span>
+                                                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary-light text-xs font-medium">
+                                                        {folder.count} visits
+                                                    </span>
+                                                </div>
+                                                <div className="mt-1.5 text-xs text-text-muted flex flex-wrap gap-x-4 gap-y-1">
+                                                    <span>Last: {folder.lastVisitAt ? new Date(folder.lastVisitAt).toLocaleString() : "Unknown"}</span>
+                                                    <span>Browser: {folder.browsers.join(", ") || "Unknown"}</span>
+                                                    <span>Device: {folder.devices.join(", ") || "Unknown"}</span>
+                                                </div>
+                                                <div className="mt-1 text-[11px] text-text-muted truncate">
+                                                    Pages: {folder.pages.join(", ") || "Unknown"}
+                                                </div>
+                                            </div>
+                                            <span className="text-text-muted text-xs font-medium shrink-0">{expanded ? "Hide" : "Open"}</span>
+                                        </button>
+
+                                        <AnimatePresence initial={false}>
+                                            {expanded && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: "auto" }}
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                    className="border-t border-surface-light/60"
+                                                >
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full text-sm">
+                                                            <thead>
+                                                                <tr className="border-b border-surface-light/60 bg-surface-light/40">
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">#</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Page</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Visit Time</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Browser</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Device</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Referrer</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {folder.visits.map((visit, visitIndex) => (
+                                                                    <tr key={visit.id || `${folder.ip}-${visitIndex}`} className="border-b border-surface-light/40 last:border-0">
+                                                                        <td className="px-4 py-2.5 text-text-muted font-mono">{visitIndex + 1}</td>
+                                                                        <td className="px-4 py-2.5">
+                                                                            <span className="text-primary-light font-mono text-xs px-2 py-0.5 rounded bg-primary/10">
+                                                                                {visit.page}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="px-4 py-2.5 text-text-secondary">{new Date(visit.at).toLocaleString()}</td>
+                                                                        <td className="px-4 py-2.5 text-text-muted">{getBrowserName(visit.userAgent)}</td>
+                                                                        <td className="px-4 py-2.5 text-text-muted">{getDeviceType(visit.userAgent, visit.screenWidth)}</td>
+                                                                        <td className="px-4 py-2.5 text-text-muted max-w-[260px] truncate" title={visit.referrer || "Direct / Unknown"}>
+                                                                            {visit.referrer || "Direct / Unknown"}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                );
+                            })}
+
+                            {groupedHistory.length === 0 && (
+                                <div className="px-6 py-16 text-center">
+                                    <span className="text-5xl block mb-3">🔍</span>
+                                    <p className="text-text-muted">No visits recorded yet. Visit pages in the portfolio to see data here.</p>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
@@ -765,174 +832,70 @@ export default function MonitorPage() {
                         <div className="p-6 border-b border-surface-light flex items-center justify-between">
                             <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
                                 <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">✉️</span>
-                                Contact Messages
+                                Contact Messages (IP Folders)
                             </h3>
                             <span className="px-3 py-1 rounded-full bg-primary/10 text-primary-light text-xs font-medium">
-                                {contactMessages.length} records
+                                {groupedMessages.length} IP folders
                             </span>
                         </div>
 
-                        <div className="divide-y divide-surface-light/50">
-                            {contactMessages.length === 0 ? (
+                        <div className="p-4 sm:p-6 space-y-4">
+                            {groupedMessages.length === 0 ? (
                                 <div className="px-6 py-16 text-center text-text-muted">No messages yet.</div>
                             ) : (
-                                contactMessages.slice(0, 100).map((msg) => (
-                                    <div key={msg.id} className="px-6 py-5">
-                                        <div className="flex flex-wrap items-center gap-3 mb-2">
-                                            <span className="text-text-primary font-semibold">{msg.name}</span>
-                                            <a href={`mailto:${msg.email}`} className="text-primary-light text-sm">{msg.email}</a>
-                                            <span className="text-text-muted text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
-                                            <span className="text-text-muted text-xs">
-                                                IP: {msg.ip ? (
-                                                    <button
-                                                        onClick={() => openVisitorProfile(msg.ip)}
-                                                        className="text-primary-light hover:text-primary underline underline-offset-2"
+                                groupedMessages.slice(0, 100).map((folder) => {
+                                    const expanded = Boolean(openMessageIpFolders[folder.ip]);
+                                    return (
+                                        <div key={folder.ip} className="rounded-xl border border-surface-light/60 bg-surface-light/20 overflow-hidden">
+                                            <button
+                                                onClick={() => toggleMessageFolder(folder.ip)}
+                                                className="w-full px-4 py-3 sm:px-5 sm:py-4 flex items-start sm:items-center justify-between gap-3 hover:bg-primary/5 transition-colors text-left"
+                                            >
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-base">{expanded ? "📂" : "📁"}</span>
+                                                        <span className="text-text-primary font-mono text-sm break-all">{folder.ip}</span>
+                                                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary-light text-xs font-medium">
+                                                            {folder.count} messages
+                                                        </span>
+                                                    </div>
+                                                    <div className="mt-1.5 text-xs text-text-muted flex flex-wrap gap-x-4 gap-y-1">
+                                                        <span>Last: {folder.lastMessageAt ? new Date(folder.lastMessageAt).toLocaleString() : "Unknown"}</span>
+                                                        <span>Emails: {folder.senders.join(", ") || "Unknown"}</span>
+                                                    </div>
+                                                </div>
+                                                <span className="text-text-muted text-xs font-medium shrink-0">{expanded ? "Hide" : "Open"}</span>
+                                            </button>
+
+                                            <AnimatePresence initial={false}>
+                                                {expanded && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: "auto" }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        className="border-t border-surface-light/60"
                                                     >
-                                                        {msg.ip}
-                                                    </button>
-                                                ) : "Unknown"}
-                                            </span>
+                                                        <div className="divide-y divide-surface-light/40">
+                                                            {folder.messages.map((msg) => (
+                                                                <div key={msg.id} className="px-5 py-4">
+                                                                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                                                                        <span className="text-text-primary font-semibold">{msg.name}</span>
+                                                                        <a href={`mailto:${msg.email}`} className="text-primary-light text-sm">{msg.email}</a>
+                                                                        <span className="text-text-muted text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
+                                                                        <span className="text-text-muted text-xs font-mono">{msg.sourcePath || "unknown"}</span>
+                                                                    </div>
+                                                                    <p className="text-text-secondary text-sm whitespace-pre-wrap">{msg.message}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
-                                        <p className="text-text-muted text-xs mb-2">
-                                            Browser: {getBrowserName(msg.userAgent)} | Device: {getDeviceType(msg.userAgent)} | Source: {msg.sourcePath || "unknown"}
-                                        </p>
-                                        <p className="text-text-secondary text-sm whitespace-pre-wrap">{msg.message}</p>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
-                    </motion.div>
-                )}
-
-                {selectedIp && (
-                    <motion.div
-                        key="visitor-profile"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="glass rounded-2xl p-6"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-display font-semibold text-lg text-text-primary">Visitor Profile: <span className="text-primary-light">{selectedIp}</span></h3>
-                            <button
-                                onClick={() => {
-                                    setSelectedIp("");
-                                    setVisitorProfile(null);
-                                }}
-                                className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-xs"
-                            >
-                                Close
-                            </button>
-                        </div>
-
-                        {visitorLoading && <p className="text-text-muted text-sm">Loading visitor details...</p>}
-
-                        {!visitorLoading && !visitorProfile && (
-                            <p className="text-text-muted text-sm">No details found for this IP.</p>
-                        )}
-
-                        {!visitorLoading && visitorProfile && (
-                            <div className="space-y-5">
-                                {visitorProfile.geolocation && (
-                                    <div className="rounded-xl border border-surface-light/60 bg-surface-light/20 p-4">
-                                        <h4 className="text-text-primary font-semibold mb-3">IP Geolocation</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">City</p>
-                                                <p className="text-text-primary">{visitorProfile.geolocation.city || "Unknown"}</p>
-                                            </div>
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">Region</p>
-                                                <p className="text-text-primary">{visitorProfile.geolocation.region || "Unknown"}</p>
-                                            </div>
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">Country</p>
-                                                <p className="text-text-primary">{visitorProfile.geolocation.country || "Unknown"}</p>
-                                            </div>
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">ISP</p>
-                                                <p className="text-text-primary">{visitorProfile.geolocation.isp || "Unknown"}</p>
-                                            </div>
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">Timezone</p>
-                                                <p className="text-text-primary">{visitorProfile.geolocation.timezone || "Unknown"}</p>
-                                            </div>
-                                            <div className="bg-surface-light/50 rounded-lg p-3">
-                                                <p className="text-text-muted text-xs">Coordinates</p>
-                                                <p className="text-text-primary">
-                                                    {visitorProfile.geolocation.latitude !== null && visitorProfile.geolocation.longitude !== null
-                                                        ? `${visitorProfile.geolocation.latitude}, ${visitorProfile.geolocation.longitude}`
-                                                        : "Unknown"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {!visitorProfile.geolocation && (
-                                    <div className="rounded-xl border border-surface-light/60 bg-surface-light/20 p-4">
-                                        <p className="text-text-muted text-sm">
-                                            Location details are unavailable for this IP (common for private, masked, VPN, or unresolved addresses).
-                                        </p>
-                                    </div>
-                                )}
-
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
-                                        <p className="text-primary-light font-display font-bold text-3xl">{visitorProfile.summary?.pageViews || 0}</p>
-                                        <p className="text-text-muted text-xs mt-1">Page Visits</p>
-                                    </div>
-                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
-                                        <p className="text-blue-400 font-display font-bold text-3xl">{visitorProfile.summary?.outboundClicks || 0}</p>
-                                        <p className="text-text-muted text-xs mt-1">Outbound Clicks</p>
-                                    </div>
-                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
-                                        <p className="text-blue-300 font-display font-bold text-3xl">{visitorProfile.summary?.contacts || 0}</p>
-                                        <p className="text-text-muted text-xs mt-1">Contact Messages</p>
-                                    </div>
-                                </div>
-
-                                <div className="overflow-x-auto rounded-xl border border-surface-light/60">
-                                    <table className="w-full text-sm">
-                                        <thead>
-                                            <tr className="bg-surface-light/40 border-b border-surface-light/60">
-                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Type</th>
-                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Detail</th>
-                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Time</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {(visitorProfile.pageViews || []).slice(0, 20).map((row) => (
-                                                <tr key={`pv-${row.id}`} className="border-b border-surface-light/40">
-                                                    <td className="px-4 py-2.5 text-text-secondary">Visit</td>
-                                                    <td className="px-4 py-2.5 text-text-primary">{row.page} ({getBrowserName(row.userAgent)}, {getDeviceType(row.userAgent, row.screenWidth)})</td>
-                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.at).toLocaleString()}</td>
-                                                </tr>
-                                            ))}
-                                            {(visitorProfile.outboundClicks || []).slice(0, 20).map((row) => (
-                                                <tr key={`oc-${row.id}`} className="border-b border-surface-light/40">
-                                                    <td className="px-4 py-2.5 text-text-secondary">Outbound</td>
-                                                    <td className="px-4 py-2.5 text-text-primary capitalize">{row.platform} from {row.sourcePath || "unknown"}</td>
-                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.at).toLocaleString()}</td>
-                                                </tr>
-                                            ))}
-                                            {(visitorProfile.contacts || []).slice(0, 20).map((row) => (
-                                                <tr key={`ct-${row.id}`} className="border-b border-surface-light/40">
-                                                    <td className="px-4 py-2.5 text-text-secondary">Contact</td>
-                                                    <td className="px-4 py-2.5 text-text-primary">{row.name} ({row.email})</td>
-                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.createdAt).toLocaleString()}</td>
-                                                </tr>
-                                            ))}
-                                            {((visitorProfile.pageViews || []).length + (visitorProfile.outboundClicks || []).length + (visitorProfile.contacts || []).length) === 0 && (
-                                                <tr>
-                                                    <td colSpan={3} className="px-4 py-6 text-center text-text-muted">No logs available for this IP yet.</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
