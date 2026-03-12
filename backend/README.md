@@ -37,5 +37,5 @@ Server default: `http://localhost:4000`
    - `AUTH_RATE_LIMIT_MAX=10` failed logins per 15 minutes
    - `CONTACT_RATE_LIMIT_MAX=6` submissions per 15 minutes
 - Contact form submissions are persisted and can trigger email notifications via Resend (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`) or SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`)
-- Visitor IP drill-down supports geolocation lookup (city/region/country/ISP) and caches results in store
+- Visitor IP drill-down supports geolocation lookup (city/region/country/ISP), uses provider fallbacks, and caches results in store
 - CORS allowlist is configured with `CORS_ORIGIN` and optionally allows `*.vercel.app` when `CORS_ALLOW_VERCEL=true`

@@ -36,17 +36,30 @@ function shouldLookupIp(ip) {
   return false;
 }
 
-async function lookupGeoByIp(ip) {
-  if (!shouldLookupIp(ip)) {
-    return null;
-  }
+function normalizeGeoData(ip, data) {
+  if (!data || typeof data !== "object") return null;
 
-  const timeoutMs = toPositiveInt(process.env.GEOLOOKUP_TIMEOUT_MS, 3000);
+  return {
+    ip,
+    city: data.city || "",
+    region: data.region || "",
+    country: data.country || "",
+    countryCode: data.countryCode || "",
+    latitude: typeof data.latitude === "number" ? data.latitude : null,
+    longitude: typeof data.longitude === "number" ? data.longitude : null,
+    timezone: data.timezone || "",
+    isp: data.isp || "",
+    cachedAt: new Date().toISOString(),
+    source: data.source || "unknown",
+  };
+}
+
+async function fetchJson(url, timeoutMs) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`, {
+    const response = await fetch(url, {
       method: "GET",
       signal: controller.signal,
       headers: {
@@ -58,29 +71,65 @@ async function lookupGeoByIp(ip) {
       return null;
     }
 
-    const data = await response.json();
-    if (!data || data.success === false) {
-      return null;
-    }
-
-    return {
-      ip,
-      city: data.city || "",
-      region: data.region || "",
-      country: data.country || "",
-      countryCode: data.country_code || "",
-      latitude: typeof data.latitude === "number" ? data.latitude : null,
-      longitude: typeof data.longitude === "number" ? data.longitude : null,
-      timezone: data.timezone?.id || "",
-      isp: data.connection?.isp || data.connection?.org || "",
-      cachedAt: new Date().toISOString(),
-      source: "ipwho.is",
-    };
+    return response.json();
   } catch {
     return null;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function lookupWithIpWho(ip, timeoutMs) {
+  const data = await fetchJson(`https://ipwho.is/${encodeURIComponent(ip)}`, timeoutMs);
+  if (!data || data.success === false) return null;
+
+  return normalizeGeoData(ip, {
+    city: data.city,
+    region: data.region,
+    country: data.country,
+    countryCode: data.country_code,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    timezone: data.timezone?.id,
+    isp: data.connection?.isp || data.connection?.org,
+    source: "ipwho.is",
+  });
+}
+
+async function lookupWithIpApiCo(ip, timeoutMs) {
+  const data = await fetchJson(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, timeoutMs);
+  if (!data || data.error) return null;
+
+  return normalizeGeoData(ip, {
+    city: data.city,
+    region: data.region,
+    country: data.country_name,
+    countryCode: data.country_code,
+    latitude: Number(data.latitude),
+    longitude: Number(data.longitude),
+    timezone: data.timezone,
+    isp: data.org,
+    source: "ipapi.co",
+  });
+}
+
+async function lookupGeoByIp(ip) {
+  if (!shouldLookupIp(ip)) {
+    return null;
+  }
+
+  const timeoutMs = toPositiveInt(process.env.GEOLOOKUP_TIMEOUT_MS, 3000);
+
+  const providers = [lookupWithIpWho, lookupWithIpApiCo];
+
+  for (const provider of providers) {
+    const result = await provider(ip, timeoutMs);
+    if (result && (result.city || result.region || result.country || result.isp)) {
+      return result;
+    }
+  }
+
+  return null;
 }
 
 module.exports = {
