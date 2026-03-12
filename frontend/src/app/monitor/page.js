@@ -173,57 +173,15 @@ export default function MonitorPage() {
     };
 
     const fetchBrowserGeo = async (ip) => {
-        const providers = [
-            async () => {
-                const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
-                if (!res.ok) return null;
-                const data = await res.json();
-                if (!data || data.success === false) return null;
-                return {
-                    ip,
-                    city: data.city || "",
-                    region: data.region || "",
-                    country: data.country || "",
-                    countryCode: data.country_code || "",
-                    latitude: typeof data.latitude === "number" ? data.latitude : null,
-                    longitude: typeof data.longitude === "number" ? data.longitude : null,
-                    timezone: data.timezone?.id || "",
-                    isp: data.connection?.isp || data.connection?.org || "",
-                    source: "ipwho.is(browser)",
-                };
-            },
-            async () => {
-                const res = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`);
-                if (!res.ok) return null;
-                const data = await res.json();
-                if (!data || data.error) return null;
-                return {
-                    ip,
-                    city: data.city || "",
-                    region: data.region || "",
-                    country: data.country_name || "",
-                    countryCode: data.country_code || "",
-                    latitude: Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : null,
-                    longitude: Number.isFinite(Number(data.longitude)) ? Number(data.longitude) : null,
-                    timezone: data.timezone || "",
-                    isp: data.org || "",
-                    source: "ipapi.co(browser)",
-                };
-            },
-        ];
+        const res = await fetch(`/api/geoip?ip=${encodeURIComponent(ip)}`, {
+            method: "GET",
+            cache: "no-store",
+        });
 
-        for (const provider of providers) {
-            try {
-                const geo = await provider();
-                if (geo && (geo.city || geo.region || geo.country || geo.isp)) {
-                    return geo;
-                }
-            } catch {
-                // Try next provider.
-            }
-        }
+        if (!res.ok) return null;
 
-        return null;
+        const data = await res.json();
+        return data?.geolocation || null;
     };
 
     const loadIpLocation = async (ip) => {
