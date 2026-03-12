@@ -72,10 +72,10 @@ export default function Navbar() {
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     {/* Logo - Clicking triggers loading screen */}
                     <a href="/" onClick={handleLogoClick} className="group flex items-center gap-2 cursor-pointer">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-display font-bold text-lg group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-black font-display font-bold text-lg group-hover:scale-110 transition-transform duration-300">
                             V
                         </div>
-                        <span className="font-display font-bold text-xl text-white hidden sm:block">
+                        <span className="font-display font-bold text-xl text-text-primary hidden sm:block">
                             Varun Sehgal
                         </span>
                     </a>
@@ -108,7 +108,7 @@ export default function Navbar() {
                     <a
                         href="/contact"
                         onClick={(e) => handleNavClick(e, "/contact")}
-                        className="hidden md:block px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 cursor-pointer"
+                        className="hidden md:block px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 cursor-pointer"
                     >
                         Let&apos;s Talk
                     </a>
@@ -123,11 +123,11 @@ export default function Navbar() {
                     socialItems={socialItems}
                     displaySocials
                     displayItemNumbering={true}
-                    menuButtonColor="#ffffff"
-                    openMenuButtonColor="#fff"
+                    menuButtonColor="#e6ff00"
+                    openMenuButtonColor="#e6ff00"
                     changeMenuColorOnOpen={true}
-                    colors={["#0f1225", "#1E4BBD"]}
-                    accentColor="#3B6DE0"
+                    colors={["#0a0a0a", "#151515"]}
+                    accentColor="#E6FF00"
                     isFixed
                     onItemClick={handleMenuItemClick}
                 />

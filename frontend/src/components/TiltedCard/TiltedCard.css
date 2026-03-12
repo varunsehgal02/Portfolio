@@ -24,7 +24,7 @@
 }
 
 .tilted-card-fallback {
-    background: linear-gradient(145deg, rgba(37, 99, 235, 0.35), rgba(30, 64, 175, 0.15));
+    background: linear-gradient(145deg, rgba(230, 255, 0, 0.22), rgba(196, 219, 0, 0.08));
 }
 
 .tilted-card-overlay {
@@ -41,10 +41,10 @@
     left: 0;
     top: 0;
     border-radius: 8px;
-    background-color: rgba(7, 10, 25, 0.95);
-    border: 1px solid rgba(96, 165, 250, 0.3);
+    background-color: rgba(21, 21, 21, 0.95);
+    border: 1px solid rgba(230, 255, 0, 0.22);
     padding: 6px 10px;
     font-size: 11px;
-    color: #dbeafe;
+    color: #f2ff73;
     z-index: 3;
 }

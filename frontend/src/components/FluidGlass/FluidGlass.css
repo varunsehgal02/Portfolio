@@ -4,27 +4,27 @@
 	position: relative;
 	overflow: hidden;
 	border-radius: 1.5rem;
-	border: 1px solid rgba(96, 165, 250, 0.3);
+	border: 1px solid rgba(230, 255, 0, 0.18);
 	background:
-		radial-gradient(120% 100% at 0% 100%, rgba(59, 130, 246, 0.25), transparent 50%),
-		radial-gradient(120% 100% at 100% 0%, rgba(56, 189, 248, 0.2), transparent 50%),
-		linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(2, 8, 32, 0.9));
+		radial-gradient(120% 100% at 0% 100%, rgba(230, 255, 0, 0.14), transparent 50%),
+		radial-gradient(120% 100% at 100% 0%, rgba(196, 219, 0, 0.14), transparent 50%),
+		linear-gradient(135deg, rgba(21, 21, 21, 0.94), rgba(10, 10, 10, 0.96));
 	backdrop-filter: blur(16px);
 	transition: border-color 0.3s ease;
 }
 
 .fluid-glass:hover {
-	border-color: rgba(59, 130, 246, 0.6);
+	border-color: rgba(230, 255, 0, 0.38);
 }
 
 .fluid-glass-beams {
 	position: absolute;
 	inset: 0;
 	background:
-		linear-gradient(95deg, transparent 5%, rgba(147, 197, 253, 0.15) 45%, transparent 75%),
-		linear-gradient(180deg, rgba(96, 165, 250, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%);
+		linear-gradient(95deg, transparent 5%, rgba(242, 255, 115, 0.08) 45%, transparent 75%),
+		linear-gradient(180deg, rgba(230, 255, 0, 0.05) 0%, rgba(196, 219, 0, 0.12) 100%);
 	mix-blend-mode: screen;
-	opacity: 0.6;
+	opacity: 0.5;
 	pointer-events: none;
 }
 
@@ -33,7 +33,7 @@
 	inset: 0;
 	pointer-events: none;
 	background:
-		radial-gradient(circle 200px at var(--fx) var(--fy), rgba(255, 255, 255, 0.35), rgba(147, 197, 253, 0.2) 40%, rgba(59, 130, 246, 0.08) 65%, transparent 85%);
+		radial-gradient(circle 200px at var(--fx) var(--fy), rgba(255, 255, 255, 0.18), rgba(230, 255, 0, 0.12) 40%, rgba(196, 219, 0, 0.06) 65%, transparent 85%);
 	mix-blend-mode: overlay;
 }
 

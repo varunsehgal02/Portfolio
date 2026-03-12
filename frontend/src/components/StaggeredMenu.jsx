@@ -6,16 +6,16 @@ import './StaggeredMenu.css';
 
 export const StaggeredMenu = ({
     position = 'right',
-    colors = ['#0f1a3a', '#1E4BBD'],
+    colors = ['#0a0a0a', '#151515'],
     items = [],
     socialItems = [],
     displaySocials = true,
     displayItemNumbering = true,
     className,
     logoUrl,
-    menuButtonColor = '#fff',
-    openMenuButtonColor = '#fff',
-    accentColor = '#1E4BBD',
+    menuButtonColor = '#E6FF00',
+    openMenuButtonColor = '#E6FF00',
+    accentColor = '#E6FF00',
     changeMenuColorOnOpen = true,
     isFixed = false,
     closeOnClickAway = true,
@@ -232,7 +232,7 @@ export const StaggeredMenu = ({
         >
             <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
                 {(() => {
-                    const raw = colors && colors.length ? colors.slice(0, 4) : ['#0f1225', '#1E4BBD'];
+                    const raw = colors && colors.length ? colors.slice(0, 4) : ['#0a0a0a', '#151515'];
                     let arr = [...raw];
                     if (arr.length >= 3) { const mid = Math.floor(arr.length / 2); arr.splice(mid, 1); }
                     return arr.map((c, i) => <div key={i} className="sm-prelayer" style={{ background: c }} />);

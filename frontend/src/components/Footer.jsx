@@ -6,16 +6,16 @@ import { trackSocialOutboundClick } from "@/lib/analytics";
 
 export default function Footer() {
     return (
-        <footer className="relative z-10 border-t border-surface-light" style={{ backgroundColor: "#0a0a12" }}>
+        <footer className="relative z-10 border-t border-surface-light" style={{ backgroundColor: "#0a0a0a" }}>
             <div className="max-w-7xl mx-auto px-6 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {/* Brand */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-display font-bold text-lg">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-black font-display font-bold text-lg">
                                 V
                             </div>
-                            <span className="font-display font-bold text-xl text-white">
+                            <span className="font-display font-bold text-xl text-text-primary">
                                 Varun Sehgal
                             </span>
                         </div>
@@ -102,7 +102,7 @@ export default function Footer() {
                         © {new Date().getFullYear()} Varun Sehgal. All rights reserved.
                     </p>
                     <p className="text-text-muted text-xs">
-                        Designed & Built with 💜
+                        Designed & Built with intent
                     </p>
                 </div>
             </div>

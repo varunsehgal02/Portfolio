@@ -72,7 +72,7 @@ function useCustomCardTexture() {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Subtle grid
-            ctx.strokeStyle = 'rgba(59, 109, 224, 0.02)';
+            ctx.strokeStyle = 'rgba(230, 255, 0, 0.03)';
             ctx.lineWidth = 1;
             for (let x = 0; x < canvas.width; x += 80) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
@@ -83,9 +83,9 @@ function useCustomCardTexture() {
 
             // ── Top accent bar ──
             const accentGr = ctx.createLinearGradient(0, 0, canvas.width * 0.55, 0);
-            accentGr.addColorStop(0, '#1E4BBD');
-            accentGr.addColorStop(0.5, '#2563EB');
-            accentGr.addColorStop(1, '#60A5FA');
+            accentGr.addColorStop(0, '#C4DB00');
+            accentGr.addColorStop(0.5, '#E6FF00');
+            accentGr.addColorStop(1, '#F2FF73');
             ctx.fillStyle = accentGr;
             ctx.fillRect(0, 0, canvas.width, 24);
 
@@ -95,9 +95,9 @@ function useCustomCardTexture() {
 
             // Glow behind photo
             const glow = ctx.createRadialGradient(cx, photoY, photoR * 0.3, cx, photoY, photoR * 2.2);
-            glow.addColorStop(0, 'rgba(37, 99, 235, 0.35)');
-            glow.addColorStop(0.5, 'rgba(30, 75, 189, 0.12)');
-            glow.addColorStop(1, 'rgba(30, 75, 189, 0)');
+            glow.addColorStop(0, 'rgba(230, 255, 0, 0.28)');
+            glow.addColorStop(0.5, 'rgba(196, 219, 0, 0.12)');
+            glow.addColorStop(1, 'rgba(196, 219, 0, 0)');
             ctx.fillStyle = glow;
             ctx.fillRect(0, photoY - photoR * 3, canvas.width, photoR * 6);
 
@@ -121,10 +121,10 @@ function useCustomCardTexture() {
             } else {
                 ctx.beginPath();
                 ctx.arc(cx, photoY, photoR, 0, Math.PI * 2);
-                ctx.fillStyle = '#161a35';
+                ctx.fillStyle = '#151515';
                 ctx.fill();
-                ctx.fillStyle = '#3B6DE0';
-                ctx.font = `bold 120px "Segoe UI", system-ui, sans-serif`;
+                ctx.fillStyle = '#E6FF00';
+                ctx.font = `bold 120px "Satoshi", "Inter", system-ui, sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('VS', cx, photoY);
@@ -133,7 +133,7 @@ function useCustomCardTexture() {
             // Photo ring — outer
             ctx.beginPath();
             ctx.arc(cx, photoY, photoR + 14, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(59, 109, 224, 0.12)';
+            ctx.strokeStyle = 'rgba(230, 255, 0, 0.12)';
             ctx.lineWidth = 3;
             ctx.stroke();
 
@@ -141,9 +141,9 @@ function useCustomCardTexture() {
             ctx.beginPath();
             ctx.arc(cx, photoY, photoR + 6, 0, Math.PI * 2);
             const ringGr = ctx.createLinearGradient(cx - photoR, photoY - photoR, cx + photoR, photoY + photoR);
-            ringGr.addColorStop(0, '#2563EB');
-            ringGr.addColorStop(0.5, '#3B82F6');
-            ringGr.addColorStop(1, '#1D4ED8');
+            ringGr.addColorStop(0, '#C4DB00');
+            ringGr.addColorStop(0.5, '#E6FF00');
+            ringGr.addColorStop(1, '#F2FF73');
             ctx.strokeStyle = ringGr;
             ctx.lineWidth = 7;
             ctx.stroke();
@@ -151,10 +151,10 @@ function useCustomCardTexture() {
             // ── 2. NAME ──
             let curY = 900;
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = `bold 110px "Segoe UI", system-ui, sans-serif`;
+            ctx.font = `bold 110px "Satoshi", "Inter", system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'alphabetic';
-            ctx.shadowColor = 'rgba(37, 99, 235, 0.35)';
+            ctx.shadowColor = 'rgba(230, 255, 0, 0.25)';
             ctx.shadowBlur = 24;
             ctx.fillText('VARUN SEHGAL', cx, curY);
             ctx.shadowColor = 'transparent';
@@ -162,25 +162,25 @@ function useCustomCardTexture() {
 
             // ── 3. TITLES ──
             curY += 100;
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = `600 54px "Segoe UI", system-ui, sans-serif`;
+            ctx.fillStyle = '#a1a1aa';
+            ctx.font = `600 54px "Inter", system-ui, sans-serif`;
             ctx.fillText('UI/UX Designer', cx, curY);
 
             curY += 75;
             ctx.fillText('Graphic Designer', cx, curY);
 
             curY += 75;
-            ctx.fillStyle = '#7c8db5';
-            ctx.font = `500 48px "Segoe UI", system-ui, sans-serif`;
+            ctx.fillStyle = '#71717a';
+            ctx.font = `500 48px "Inter", system-ui, sans-serif`;
             ctx.fillText('Motion Graphics Artist', cx, curY);
 
             // ── Divider 1 ──
             curY += 70;
             const divGr = ctx.createLinearGradient(leftEdge, 0, rightEdge, 0);
-            divGr.addColorStop(0, 'rgba(59, 109, 224, 0)');
-            divGr.addColorStop(0.15, 'rgba(59, 109, 224, 0.5)');
-            divGr.addColorStop(0.85, 'rgba(59, 109, 224, 0.5)');
-            divGr.addColorStop(1, 'rgba(59, 109, 224, 0)');
+            divGr.addColorStop(0, 'rgba(230, 255, 0, 0)');
+            divGr.addColorStop(0.15, 'rgba(230, 255, 0, 0.45)');
+            divGr.addColorStop(0.85, 'rgba(230, 255, 0, 0.45)');
+            divGr.addColorStop(1, 'rgba(230, 255, 0, 0)');
             ctx.strokeStyle = divGr;
             ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(leftEdge + 10, curY); ctx.lineTo(rightEdge - 10, curY); ctx.stroke();
@@ -195,17 +195,17 @@ function useCustomCardTexture() {
             const statSpacing = contentW / (stats.length + 1);
             stats.forEach((stat, i) => {
                 const sx = leftEdge + statSpacing * (i + 1);
-                ctx.fillStyle = '#3B8CF0';
-                ctx.font = `bold 96px "Segoe UI", system-ui, sans-serif`;
+                ctx.fillStyle = '#E6FF00';
+                ctx.font = `bold 96px "Satoshi", "Inter", system-ui, sans-serif`;
                 ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(59, 140, 240, 0.25)';
+                ctx.shadowColor = 'rgba(230, 255, 0, 0.22)';
                 ctx.shadowBlur = 12;
                 ctx.fillText(stat.value, sx, curY + 70);
                 ctx.shadowColor = 'transparent';
                 ctx.shadowBlur = 0;
 
-                ctx.fillStyle = '#64748b';
-                ctx.font = `600 36px "Segoe UI", system-ui, sans-serif`;
+                ctx.fillStyle = '#71717a';
+                ctx.font = `600 36px "Inter", system-ui, sans-serif`;
                 ctx.fillText(stat.label, sx, curY + 120);
             });
 
@@ -217,15 +217,15 @@ function useCustomCardTexture() {
 
             // ── 5. EMAIL ──
             curY += 80;
-            ctx.fillStyle = '#e2e8f0';
-            ctx.font = `600 56px "Segoe UI", system-ui, sans-serif`;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `600 56px "Inter", system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText('varun.sehgal02@gmail.com', cx, curY);
 
             // ── 6. LOCATION ──
             curY += 65;
-            ctx.fillStyle = '#64748b';
-            ctx.font = `500 46px "Segoe UI", system-ui, sans-serif`;
+            ctx.fillStyle = '#a1a1aa';
+            ctx.font = `500 46px "Inter", system-ui, sans-serif`;
             ctx.fillText('📍 Gwalior, MP, India', cx, curY);
 
             // ── Divider 3 ──
@@ -244,7 +244,7 @@ function useCustomCardTexture() {
             let bx = cx - totalBW / 2;
             const badgeY = curY;
             badges.forEach((badge) => {
-                ctx.fillStyle = 'rgba(37, 99, 235, 0.12)';
+                ctx.fillStyle = 'rgba(230, 255, 0, 0.1)';
                 const r = 14;
                 ctx.beginPath();
                 ctx.moveTo(bx + r, badgeY);
@@ -258,12 +258,12 @@ function useCustomCardTexture() {
                 ctx.quadraticCurveTo(bx, badgeY, bx + r, badgeY);
                 ctx.fill();
 
-                ctx.strokeStyle = 'rgba(59, 109, 224, 0.3)';
+                ctx.strokeStyle = 'rgba(230, 255, 0, 0.22)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                ctx.fillStyle = '#60A5FA';
-                ctx.font = `bold 34px "Segoe UI", system-ui, sans-serif`;
+                ctx.fillStyle = '#E6FF00';
+                ctx.font = `bold 34px "Satoshi", "Inter", system-ui, sans-serif`;
                 ctx.fillText(badge, bx + badgeW / 2, badgeY + badgeH / 2 + 11);
                 bx += badgeW + badgeGap;
             });
@@ -273,7 +273,7 @@ function useCustomCardTexture() {
             ctx.fillRect(0, canvas.height - 18, canvas.width, 18);
 
             // ── Corner decorations ──
-            ctx.strokeStyle = 'rgba(59, 109, 224, 0.12)';
+            ctx.strokeStyle = 'rgba(230, 255, 0, 0.12)';
             ctx.lineWidth = 3;
             const cs = 44; const cm = 50;
             ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();

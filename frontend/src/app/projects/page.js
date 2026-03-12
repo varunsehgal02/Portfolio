@@ -85,6 +85,11 @@ export default function ProjectsPage() {
         return [...new Set(merged)].slice(0, 3);
     };
 
+    const openProjectModal = (project) => {
+        setSelectedProject(project);
+        setActiveModalImage(0);
+    };
+
     const modalGallery = selectedProject ? getProjectGallery(selectedProject) : [];
 
     return (
@@ -117,7 +122,7 @@ export default function ProjectsPage() {
                 <div className="absolute inset-0 z-[4] pointer-events-none bg-gradient-to-b from-black/20 via-black/30 to-black/45" />
 
                 <div
-                    className="absolute flex flex-col items-center justify-center text-center px-8 rounded-3xl border border-white/10 backdrop-blur-md"
+                    className="absolute flex flex-col items-center justify-center text-center px-8 rounded-3xl border border-border backdrop-blur-md"
                     style={{
                         top: "50%",
                         left: "50%",
@@ -125,8 +130,8 @@ export default function ProjectsPage() {
                         width: "86%",
                         maxWidth: "900px",
                         zIndex: 6,
-                        background: "linear-gradient(135deg, rgba(2, 6, 23, 0.6), rgba(15, 23, 42, 0.35))",
-                        boxShadow: "0 12px 60px rgba(2, 6, 23, 0.45)",
+                        background: "linear-gradient(135deg, rgba(21, 21, 21, 0.92), rgba(10, 10, 10, 0.82))",
+                        boxShadow: "0 12px 60px rgba(0, 0, 0, 0.45)",
                         paddingTop: "2.5rem",
                         paddingBottom: "2.5rem",
                     }}
@@ -135,8 +140,8 @@ export default function ProjectsPage() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
-                        className="font-display font-bold text-5xl sm:text-6xl md:text-7xl text-white mb-4"
-                        style={{ textShadow: "0 8px 24px rgba(15, 23, 42, 0.75)" }}
+                        className="font-display font-bold text-5xl sm:text-6xl md:text-7xl text-text-primary mb-4"
+                        style={{ textShadow: "0 8px 24px rgba(0, 0, 0, 0.65)" }}
                     >
                         {content.heroTitlePrefix} <span className="gradient-text">{content.heroTitleHighlight}</span>
                     </motion.h1>
@@ -144,7 +149,7 @@ export default function ProjectsPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="text-slate-200 text-lg md:text-xl max-w-2xl"
+                        className="text-text-secondary text-lg md:text-xl max-w-2xl"
                     >
                         {content.heroSubtitle}
                     </motion.p>
@@ -161,8 +166,8 @@ export default function ProjectsPage() {
                                 onClick={() => setActiveRevealCategory(item.id)}
                                 onMouseEnter={() => setActiveRevealCategory(item.id)}
                                 className={`group relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110 ${activeRevealCategory === item.id
-                                    ? "border-primary shadow-[0_0_24px_rgba(59,130,246,0.45)]"
-                                    : "border-white/20 hover:border-primary/60"
+                                    ? "border-primary shadow-[0_0_24px_rgba(230,255,0,0.28)]"
+                                    : "border-border hover:border-primary/60"
                                     }`}
                                 aria-label={`Show ${item.label} reveal`}
                             >
@@ -206,7 +211,7 @@ export default function ProjectsPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className={`relative px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeCategory === cat.id
-                                ? "text-white"
+                                ? "text-black"
                                 : "text-text-secondary hover:text-text-primary glass"
                                 }`}
                         >
@@ -226,14 +231,25 @@ export default function ProjectsPage() {
             <section className="relative z-[1] max-w-7xl mx-auto px-6 mb-12 py-8">
                 <FluidGlass style={{ height: "600px" }}>
                     <div className="absolute inset-0 pointer-events-none opacity-70">
-                        <div className="absolute -top-24 -left-20 w-72 h-72 rounded-full bg-cyan-400/20 blur-3xl" />
-                        <div className="absolute bottom-8 right-8 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl" />
-                        <div className="absolute inset-x-12 top-1/2 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
+                        <div className="absolute -top-24 -left-20 w-72 h-72 rounded-full bg-primary/16 blur-3xl" />
+                        <div className="absolute bottom-8 right-8 w-64 h-64 rounded-full bg-secondary/16 blur-3xl" />
+                        <div className="absolute inset-x-12 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
                     </div>
 
-                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 h-full items-center">
+                    <div
+                        className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 h-full items-center cursor-pointer"
+                        onClick={() => openProjectModal(featuredProject)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                openProjectModal(featuredProject);
+                            }
+                        }}
+                    >
                         <div className="relative z-10">
-                            <p className="text-blue-200/80 text-sm uppercase tracking-[0.22em] mb-2">✨ Best Project</p>
+                            <p className="text-primary-light text-sm uppercase tracking-[0.22em] mb-2">✨ Best Project</p>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {[
                                     { id: "uiux", label: "UI/UX" },
@@ -242,37 +258,40 @@ export default function ProjectsPage() {
                                 ].map((opt) => (
                                     <button
                                         key={opt.id}
-                                        onClick={() => setActiveBestCategory(opt.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveBestCategory(opt.id);
+                                        }}
                                         className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm border transition-all duration-300 ${activeBestCategory === opt.id
-                                            ? "border-cyan-300 bg-cyan-400/20 text-white shadow-[0_0_18px_rgba(34,211,238,0.35)]"
-                                            : "border-white/20 bg-white/5 text-slate-300 hover:border-cyan-300/70"
+                                            ? "border-primary bg-primary/15 text-text-primary shadow-[0_0_18px_rgba(230,255,0,0.25)]"
+                                            : "border-border bg-surface-light/70 text-text-secondary hover:border-primary/50"
                                             }`}
                                     >
                                         {opt.label}
                                     </button>
                                 ))}
                             </div>
-                            <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mb-4">
+                            <h2 className="font-display text-3xl sm:text-4xl text-text-primary font-bold mb-4">
                                 {featuredProject.title}
                             </h2>
-                            <p className="text-slate-200/85 leading-relaxed mb-5">{featuredProject.description}</p>
+                            <p className="text-text-secondary leading-relaxed mb-5">{featuredProject.description}</p>
                             <div className="flex flex-wrap gap-2">
                                 {featuredProject.tools.map((tool) => (
-                                    <span key={tool} className="px-3 py-1 text-xs rounded-lg border border-blue-300/25 bg-blue-300/10 text-blue-100">
+                                    <span key={tool} className="px-3 py-1 text-xs rounded-lg border border-primary/20 bg-primary/10 text-primary-light">
                                         {tool}
                                     </span>
                                 ))}
                             </div>
                         </div>
-                        <div className="relative rounded-xl overflow-hidden border border-blue-300/30 h-80 bg-slate-900/50 backdrop-blur-md group">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.22),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.26),transparent_45%)]" />
+                        <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
                             {featuredProject.image ? (
                                 <img src={featuredProject.image} alt={featuredProject.title} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs bg-black/45 border border-cyan-300/30 text-cyan-100">
+                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs bg-black/45 border border-primary/30 text-primary-light">
                                 {content.featuredPrefix} {activeBestCategory === "uiux" ? "UI/UX" : activeBestCategory === "graphic" ? "Graphic" : "Motion"}
                             </div>
                         </div>
@@ -295,10 +314,7 @@ export default function ProjectsPage() {
                                 key={project.id}
                                 project={project}
                                 index={i}
-                                onOpen={(picked) => {
-                                    setSelectedProject(picked);
-                                    setActiveModalImage(0);
-                                }}
+                                onOpen={openProjectModal}
                             />
                         ))}
                     </motion.div>
@@ -318,11 +334,11 @@ export default function ProjectsPage() {
                                 animate={{ y: 0, opacity: 1, scale: 1 }}
                                 exit={{ y: 24, opacity: 0, scale: 0.98 }}
                                 transition={{ duration: 0.25 }}
-                                className="max-w-5xl mx-auto h-full max-h-[90vh] glass rounded-2xl border border-white/20 overflow-hidden"
+                                className="max-w-5xl mx-auto h-full max-h-[90vh] rounded-2xl border border-primary/20 overflow-hidden bg-[#111111] shadow-[0_28px_80px_rgba(0,0,0,0.5)]"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="h-full grid grid-cols-1 lg:grid-cols-2">
-                                    <div className="relative bg-black/50 min-h-[260px]">
+                                    <div className="relative bg-[#0c0c0c] min-h-[260px] border-r border-border/80">
                                         {modalGallery[activeModalImage] ? (
                                             <img
                                                 src={modalGallery[activeModalImage]}
@@ -337,7 +353,7 @@ export default function ProjectsPage() {
                                                 <button
                                                     key={`${item}-${i}`}
                                                     onClick={() => setActiveModalImage(i)}
-                                                    className={`w-16 h-12 rounded-md overflow-hidden border ${activeModalImage === i ? "border-cyan-300" : "border-white/25"}`}
+                                                    className={`w-16 h-12 rounded-md overflow-hidden border ${activeModalImage === i ? "border-primary shadow-[0_0_0_1px_rgba(230,255,0,0.25)]" : "border-border"}`}
                                                 >
                                                     <img src={item} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" />
                                                 </button>
@@ -345,20 +361,20 @@ export default function ProjectsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="p-5 sm:p-6 overflow-y-auto">
+                                    <div className="p-5 sm:p-6 overflow-y-auto bg-[linear-gradient(180deg,#151515_0%,#101010_100%)]">
                                         <div className="flex items-start justify-between gap-4 mb-3">
-                                            <h3 className="text-2xl sm:text-3xl font-display text-white font-bold">{selectedProject.title}</h3>
+                                            <h3 className="text-2xl sm:text-3xl font-display text-text-primary font-bold">{selectedProject.title}</h3>
                                             <button
                                                 onClick={() => setSelectedProject(null)}
-                                                className="w-9 h-9 rounded-lg border border-white/20 text-white/90 hover:bg-white/10"
+                                                className="w-9 h-9 rounded-lg border border-primary/20 bg-surface-light/60 text-text-primary hover:bg-primary/10 hover:border-primary/40 transition-colors"
                                                 aria-label="Close"
                                             >
                                                 ×
                                             </button>
                                         </div>
-                                        <p className="text-slate-200/85 mb-4">{selectedProject.description}</p>
+                                        <p className="text-text-secondary mb-4">{selectedProject.description}</p>
 
-                                        <div className="rounded-xl overflow-hidden border border-cyan-300/25 bg-black/35 mb-4">
+                                        <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
                                             {selectedProject.video ? (
                                                 <video
                                                     src={selectedProject.video}
@@ -366,7 +382,7 @@ export default function ProjectsPage() {
                                                     className="w-full h-[220px] object-cover"
                                                 />
                                             ) : (
-                                                <div className="h-[220px] flex items-center justify-center text-slate-300">
+                                                <div className="h-[220px] flex items-center justify-center text-text-secondary">
                                                     Video preview coming soon
                                                 </div>
                                             )}
@@ -374,9 +390,17 @@ export default function ProjectsPage() {
 
                                         <div className="grid grid-cols-2 gap-2">
                                             {selectedProject.highlights.map((h) => (
-                                                <div key={h} className="text-sm text-slate-300 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                                <div key={h} className="text-sm text-text-secondary bg-surface-light/70 border border-primary/15 rounded-lg px-3 py-2">
                                                     {h}
                                                 </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {selectedProject.tools.map((tool) => (
+                                                <span key={tool} className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary-light border border-primary/20">
+                                                    {tool}
+                                                </span>
                                             ))}
                                         </div>
                                     </div>

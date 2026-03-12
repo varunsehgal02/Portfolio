@@ -31,7 +31,7 @@ export const projects = [
             "Optimized user flows",
         ],
         tools: ["Figma", "User Research", "Usability Testing"],
-        gradient: "from-cyan-500 via-blue-500 to-indigo-500",
+        gradient: "from-primary via-secondary to-primary-light",
         icon: "📱",
         link: "",
         image: "/projects/mobile-app.png",

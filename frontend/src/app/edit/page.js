@@ -279,7 +279,7 @@ export default function EditPage() {
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-all ${
                                         activeTab === tab.id
-                                            ? "bg-gradient-to-r from-primary to-secondary text-white"
+                                            ? "bg-gradient-to-r from-primary to-secondary text-black"
                                             : "text-text-secondary hover:text-text-primary hover:bg-surface-light/60"
                                     }`}
                                 >
@@ -370,7 +370,7 @@ export default function EditPage() {
                                             "Personal saved",
                                             "Failed to save personal profile."
                                         )}
-                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold"
+                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
                                     >
                                         Save Personal
                                     </button>
@@ -482,7 +482,7 @@ export default function EditPage() {
                                             "Skills saved",
                                             "Failed to save skills."
                                         )}
-                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold"
+                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
                                     >
                                         Save Skills
                                     </button>
@@ -607,7 +607,7 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("experience", experienceData), "Experience saved", "Failed to save experience.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Experience</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("experience", experienceData), "Experience saved", "Failed to save experience.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Experience</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("experience"); setExperienceData(defaultExperience); }, "Experience reset", "Failed to reset experience.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -621,7 +621,7 @@ export default function EditPage() {
                                     <Field label="Period" value={education.period} onChange={(v) => setEducation({ ...education, period: v })} />
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("education", education), "Education saved", "Failed to save education.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Education</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("education", education), "Education saved", "Failed to save education.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Education</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("education"); setEducation(defaultEducation); }, "Education reset", "Failed to reset education.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -653,7 +653,7 @@ export default function EditPage() {
                                 <button onClick={() => setCertifications([...certifications, "New certification"])} className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs">+ Add Certification</button>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("certifications", certifications), "Certifications saved", "Failed to save certifications.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Certifications</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("certifications", certifications), "Certifications saved", "Failed to save certifications.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Certifications</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("certifications"); setCertifications(defaultCerts); }, "Certifications reset", "Failed to reset certifications.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -894,7 +894,7 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("projects", projectsData), "Projects saved", "Failed to save projects.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projects", projectsData), "Projects saved", "Failed to save projects.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Projects</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("projects"); setProjectsData(defaultProjects); }, "Projects reset", "Failed to reset projects.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -936,7 +936,7 @@ export default function EditPage() {
                                 <button onClick={() => setProjectCategories([...projectCategories, { id: "new", label: "New Category" }])} className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs">+ Add Category</button>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("projectCategories", projectCategories), "Categories saved", "Failed to save categories.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Categories</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projectCategories", projectCategories), "Categories saved", "Failed to save categories.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Categories</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("projectCategories"); setProjectCategories(defaultCategories); }, "Categories reset", "Failed to reset categories.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -950,7 +950,7 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("homeContent", homeContent), "Home content saved", "Failed to save home content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Home Content</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("homeContent", homeContent), "Home content saved", "Failed to save home content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Home Content</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("homeContent"); setHomeContent(defaultHomeContent); }, "Home content reset", "Failed to reset home content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -1140,8 +1140,8 @@ export default function EditPage() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("aboutContent", aboutContent), "About content saved", "Failed to save about content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Content</button>
-                                    <button onClick={() => runEditorAction(async () => saveData("aboutBentoCards", aboutBentoCards), "About cards saved", "Failed to save about cards.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save About Cards</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("aboutContent", aboutContent), "About content saved", "Failed to save about content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save About Content</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("aboutBentoCards", aboutBentoCards), "About cards saved", "Failed to save about cards.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save About Cards</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("aboutContent"); setAboutContent(defaultAboutContent); }, "About content reset", "Failed to reset about content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("aboutBentoCards"); setAboutBentoCards(defaultAboutBentoCards); }, "About cards reset", "Failed to reset about cards.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset Cards</button>
                                 </div>
@@ -1156,7 +1156,7 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Projects content saved", "Failed to save projects content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Projects Content</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Projects content saved", "Failed to save projects content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Projects Content</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("projectsContent"); setProjectsContent(defaultProjectsContent); }, "Projects content reset", "Failed to reset projects content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>
@@ -1170,7 +1170,7 @@ export default function EditPage() {
                                     ))}
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => runEditorAction(async () => saveData("contactContent", contactContent), "Contact content saved", "Failed to save contact content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold">Save Contact Content</button>
+                                    <button onClick={() => runEditorAction(async () => saveData("contactContent", contactContent), "Contact content saved", "Failed to save contact content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Contact Content</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("contactContent"); setContactContent(defaultContactContent); }, "Contact content reset", "Failed to reset contact content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
                                 </div>
                             </SectionCard>

@@ -40,7 +40,7 @@ export default function DevToolsBlocker() {
                 justifyContent: "center",
                 background: "#05070f",
                 color: "#e2e8f0",
-                fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+                fontFamily: "Inter, system-ui, sans-serif",
                 textAlign: "center",
                 padding: "24px",
             });

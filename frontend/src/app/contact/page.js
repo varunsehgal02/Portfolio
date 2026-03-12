@@ -23,7 +23,7 @@ export default function ContactPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [submitNotice, setSubmitNotice] = useState("");
-    const [isMobile, setIsMobile] = useState(true);
+    const [showDesktopSticker, setShowDesktopSticker] = useState(false);
     const messageMaxLength = 4000;
     const messageLength = formData.message.length;
 
@@ -31,30 +31,30 @@ export default function ContactPage() {
         if (typeof window === "undefined") return;
 
         const mediaQueries = [
-            window.matchMedia("(max-width: 768px)"),
-            window.matchMedia("(hover: none) and (pointer: coarse)"),
+            window.matchMedia("(min-width: 1025px)"),
+            window.matchMedia("(hover: hover) and (pointer: fine)"),
         ];
 
-        const updateIsMobile = () => {
-            setIsMobile(mediaQueries.some((query) => query.matches));
+        const updateStickerVisibility = () => {
+            setShowDesktopSticker(mediaQueries.every((query) => query.matches));
         };
 
-        updateIsMobile();
+        updateStickerVisibility();
 
         mediaQueries.forEach((query) => {
             if (typeof query.addEventListener === "function") {
-                query.addEventListener("change", updateIsMobile);
+                query.addEventListener("change", updateStickerVisibility);
             } else {
-                query.addListener(updateIsMobile);
+                query.addListener(updateStickerVisibility);
             }
         });
 
         return () => {
             mediaQueries.forEach((query) => {
                 if (typeof query.removeEventListener === "function") {
-                    query.removeEventListener("change", updateIsMobile);
+                    query.removeEventListener("change", updateStickerVisibility);
                 } else {
-                    query.removeListener(updateIsMobile);
+                    query.removeListener(updateStickerVisibility);
                 }
             });
         };
@@ -252,8 +252,8 @@ export default function ContactPage() {
             </div>
 
             {/* Draggable sticker overlay across full contact page (desktop only) */}
-            {!isMobile && (
-                <div className="hidden lg:block fixed inset-0 z-[2] pointer-events-none">
+            {showDesktopSticker && (
+                <div className="fixed inset-0 z-[2] pointer-events-none">
                     <div className="relative w-full h-full">
                         <StickerPeel
                             className="pointer-events-auto"
@@ -429,7 +429,7 @@ export default function ContactPage() {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 disabled={isSubmitting}
-                                className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${isSubmitted
+                                className={`w-full py-4 rounded-xl font-semibold ${isSubmitted ? "text-white" : "text-black"} transition-all duration-300 ${isSubmitted
                                     ? "bg-green-500"
                                     : "bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25"
                                     }`}

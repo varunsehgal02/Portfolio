@@ -56,7 +56,7 @@ export default function LoadingScreen() {
                             transition={{ duration: 0.45, type: "spring", bounce: 0.25 }}
                             className="mx-auto mb-8 w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl shadow-primary/30"
                         >
-                            <span className="font-display font-extrabold text-4xl text-white">VS</span>
+                            <span className="font-display font-extrabold text-4xl text-black">VS</span>
                         </motion.div>
 
                         {/* Name */}

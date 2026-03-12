@@ -52,18 +52,18 @@ const popIn = {
 
 /* ── glassy card style reusable ── */
 const glassCard = {
-    background: "rgba(10, 12, 30, 0.75)",
-    border: "1px solid rgba(59, 109, 224, 0.1)",
+    background: "rgba(21, 21, 21, 0.82)",
+    border: "1px solid rgba(42, 42, 42, 0.92)",
     backdropFilter: "blur(8px)",
 };
 
 const glassCardAccent = {
     ...glassCard,
-    borderLeft: "3px solid rgba(59, 109, 224, 0.4)",
+    borderLeft: "3px solid rgba(230, 255, 0, 0.45)",
 };
 
 /* ── divider style ── */
-const dividerGradient = "linear-gradient(to right, transparent, rgba(59, 109, 224, 0.3), transparent)";
+const dividerGradient = "linear-gradient(to right, transparent, rgba(230, 255, 0, 0.3), transparent)";
 
 // Auto-sliding image carousel component
 const AutoSlideImages = () => {
@@ -80,7 +80,7 @@ const AutoSlideImages = () => {
     }, [images.length]);
 
     return (
-        <div className="relative w-full h-full overflow-hidden rounded-xl bg-surface-light">
+            <div className="relative w-full h-full overflow-hidden rounded-xl bg-surface-light">
             <AnimatePresence mode="popLayout">
                 <motion.img
                     key={idx}
@@ -94,9 +94,9 @@ const AutoSlideImages = () => {
                 />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute bottom-4 left-4 right-4 text-white">
+            <div className="absolute bottom-4 left-4 right-4 text-text-primary">
                 <h4 className="font-display font-bold text-lg">Visual Design</h4>
-                <p className="text-white/70 text-sm">UI/UX & Branding</p>
+                <p className="text-text-secondary text-sm">UI/UX & Branding</p>
             </div>
         </div>
     );
@@ -106,8 +106,8 @@ const AutoSlideImages = () => {
 const ToolTicker = () => {
     const tools = [...skills["Design Tools"], "Wireframing", "Prototyping"];
     return (
-        <div className="w-full h-full rounded-xl overflow-hidden flex flex-col justify-center relative bg-gradient-to-br from-[#0a0c1e] to-[#050610] border border-primary/10">
-            <h4 className="font-display font-bold text-lg text-white mb-6 px-6 relative z-10">Toolkit</h4>
+        <div className="w-full h-full rounded-xl overflow-hidden flex flex-col justify-center relative bg-gradient-to-br from-[#151515] to-[#0a0a0a] border border-border">
+            <h4 className="font-display font-bold text-lg text-text-primary mb-6 px-6 relative z-10">Toolkit</h4>
             <div className="relative overflow-hidden w-full flex select-none">
                 <motion.div
                     animate={{ x: [0, -1000] }}
@@ -118,15 +118,15 @@ const ToolTicker = () => {
                         <div
                             key={i}
                             className="px-4 py-2 rounded-lg text-base font-medium glass"
-                            style={{ color: "#60A5FA", border: "1px solid rgba(59, 109, 224, 0.2)" }}
+                            style={{ color: "#E6FF00", border: "1px solid rgba(230, 255, 0, 0.18)" }}
                         >
                             {tool}
                         </div>
                     ))}
                 </motion.div>
                 {/* Fade edges */}
-                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#0a0c1e] to-transparent z-10 pointer-events-none" />
-                <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0c1e] to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#151515] to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#151515] to-transparent z-10 pointer-events-none" />
             </div>
         </div>
     );
@@ -140,12 +140,12 @@ export default function AboutPage() {
     const aboutBentoCards = useEditableData("aboutBentoCards", defaultAboutBentoCards);
 
     return (
-        <div className="relative" style={{ background: "#050510" }}>
+        <div className="relative" style={{ background: "#0a0a0a" }}>
             {/* ═══════ LIGHT PILLAR BACKGROUND ═══════ */}
             <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
                 <LightPillar
-                    topColor="#1E4BBD"
-                    bottomColor="#60A5FA"
+                    topColor="#E6FF00"
+                    bottomColor="#5A6200"
                     intensity={0.5}
                     rotationSpeed={0.15}
                     glowAmount={0.0015}
@@ -160,7 +160,7 @@ export default function AboutPage() {
             </div>
             <div
                 className="fixed inset-0 pointer-events-none"
-                style={{ zIndex: 0, background: "rgba(5, 5, 16, 0.35)" }}
+                style={{ zIndex: 0, background: "rgba(10, 10, 10, 0.45)" }}
             />
 
             {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
@@ -196,16 +196,16 @@ export default function AboutPage() {
                         variants={fadeUp}
                         className="mb-16 text-center"
                     >
-                        <h1 className="font-display font-bold text-5xl sm:text-6xl md:text-7xl mb-4">
+                        <h1 className="font-display font-bold text-5xl sm:text-6xl md:text-7xl leading-[1.18] pb-4 mb-4 overflow-visible">
                             <ShinyText
                                 text={personal.name}
                                 speed={3}
                                 delay={0}
-                                color="#94a3b8"
-                                shineColor="#ffffff"
+                                color="#a1a1aa"
+                                shineColor="#e6ff00"
                                 spread={120}
                                 direction="left"
-                                className="font-display font-bold"
+                                className="font-display font-bold block"
                             />
                         </h1>
 
@@ -333,11 +333,11 @@ export default function AboutPage() {
                                                 viewport={{ once: true }}
                                                 variants={popIn}
                                                 whileHover={{ scale: 1.1, y: -2 }}
-                                                className="px-4 py-2 rounded-lg text-base font-medium cursor-default transition-colors duration-300 hover:bg-primary/20 hover:text-white"
+                                                className="px-4 py-2 rounded-lg text-base font-medium cursor-default transition-colors duration-300 hover:bg-primary/20 hover:text-text-primary"
                                                 style={{
-                                                    background: "rgba(37, 99, 235, 0.1)",
-                                                    border: "1px solid rgba(59, 109, 224, 0.15)",
-                                                    color: "#60A5FA",
+                                                    background: "rgba(230, 255, 0, 0.08)",
+                                                    border: "1px solid rgba(230, 255, 0, 0.15)",
+                                                    color: "#E6FF00",
                                                 }}
                                             >
                                                 {skill}

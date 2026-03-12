@@ -30,7 +30,7 @@ export default function RootLayout({ children }) {
             </head>
             <body className="bg-background text-text-primary antialiased" suppressHydrationWarning>
                 <ClickSpark
-                    sparkColor="#3B6DE0"
+                    sparkColor="#E6FF00"
                     sparkSize={10}
                     sparkRadius={15}
                     sparkCount={8}
@@ -41,10 +41,10 @@ export default function RootLayout({ children }) {
                     <LoadingScreen />
                     <PillNav
                         items={navItems}
-                        baseColor="#0f1225"
-                        pillColor="#161a35"
-                        hoveredPillTextColor="#f1f5f9"
-                        pillTextColor="#94a3b8"
+                        baseColor="#151515"
+                        pillColor="#222222"
+                        hoveredPillTextColor="#E6FF00"
+                        pillTextColor="#A1A1AA"
                         initialLoadAnimation={true}
                     />
                     <main className="min-h-screen">{children}</main>

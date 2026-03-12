@@ -151,11 +151,11 @@ const PillNav = ({
                     socialItems={mobileSocialItems}
                     displaySocials
                     displayItemNumbering={true}
-                    menuButtonColor="#f1f5f9"
-                    openMenuButtonColor="#f1f5f9"
+                    menuButtonColor="#e6ff00"
+                    openMenuButtonColor="#e6ff00"
                     changeMenuColorOnOpen={true}
-                    colors={["#0f1a3a", "#1E4BBD"]}
-                    accentColor="#3B6DE0"
+                    colors={["#0a0a0a", "#151515"]}
+                    accentColor="#E6FF00"
                     isFixed={true}
                     closeOnClickAway
                     onItemClick={(item) => router.push(item.link)}

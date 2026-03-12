@@ -145,10 +145,10 @@ export default function MonitorPage() {
     ];
 
     const statCards = stats ? [
-        { label: "Today", value: stats.today, icon: "📅", color: "from-cyan-500 to-blue-500", textColor: "text-cyan-400" },
-        { label: "This Week", value: stats.thisWeek, icon: "📊", color: "from-primary to-blue-400", textColor: "text-primary-light" },
-        { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-purple-400", textColor: "text-secondary" },
-        { label: "All Time", value: stats.total, icon: "🌟", color: "from-amber-500 to-orange-400", textColor: "text-amber-400" },
+        { label: "Today", value: stats.today, icon: "📅", color: "from-primary to-secondary", textColor: "text-primary-light" },
+        { label: "This Week", value: stats.thisWeek, icon: "📊", color: "from-primary-light to-primary", textColor: "text-primary-light" },
+        { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-primary", textColor: "text-primary-light" },
+        { label: "All Time", value: stats.total, icon: "🌟", color: "from-primary to-accent", textColor: "text-primary-light" },
     ] : [];
 
     const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
@@ -355,7 +355,7 @@ export default function MonitorPage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
-                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25"
+                            ? "bg-gradient-to-r from-primary to-secondary text-black shadow-lg shadow-primary/25"
                             : "text-text-secondary hover:text-text-primary"
                             }`}
                     >
@@ -628,11 +628,11 @@ export default function MonitorPage() {
                     >
                         {/* LinkedIn */}
                         <div className="glass rounded-2xl p-6 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-blue-400" />
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary to-secondary" />
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                                    <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-primary-light" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                                         </svg>
                                     </div>
@@ -682,7 +682,7 @@ export default function MonitorPage() {
                                         </div>
                                         <button
                                             onClick={handleLinkedinSave}
-                                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
+                                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
                                         >
                                             💾 Save Stats
                                         </button>
@@ -696,7 +696,7 @@ export default function MonitorPage() {
                                         ].map((stat) => (
                                             <div key={stat.label} className="bg-surface-light/50 rounded-xl p-5 text-center hover:bg-surface-light transition-colors">
                                                 <span className="text-xl block mb-2">{stat.icon}</span>
-                                                <p className="text-blue-400 font-display font-bold text-3xl">{stat.value}</p>
+                                                <p className="text-primary-light font-display font-bold text-3xl">{stat.value}</p>
                                                 <p className="text-text-muted text-xs mt-1.5">{stat.label}</p>
                                             </div>
                                         ))}
@@ -707,11 +707,11 @@ export default function MonitorPage() {
 
                         {/* Behance */}
                         <div className="glass rounded-2xl p-6 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-300 to-indigo-400" />
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-secondary to-primary" />
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-400/15 flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-blue-300" viewBox="0 0 24 24" fill="currentColor">
+                                    <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-primary-light" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z" />
                                         </svg>
                                     </div>
@@ -762,7 +762,7 @@ export default function MonitorPage() {
                                         </div>
                                         <button
                                             onClick={handleBehanceSave}
-                                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
+                                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
                                         >
                                             💾 Save Stats
                                         </button>
@@ -777,7 +777,7 @@ export default function MonitorPage() {
                                         ].map((stat) => (
                                             <div key={stat.label} className="bg-surface-light/50 rounded-xl p-5 text-center hover:bg-surface-light transition-colors">
                                                 <span className="text-xl block mb-2">{stat.icon}</span>
-                                                <p className="text-blue-300 font-display font-bold text-3xl">{stat.value}</p>
+                                                <p className="text-primary-light font-display font-bold text-3xl">{stat.value}</p>
                                                 <p className="text-text-muted text-xs mt-1.5">{stat.label}</p>
                                             </div>
                                         ))}
@@ -808,11 +808,11 @@ export default function MonitorPage() {
                                     <p className="text-text-muted text-xs mt-1">All outbound clicks</p>
                                 </div>
                                 <div className="bg-surface-light/50 rounded-xl p-4 text-center">
-                                    <p className="text-blue-400 font-display font-bold text-3xl">{outboundSummary.byPlatform?.linkedin || 0}</p>
+                                    <p className="text-primary-light font-display font-bold text-3xl">{outboundSummary.byPlatform?.linkedin || 0}</p>
                                     <p className="text-text-muted text-xs mt-1">LinkedIn clicks</p>
                                 </div>
                                 <div className="bg-surface-light/50 rounded-xl p-4 text-center">
-                                    <p className="text-blue-300 font-display font-bold text-3xl">{outboundSummary.byPlatform?.behance || 0}</p>
+                                    <p className="text-primary-light font-display font-bold text-3xl">{outboundSummary.byPlatform?.behance || 0}</p>
                                     <p className="text-text-muted text-xs mt-1">Behance clicks</p>
                                 </div>
                             </div>
@@ -824,8 +824,8 @@ export default function MonitorPage() {
                                         <p className="text-text-muted text-xs">Tracked outbound clicks from your portfolio</p>
                                     </div>
                                     <div className="flex items-center gap-4 text-xs">
-                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" />LinkedIn</span>
-                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-blue-300" />Behance</span>
+                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-primary" />LinkedIn</span>
+                                        <span className="flex items-center gap-2 text-text-secondary"><span className="w-2.5 h-2.5 rounded-full bg-secondary" />Behance</span>
                                     </div>
                                 </div>
 
@@ -838,14 +838,14 @@ export default function MonitorPage() {
                                                     initial={{ height: 0 }}
                                                     animate={{ height: `${Math.max((day.linkedin / socialTrend.maxValue) * 100, day.linkedin ? 8 : 0)}%` }}
                                                     transition={{ duration: 0.45, delay: index * 0.04 }}
-                                                    className="w-3 rounded-t-md bg-blue-400"
+                                                    className="w-3 rounded-t-md bg-primary"
                                                     title={`${day.label}: ${day.linkedin} LinkedIn clicks`}
                                                 />
                                                 <motion.div
                                                     initial={{ height: 0 }}
                                                     animate={{ height: `${Math.max((day.behance / socialTrend.maxValue) * 100, day.behance ? 8 : 0)}%` }}
                                                     transition={{ duration: 0.45, delay: index * 0.04 + 0.05 }}
-                                                    className="w-3 rounded-t-md bg-blue-300"
+                                                    className="w-3 rounded-t-md bg-secondary"
                                                     title={`${day.label}: ${day.behance} Behance clicks`}
                                                 />
                                             </div>

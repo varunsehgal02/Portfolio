@@ -64,7 +64,7 @@ export default function ProjectCard({ project, index, onOpen }) {
 
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/35 backdrop-blur-sm text-white border border-white/25">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/40 backdrop-blur-sm text-primary-light border border-primary/20">
                         {project.category === "uiux"
                             ? "UI/UX"
                             : project.category === "graphic"
@@ -115,7 +115,7 @@ export default function ProjectCard({ project, index, onOpen }) {
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 group/btn"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 group/btn"
                         >
                             <span>View Project</span>
                             <svg

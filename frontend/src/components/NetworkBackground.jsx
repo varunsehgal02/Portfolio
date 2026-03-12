@@ -57,7 +57,7 @@ export default function NetworkBackground({ className = "" }) {
         const animate = () => {
             ctx.clearRect(0, 0, width, height);
 
-            ctx.fillStyle = "rgba(8, 15, 40, 0.55)";
+            ctx.fillStyle = "rgba(10, 10, 10, 0.58)";
             ctx.fillRect(0, 0, width, height);
 
             for (let i = 0; i < nodes.length; i += 1) {
@@ -103,7 +103,7 @@ export default function NetworkBackground({ className = "" }) {
 
                 ctx.beginPath();
                 ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(125, 211, 252, 0.9)";
+                ctx.fillStyle = "rgba(230, 255, 0, 0.82)";
                 ctx.fill();
             }
 
@@ -120,7 +120,7 @@ export default function NetworkBackground({ className = "" }) {
                         ctx.beginPath();
                         ctx.moveTo(a.x, a.y);
                         ctx.lineTo(b.x, b.y);
-                        ctx.strokeStyle = `rgba(59,130,246,${alpha})`;
+                        ctx.strokeStyle = `rgba(196,219,0,${alpha})`;
                         ctx.lineWidth = 1;
                         ctx.stroke();
                     }
@@ -129,8 +129,8 @@ export default function NetworkBackground({ className = "" }) {
 
             if (pointer.active && !isTouchDevice) {
                 const grad = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 260);
-                grad.addColorStop(0, "rgba(59,130,246,0.18)");
-                grad.addColorStop(1, "rgba(59,130,246,0)");
+                grad.addColorStop(0, "rgba(230,255,0,0.16)");
+                grad.addColorStop(1, "rgba(230,255,0,0)");
                 ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(pointer.x, pointer.y, 260, 0, Math.PI * 2);

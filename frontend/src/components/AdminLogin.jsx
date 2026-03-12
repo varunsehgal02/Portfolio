@@ -58,7 +58,7 @@ export default function AdminLogin({ onSuccess, title = "Admin Access" }) {
                     <div className="text-center">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary mx-auto flex items-center justify-center mb-4">
                             <svg
-                                className="w-8 h-8 text-white"
+                                className="w-8 h-8 text-black"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -135,7 +135,7 @@ export default function AdminLogin({ onSuccess, title = "Admin Access" }) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         disabled={isLoading}
-                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50"
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50"
                     >
                         {isLoading ? (
                             <span className="flex items-center justify-center gap-2">

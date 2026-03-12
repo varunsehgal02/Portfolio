@@ -18,7 +18,7 @@ const darkenColor = (hex, percent) => {
     return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 };
 
-const Folder = ({ color = '#3B6DE0', size = 1, items = [], className = '' }) => {
+const Folder = ({ color = '#E6FF00', size = 1, items = [], className = '' }) => {
     const maxItems = 3;
     const papers = items.slice(0, maxItems);
     while (papers.length < maxItems) {

@@ -69,8 +69,8 @@ export default function Home() {
                     speed={0.5}
                     squareSize={40}
                     direction="diagonal"
-                    borderColor="#0f1a3a"
-                    hoverFillColor="#1E4BBD22"
+                    borderColor="#222222"
+                    hoverFillColor="#E6FF0018"
                 />
             </div>
 
@@ -89,7 +89,7 @@ export default function Home() {
                             transition={{ delay: 0.2, duration: 0.5 }}
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
                         >
-                            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                             <span className="text-text-secondary text-sm">{content.availabilityBadge}</span>
                         </motion.div>
 
@@ -144,7 +144,7 @@ export default function Home() {
                         >
                             <Link
                                 href="/projects"
-                                className="group px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                className="group px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-black font-semibold text-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 flex items-center gap-2"
                             >
                                 {content.ctaPrimary}
                                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -160,7 +160,7 @@ export default function Home() {
                             <a
                                 href="/resume/Varun_Sehgal.pdf"
                                 download
-                                className="px-8 py-4 rounded-2xl border border-primary/30 text-primary-light font-semibold text-lg hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+                                className="px-8 py-4 rounded-2xl border border-primary/30 text-primary-light font-semibold text-lg hover:bg-primary/10 hover:text-text-primary transition-all duration-300 hover:scale-105"
                             >
                                 {content.ctaResume || "Download Resume"}
                             </a>
@@ -202,7 +202,7 @@ export default function Home() {
                     gap={16}
                     hoverSpeed={0}
                     fadeOut
-                    fadeOutColor="#0a0a0f"
+                    fadeOutColor="#0a0a0a"
                     ariaLabel="Skills and tools"
                 />
             </section>
@@ -235,7 +235,7 @@ export default function Home() {
                                 {/* Folder icon */}
                                 <div className="flex justify-center mb-8 mt-4">
                                     <Folder
-                                        color="#3B6DE0"
+                                        color="#E6FF00"
                                         size={1.8}
                                         items={[
                                             <div key="p1" className="flex items-center justify-center h-full">
@@ -279,7 +279,7 @@ export default function Home() {
                     <div className="mt-12 text-center">
                         <Link
                             href="/projects"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-black font-semibold hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
                         >
                             {content.viewAllProjects}
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -310,7 +310,7 @@ export default function Home() {
                         </p>
                         <Link
                             href="/contact"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-black font-semibold text-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
                         >
                             {content.ctaSectionButton}
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
