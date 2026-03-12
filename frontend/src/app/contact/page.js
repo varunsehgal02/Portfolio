@@ -234,7 +234,7 @@ export default function ContactPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6 }}
+                        transition={{ duration: 0.35 }}
                         className="space-y-8"
                     >
                         <div>
@@ -316,7 +316,7 @@ export default function ContactPage() {
                     <motion.div
                         initial={{ opacity: 0, x: 30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
+                        transition={{ duration: 0.35 }}
                     >
                         <form onSubmit={handleSubmit} className="glass rounded-2xl p-8 space-y-6">
                             <div>

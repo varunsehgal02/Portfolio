@@ -2,6 +2,7 @@ const express = require("express");
 const { z } = require("zod");
 const { readStore, writeStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
+const { lookupGeoByIp } = require("../lib/geoip");
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ function ensureAnalytics(store) {
   store.analytics.pageViews = store.analytics.pageViews || [];
   store.analytics.aboutPopupOpens = store.analytics.aboutPopupOpens || [];
   store.analytics.outboundClicks = store.analytics.outboundClicks || [];
+  store.analytics.ipGeoCache = store.analytics.ipGeoCache || {};
   return store.analytics;
 }
 
@@ -147,6 +149,55 @@ router.get("/outbound-summary", requireAuth, async (_req, res) => {
     total: clicks.length,
     byPlatform,
     recent: clicks.slice(-20).reverse(),
+  });
+});
+
+router.get("/visitor", requireAuth, async (req, res) => {
+  const ip = typeof req.query.ip === "string" ? req.query.ip.trim() : "";
+  if (!ip) {
+    return res.status(400).json({ error: "Missing ip query parameter" });
+  }
+
+  const store = await readStore();
+  const analytics = ensureAnalytics(store);
+
+  const pageViews = (analytics.pageViews || [])
+    .filter((row) => (row.ip || "") === ip)
+    .slice()
+    .reverse();
+
+  const outboundClicks = (analytics.outboundClicks || [])
+    .filter((row) => (row.ip || "") === ip)
+    .slice()
+    .reverse();
+
+  const contacts = (store.contacts || [])
+    .filter((row) => (row.ip || "") === ip)
+    .slice()
+    .reverse();
+
+  const geoLookupEnabled = process.env.GEOLOOKUP_ENABLED !== "false";
+  let geolocation = analytics.ipGeoCache[ip] || null;
+
+  if (geoLookupEnabled && !geolocation) {
+    geolocation = await lookupGeoByIp(ip);
+    if (geolocation) {
+      analytics.ipGeoCache[ip] = geolocation;
+      await writeStore(store);
+    }
+  }
+
+  return res.json({
+    ip,
+    geolocation,
+    summary: {
+      pageViews: pageViews.length,
+      outboundClicks: outboundClicks.length,
+      contacts: contacts.length,
+    },
+    pageViews: pageViews.slice(0, 100),
+    outboundClicks: outboundClicks.slice(0, 100),
+    contacts: contacts.slice(0, 100),
   });
 });
 

@@ -16,6 +16,7 @@ import {
     getAboutPopupStats,
     getOutboundClickSummary,
     getOutboundClickHistory,
+    getVisitorProfile,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -29,6 +30,9 @@ export default function MonitorPage() {
     const [outboundSummary, setOutboundSummary] = useState({ total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] });
     const [outboundHistory, setOutboundHistory] = useState([]);
     const [contactMessages, setContactMessages] = useState([]);
+    const [selectedIp, setSelectedIp] = useState("");
+    const [visitorProfile, setVisitorProfile] = useState(null);
+    const [visitorLoading, setVisitorLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("overview");
     const [editingLinkedin, setEditingLinkedin] = useState(false);
     const [editingBehance, setEditingBehance] = useState(false);
@@ -79,6 +83,15 @@ export default function MonitorPage() {
     const handleBehanceSave = async () => {
         await setBehanceStats(behance);
         setEditingBehance(false);
+    };
+
+    const openVisitorProfile = async (ip) => {
+        if (!ip) return;
+        setSelectedIp(ip);
+        setVisitorLoading(true);
+        const data = await getVisitorProfile(ip);
+        setVisitorProfile(data);
+        setVisitorLoading(false);
     };
 
     const socialTrend = useMemo(() => {
@@ -438,7 +451,16 @@ export default function MonitorPage() {
                                                 {new Date(visit.at).toLocaleString()}
                                             </td>
                                             <td className="px-6 py-3.5 text-text-muted text-sm font-mono">
-                                                {visit.ip || "Unknown"}
+                                                {visit.ip ? (
+                                                    <button
+                                                        onClick={() => openVisitorProfile(visit.ip)}
+                                                        className="text-primary-light hover:text-primary underline underline-offset-2"
+                                                    >
+                                                        {visit.ip}
+                                                    </button>
+                                                ) : (
+                                                    "Unknown"
+                                                )}
                                             </td>
                                             <td className="px-6 py-3.5 text-text-muted text-sm">
                                                 {getBrowserName(visit.userAgent)}
@@ -760,12 +782,149 @@ export default function MonitorPage() {
                                             <span className="text-text-primary font-semibold">{msg.name}</span>
                                             <a href={`mailto:${msg.email}`} className="text-primary-light text-sm">{msg.email}</a>
                                             <span className="text-text-muted text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
+                                            <span className="text-text-muted text-xs">
+                                                IP: {msg.ip ? (
+                                                    <button
+                                                        onClick={() => openVisitorProfile(msg.ip)}
+                                                        className="text-primary-light hover:text-primary underline underline-offset-2"
+                                                    >
+                                                        {msg.ip}
+                                                    </button>
+                                                ) : "Unknown"}
+                                            </span>
                                         </div>
+                                        <p className="text-text-muted text-xs mb-2">
+                                            Browser: {getBrowserName(msg.userAgent)} | Device: {getDeviceType(msg.userAgent)} | Source: {msg.sourcePath || "unknown"}
+                                        </p>
                                         <p className="text-text-secondary text-sm whitespace-pre-wrap">{msg.message}</p>
                                     </div>
                                 ))
                             )}
                         </div>
+                    </motion.div>
+                )}
+
+                {selectedIp && (
+                    <motion.div
+                        key="visitor-profile"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="glass rounded-2xl p-6"
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-display font-semibold text-lg text-text-primary">Visitor Profile: <span className="text-primary-light">{selectedIp}</span></h3>
+                            <button
+                                onClick={() => {
+                                    setSelectedIp("");
+                                    setVisitorProfile(null);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-xs"
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        {visitorLoading && <p className="text-text-muted text-sm">Loading visitor details...</p>}
+
+                        {!visitorLoading && !visitorProfile && (
+                            <p className="text-text-muted text-sm">No details found for this IP.</p>
+                        )}
+
+                        {!visitorLoading && visitorProfile && (
+                            <div className="space-y-5">
+                                {visitorProfile.geolocation && (
+                                    <div className="rounded-xl border border-surface-light/60 bg-surface-light/20 p-4">
+                                        <h4 className="text-text-primary font-semibold mb-3">IP Geolocation</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">City</p>
+                                                <p className="text-text-primary">{visitorProfile.geolocation.city || "Unknown"}</p>
+                                            </div>
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">Region</p>
+                                                <p className="text-text-primary">{visitorProfile.geolocation.region || "Unknown"}</p>
+                                            </div>
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">Country</p>
+                                                <p className="text-text-primary">{visitorProfile.geolocation.country || "Unknown"}</p>
+                                            </div>
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">ISP</p>
+                                                <p className="text-text-primary">{visitorProfile.geolocation.isp || "Unknown"}</p>
+                                            </div>
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">Timezone</p>
+                                                <p className="text-text-primary">{visitorProfile.geolocation.timezone || "Unknown"}</p>
+                                            </div>
+                                            <div className="bg-surface-light/50 rounded-lg p-3">
+                                                <p className="text-text-muted text-xs">Coordinates</p>
+                                                <p className="text-text-primary">
+                                                    {visitorProfile.geolocation.latitude !== null && visitorProfile.geolocation.longitude !== null
+                                                        ? `${visitorProfile.geolocation.latitude}, ${visitorProfile.geolocation.longitude}`
+                                                        : "Unknown"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                        <p className="text-primary-light font-display font-bold text-3xl">{visitorProfile.summary?.pageViews || 0}</p>
+                                        <p className="text-text-muted text-xs mt-1">Page Visits</p>
+                                    </div>
+                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                        <p className="text-blue-400 font-display font-bold text-3xl">{visitorProfile.summary?.outboundClicks || 0}</p>
+                                        <p className="text-text-muted text-xs mt-1">Outbound Clicks</p>
+                                    </div>
+                                    <div className="bg-surface-light/50 rounded-xl p-4 text-center">
+                                        <p className="text-blue-300 font-display font-bold text-3xl">{visitorProfile.summary?.contacts || 0}</p>
+                                        <p className="text-text-muted text-xs mt-1">Contact Messages</p>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto rounded-xl border border-surface-light/60">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="bg-surface-light/40 border-b border-surface-light/60">
+                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Type</th>
+                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Detail</th>
+                                                <th className="text-left px-4 py-2.5 text-text-muted text-xs uppercase tracking-wider">Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {(visitorProfile.pageViews || []).slice(0, 20).map((row) => (
+                                                <tr key={`pv-${row.id}`} className="border-b border-surface-light/40">
+                                                    <td className="px-4 py-2.5 text-text-secondary">Visit</td>
+                                                    <td className="px-4 py-2.5 text-text-primary">{row.page} ({getBrowserName(row.userAgent)}, {getDeviceType(row.userAgent, row.screenWidth)})</td>
+                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.at).toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                            {(visitorProfile.outboundClicks || []).slice(0, 20).map((row) => (
+                                                <tr key={`oc-${row.id}`} className="border-b border-surface-light/40">
+                                                    <td className="px-4 py-2.5 text-text-secondary">Outbound</td>
+                                                    <td className="px-4 py-2.5 text-text-primary capitalize">{row.platform} from {row.sourcePath || "unknown"}</td>
+                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.at).toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                            {(visitorProfile.contacts || []).slice(0, 20).map((row) => (
+                                                <tr key={`ct-${row.id}`} className="border-b border-surface-light/40">
+                                                    <td className="px-4 py-2.5 text-text-secondary">Contact</td>
+                                                    <td className="px-4 py-2.5 text-text-primary">{row.name} ({row.email})</td>
+                                                    <td className="px-4 py-2.5 text-text-muted">{new Date(row.createdAt).toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                            {((visitorProfile.pageViews || []).length + (visitorProfile.outboundClicks || []).length + (visitorProfile.contacts || []).length) === 0 && (
+                                                <tr>
+                                                    <td colSpan={3} className="px-4 py-6 text-center text-text-muted">No logs available for this IP yet.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

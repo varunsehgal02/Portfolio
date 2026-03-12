@@ -4,56 +4,137 @@ import { useEffect } from "react";
 
 export default function DevToolsBlocker() {
     useEffect(() => {
-        // 1. Block right-click
-        const handleContextMenu = (e) => {
+        if (process.env.NODE_ENV !== "production") return;
+
+        let blocked = false;
+        let consoleTimer;
+        let devtoolsCheckTimer;
+
+        const blockEvent = (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === "function") {
+                e.stopImmediatePropagation();
+            }
             return false;
         };
 
-        // 2. Block keyboard shortcuts
+        const lockPage = () => {
+            if (blocked) return;
+            blocked = true;
+
+            if (consoleTimer) clearInterval(consoleTimer);
+            if (devtoolsCheckTimer) clearInterval(devtoolsCheckTimer);
+
+            const html = document.documentElement;
+            const body = document.body;
+            html.innerHTML = "";
+            body.innerHTML = "";
+
+            Object.assign(body.style, {
+                margin: "0",
+                width: "100vw",
+                height: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#05070f",
+                color: "#e2e8f0",
+                fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+                textAlign: "center",
+                padding: "24px",
+            });
+
+            const msg = document.createElement("div");
+            msg.innerHTML = "<h1 style=\"margin:0 0 12px;font-size:28px\">Session Blocked</h1><p style=\"margin:0;opacity:.9;font-size:16px\">Developer tools are disabled on this page.</p>";
+            body.appendChild(msg);
+        };
+
+        // Break out if opened inside an iframe.
+        if (window.top !== window.self) {
+            try {
+                window.top.location = window.self.location;
+            } catch {
+                lockPage();
+            }
+        }
+
+        // Block right-click and opening links in new tabs from the menu.
+        const handleContextMenu = (e) => blockEvent(e);
+
+        // Block common inspect/devtools/view-source/save shortcuts.
         const handleKeyDown = (e) => {
-            if (e.key === "F12") { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && /[IJCijc]/.test(e.key)) { e.preventDefault(); return false; }
-            if (e.ctrlKey && /[UuSsPp]/.test(e.key)) { e.preventDefault(); return false; }
+            const key = (e.key || "").toLowerCase();
+            const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+            if (key === "f12") return blockEvent(e);
+            if ((ctrlOrMeta && e.shiftKey && ["i", "j", "c", "k"].includes(key))) return blockEvent(e);
+            if ((ctrlOrMeta && ["u", "s", "p"].includes(key))) return blockEvent(e);
+            if (e.altKey && e.metaKey && ["i", "j", "c"].includes(key)) return blockEvent(e);
+
+            return true;
         };
 
-        // 3. Disable text selection (except inputs)
+        // Disable selection/drag/copy outside form elements.
         const handleSelectStart = (e) => {
-            if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return true;
-            e.preventDefault();
-            return false;
+            const tag = e.target?.tagName;
+            if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return true;
+            return blockEvent(e);
         };
 
-        // 4. Disable drag
-        const handleDragStart = (e) => { e.preventDefault(); return false; };
+        const handleDragStart = (e) => blockEvent(e);
 
-        // 5. Disable copy (except inputs)
         const handleCopy = (e) => {
-            if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return true;
-            e.preventDefault();
-            return false;
+            const tag = e.target?.tagName;
+            if (["INPUT", "TEXTAREA"].includes(tag)) return true;
+            return blockEvent(e);
         };
 
-        // 6. Console flood — clear & warn
-        const clearConsole = setInterval(() => {
-            console.clear();
-            console.log("%c⛔ STOP!", "color:red;font-size:50px;font-weight:bold;text-shadow:2px 2px 0 #000;");
-            console.log("%cThis browser feature is for developers. Do not paste anything here.", "font-size:16px;color:#aaa;");
-        }, 2000);
+        // Heuristic checks for opened DevTools.
+        const hasDevToolsByWindowDiff = () => {
+            const widthDiff = Math.abs(window.outerWidth - window.innerWidth);
+            const heightDiff = Math.abs(window.outerHeight - window.innerHeight);
+            return widthDiff > 160 || heightDiff > 160;
+        };
 
-        document.addEventListener("contextmenu", handleContextMenu);
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("selectstart", handleSelectStart);
-        document.addEventListener("dragstart", handleDragStart);
-        document.addEventListener("copy", handleCopy);
+        const hasDevToolsByDebuggerDelay = () => {
+            const start = performance.now();
+            // eslint-disable-next-line no-debugger
+            debugger;
+            return performance.now() - start > 120;
+        };
+
+        const detectDevTools = () => {
+            if (blocked) return;
+            if (hasDevToolsByWindowDiff() || hasDevToolsByDebuggerDelay()) {
+                lockPage();
+            }
+        };
+
+        // Console flood warning and repeated checks.
+        consoleTimer = setInterval(() => {
+            if (blocked) return;
+            console.clear();
+            console.log("%cSTOP", "color:red;font-size:42px;font-weight:800;");
+            console.log("%cThis page blocks developer tools in production.", "font-size:14px;color:#9ca3af;");
+        }, 1800);
+
+        devtoolsCheckTimer = setInterval(detectDevTools, 1000);
+
+        document.addEventListener("contextmenu", handleContextMenu, true);
+        document.addEventListener("keydown", handleKeyDown, true);
+        document.addEventListener("selectstart", handleSelectStart, true);
+        document.addEventListener("dragstart", handleDragStart, true);
+        document.addEventListener("copy", handleCopy, true);
 
         return () => {
-            document.removeEventListener("contextmenu", handleContextMenu);
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("selectstart", handleSelectStart);
-            document.removeEventListener("dragstart", handleDragStart);
-            document.removeEventListener("copy", handleCopy);
-            clearInterval(clearConsole);
+            document.removeEventListener("contextmenu", handleContextMenu, true);
+            document.removeEventListener("keydown", handleKeyDown, true);
+            document.removeEventListener("selectstart", handleSelectStart, true);
+            document.removeEventListener("dragstart", handleDragStart, true);
+            document.removeEventListener("copy", handleCopy, true);
+            if (consoleTimer) clearInterval(consoleTimer);
+            if (devtoolsCheckTimer) clearInterval(devtoolsCheckTimer);
         };
     }, []);
 

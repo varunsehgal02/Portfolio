@@ -145,6 +145,14 @@ export async function getOutboundClickHistory(platform = "") {
   }
 }
 
+export async function getVisitorProfile(ip) {
+  try {
+    return await apiRequest(`/analytics/visitor?ip=${encodeURIComponent(ip)}`);
+  } catch {
+    return null;
+  }
+}
+
 export async function getAboutPopupStats() {
   try {
     const summary = await apiRequest("/analytics/summary");

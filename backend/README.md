@@ -36,3 +36,4 @@ Server default: `http://localhost:4000`
    - `AUTH_RATE_LIMIT_MAX=10` failed logins per 15 minutes
    - `CONTACT_RATE_LIMIT_MAX=6` submissions per 15 minutes
 - Contact form submissions are persisted and can also trigger email notifications when SMTP env vars are configured
+- Visitor IP drill-down supports geolocation lookup (city/region/country/ISP) and caches results in store

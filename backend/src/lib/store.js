@@ -10,8 +10,25 @@ const DEFAULT_STORE = {
     pageViews: [],
     aboutPopupOpens: [],
     outboundClicks: [],
+    ipGeoCache: {},
   },
 };
+
+function normalizeStore(input) {
+  const source = input && typeof input === "object" ? input : {};
+  const analytics = source.analytics && typeof source.analytics === "object" ? source.analytics : {};
+
+  return {
+    content: source.content && typeof source.content === "object" ? source.content : {},
+    contacts: Array.isArray(source.contacts) ? source.contacts : [],
+    analytics: {
+      pageViews: Array.isArray(analytics.pageViews) ? analytics.pageViews : [],
+      aboutPopupOpens: Array.isArray(analytics.aboutPopupOpens) ? analytics.aboutPopupOpens : [],
+      outboundClicks: Array.isArray(analytics.outboundClicks) ? analytics.outboundClicks : [],
+      ipGeoCache: analytics.ipGeoCache && typeof analytics.ipGeoCache === "object" ? analytics.ipGeoCache : {},
+    },
+  };
+}
 
 async function ensureStore() {
   try {
@@ -24,11 +41,18 @@ async function ensureStore() {
 async function readStore() {
   await ensureStore();
   const raw = await fs.readFile(STORE_PATH, "utf8");
-  return JSON.parse(raw || "{}");
+
+  try {
+    const parsed = JSON.parse(raw || "{}");
+    return normalizeStore(parsed);
+  } catch {
+    return normalizeStore(DEFAULT_STORE);
+  }
 }
 
 async function writeStore(nextStore) {
-  await fs.writeFile(STORE_PATH, JSON.stringify(nextStore, null, 2), "utf8");
+  const normalized = normalizeStore(nextStore);
+  await fs.writeFile(STORE_PATH, JSON.stringify(normalized, null, 2), "utf8");
 }
 
 module.exports = {

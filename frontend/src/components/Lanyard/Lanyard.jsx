@@ -51,6 +51,7 @@ function useCustomCardTexture() {
             canvas.width = 2048;
             canvas.height = 3072;
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
 
@@ -286,14 +287,28 @@ function useCustomCardTexture() {
             tex.minFilter = THREE.LinearMipmapLinearFilter;
             tex.magFilter = THREE.LinearFilter;
             tex.needsUpdate = true;
-            setTexture(tex);
+            setTexture((prev) => {
+                prev?.dispose?.();
+                return tex;
+            });
         };
 
+        // Draw instantly with the "VS" fallback so text is visible immediately.
+        buildTexture(null);
+
+        // Then load the real photo and redraw.
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => buildTexture(img);
-        img.onerror = () => buildTexture(null);
+        img.onerror = () => { /* fallback already set */ };
         img.src = '/varun.jpg';
+
+        return () => {
+            setTexture((prev) => {
+                prev?.dispose?.();
+                return null;
+            });
+        };
     }, []);
 
     return texture;
@@ -338,6 +353,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     }, [hovered, dragged]);
 
     useFrame((state, delta) => {
+        if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current || !band.current) {
+            return;
+        }
+
         if (dragged) {
             vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
             dir.copy(vec).sub(state.camera.position).normalize();
@@ -345,21 +364,20 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
             [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
             card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
         }
-        if (fixed.current) {
-            [j1, j2].forEach((ref) => {
-                if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-                const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
-                ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
-            });
-            curve.points[0].copy(j3.current.translation());
-            curve.points[1].copy(j2.current.lerped);
-            curve.points[2].copy(j1.current.lerped);
-            curve.points[3].copy(fixed.current.translation());
-            band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
-            ang.copy(card.current.angvel());
-            rot.copy(card.current.rotation());
-            card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
-        }
+
+        [j1, j2].forEach((ref) => {
+            if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
+            const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
+            ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+        });
+        curve.points[0].copy(j3.current.translation());
+        curve.points[1].copy(j2.current.lerped);
+        curve.points[2].copy(j1.current.lerped);
+        curve.points[3].copy(fixed.current.translation());
+        band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+        ang.copy(card.current.angvel());
+        rot.copy(card.current.rotation());
+        card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
     });
 
     curve.curveType = 'chordal';

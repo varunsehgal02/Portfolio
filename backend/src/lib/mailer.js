@@ -71,6 +71,8 @@ async function sendContactNotification(entry) {
       "You received a new contact form submission:",
       `Name: ${entry.name}`,
       `Email: ${entry.email}`,
+      `IP: ${entry.ip || "unknown"}`,
+      `Source: ${entry.sourcePath || "unknown"}`,
       `Submitted: ${entry.createdAt}`,
       "",
       "Message:",
@@ -80,6 +82,8 @@ async function sendContactNotification(entry) {
       <h2>New portfolio contact submission</h2>
       <p><strong>Name:</strong> ${escapeHtml(entry.name)}</p>
       <p><strong>Email:</strong> ${escapeHtml(entry.email)}</p>
+      <p><strong>IP:</strong> ${escapeHtml(entry.ip || "unknown")}</p>
+      <p><strong>Source:</strong> ${escapeHtml(entry.sourcePath || "unknown")}</p>
       <p><strong>Submitted:</strong> ${escapeHtml(entry.createdAt)}</p>
       <p><strong>Message:</strong></p>
       <p>${escapeHtml(entry.message).replaceAll("\n", "<br />")}</p>

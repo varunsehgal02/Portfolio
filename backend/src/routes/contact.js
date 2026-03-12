@@ -7,10 +7,26 @@ const { sendContactNotification } = require("../lib/mailer");
 
 const router = express.Router();
 
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length > 0) {
+    return forwarded.split(",")[0].trim();
+  }
+
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    return String(forwarded[0]).split(",")[0].trim();
+  }
+
+  return req.ip || "";
+}
+
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email().max(200),
   message: z.string().min(5).max(4000),
+  sourcePath: z.string().max(200).optional(),
+  userAgent: z.string().max(1000).optional(),
+  referrer: z.string().max(1000).optional(),
 });
 
 router.post("/", contactLimiter, async (req, res) => {
@@ -25,6 +41,10 @@ router.post("/", contactLimiter, async (req, res) => {
   const entry = {
     id: Date.now(),
     ...parsed.data,
+    ip: getClientIp(req),
+    userAgent: parsed.data.userAgent || req.headers["user-agent"] || "",
+    referrer: parsed.data.referrer || req.headers.referer || "",
+    sourcePath: parsed.data.sourcePath || "unknown",
     createdAt: new Date().toISOString(),
   };
 
