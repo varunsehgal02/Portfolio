@@ -3,8 +3,7 @@
 import { apiRequest } from "@/lib/api";
 import { getData, saveData } from "@/lib/editableData";
 
-const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
-const ANALYTICS_CLICK_URL = `${RAW_API_BASE}/api/analytics/outbound-click`;
+const ANALYTICS_CLICK_URL = "/api/analytics/outbound-click";
 
 export async function trackPageView(page) {
   try {

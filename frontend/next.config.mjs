@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const backendBase = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000")
+    .replace(/\/api\/?$/, "")
+    .replace(/\/$/, "");
+
 const nextConfig = {
     // Disable source maps in production to avoid exposing original source.
     productionBrowserSourceMaps: false,
@@ -51,6 +55,15 @@ const nextConfig = {
                     { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
                     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
                 ],
+            },
+        ];
+    },
+
+    async rewrites() {
+        return [
+            {
+                source: "/api/:path*",
+                destination: `${backendBase}/api/:path*`,
             },
         ];
     },

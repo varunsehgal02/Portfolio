@@ -17,13 +17,41 @@ const app = express();
 const port = Number(process.env.PORT || 4000);
 const rawOrigins = process.env.CORS_ORIGIN || "http://localhost:3000,http://localhost:3001";
 const allowedOrigins = rawOrigins.split(",").map((s) => s.trim()).filter(Boolean);
+const allowVercelDomains = String(process.env.CORS_ALLOW_VERCEL || "true").toLowerCase() === "true";
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const hostname = new URL(origin).hostname.toLowerCase();
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return true;
+    }
+
+    if (allowVercelDomains && hostname.endsWith(".vercel.app")) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
 
 app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS not allowed"));
+    },
     credentials: true,
   })
 );

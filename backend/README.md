@@ -37,3 +37,4 @@ Server default: `http://localhost:4000`
    - `CONTACT_RATE_LIMIT_MAX=6` submissions per 15 minutes
 - Contact form submissions are persisted and can also trigger email notifications when SMTP env vars are configured
 - Visitor IP drill-down supports geolocation lookup (city/region/country/ISP) and caches results in store
+- CORS allowlist is configured with `CORS_ORIGIN` and optionally allows `*.vercel.app` when `CORS_ALLOW_VERCEL=true`
