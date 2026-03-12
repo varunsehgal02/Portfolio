@@ -7,6 +7,25 @@ const { sendContactNotification } = require("../lib/mailer");
 
 const router = express.Router();
 
+function parseMs(value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.floor(n);
+}
+
+function withTimeout(promise, timeoutMs) {
+  let timeoutId;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      const err = new Error("EMAIL_SEND_TIMEOUT");
+      reject(err);
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+}
+
 function getClientIp(req) {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.length > 0) {
@@ -51,12 +70,38 @@ router.post("/", contactLimiter, async (req, res) => {
   store.contacts.push(entry);
   await writeStore(store);
 
-  // Send email in background — do NOT await so the response is instant.
-  sendContactNotification(entry).catch((err) => {
-    console.error("Contact email notification failed:", err?.message || err);
-  });
+  const emailSendTimeoutMs = parseMs(process.env.CONTACT_EMAIL_SEND_TIMEOUT_MS, 5000);
+  let emailSent = false;
+  let emailStatus = "disabled";
+  let emailError = "";
 
-  return res.json({ ok: true, id: entry.id });
+  try {
+    emailSent = Boolean(await withTimeout(sendContactNotification(entry), emailSendTimeoutMs));
+    emailStatus = emailSent ? "sent" : "disabled";
+  } catch (err) {
+    const message = String(err?.message || err || "Unknown email error");
+
+    if (message === "EMAIL_SEND_TIMEOUT") {
+      emailStatus = "queued";
+
+      // Retry once in background when SMTP is slow.
+      sendContactNotification(entry).catch((bgErr) => {
+        console.error("Contact email notification failed:", bgErr?.message || bgErr);
+      });
+    } else {
+      emailStatus = "failed";
+      emailError = message;
+      console.error("Contact email notification failed:", message);
+    }
+  }
+
+  return res.json({
+    ok: true,
+    id: entry.id,
+    emailSent,
+    emailStatus,
+    emailError,
+  });
 });
 
 router.get("/", requireAuth, async (_req, res) => {

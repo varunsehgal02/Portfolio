@@ -22,6 +22,7 @@ export default function ContactPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
+    const [submitNotice, setSubmitNotice] = useState("");
     const [isMobile, setIsMobile] = useState(true);
     const messageMaxLength = 4000;
     const messageLength = formData.message.length;
@@ -116,6 +117,7 @@ export default function ContactPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError("");
+        setSubmitNotice("");
 
         const nextErrors = validateForm(formData);
         setFieldErrors(nextErrors);
@@ -129,7 +131,16 @@ export default function ContactPage() {
         setIsSubmitting(true);
 
         try {
-            await submitContactMessage(formData);
+            const result = await submitContactMessage(formData);
+
+            if (result?.emailStatus === "failed") {
+                setSubmitNotice("Message saved, but email delivery failed. Please verify SMTP settings.");
+            } else if (result?.emailStatus === "queued") {
+                setSubmitNotice("Message saved. Email delivery is delayed and will be retried.");
+            } else if (result?.emailStatus === "disabled") {
+                setSubmitNotice("Message saved. Email notifications are currently disabled.");
+            }
+
             setIsSubmitted(true);
             setTimeout(() => setIsSubmitted(false), 4000);
             setFormData({ name: "", email: "", message: "" });
@@ -242,7 +253,7 @@ export default function ContactPage() {
 
             {/* Draggable sticker overlay across full contact page (desktop only) */}
             {!isMobile && (
-                <div className="fixed inset-0 z-[2] pointer-events-none">
+                <div className="hidden lg:block fixed inset-0 z-[2] pointer-events-none">
                     <div className="relative w-full h-full">
                         <StickerPeel
                             className="pointer-events-auto"
@@ -435,6 +446,7 @@ export default function ContactPage() {
                                 )}
                             </motion.button>
                             {submitError && <p className="text-red-400 text-sm">{submitError}</p>}
+                            {submitNotice && <p className="text-amber-300 text-sm">{submitNotice}</p>}
                         </form>
                     </motion.div>
                 </div>
