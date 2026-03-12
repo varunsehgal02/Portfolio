@@ -149,6 +149,24 @@ export default function MonitorPage() {
     const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
     const trackedBehanceClicks = outboundSummary.byPlatform?.behance || 0;
 
+    const getBrowserName = (userAgent = "") => {
+        const ua = String(userAgent).toLowerCase();
+        if (!ua) return "Unknown";
+        if (ua.includes("edg/")) return "Edge";
+        if (ua.includes("opr/") || ua.includes("opera")) return "Opera";
+        if (ua.includes("chrome/") && !ua.includes("edg/")) return "Chrome";
+        if (ua.includes("safari/") && !ua.includes("chrome/")) return "Safari";
+        if (ua.includes("firefox/")) return "Firefox";
+        return "Other";
+    };
+
+    const getDeviceType = (userAgent = "", screenWidth = 0) => {
+        const ua = String(userAgent).toLowerCase();
+        if (ua.includes("ipad") || ua.includes("tablet")) return "Tablet";
+        if (ua.includes("mobi") || Number(screenWidth) < 768) return "Mobile";
+        return "Desktop";
+    };
+
     return (
         <div className="relative min-h-screen pt-28 pb-20">
             <TargetCursor
@@ -394,8 +412,11 @@ export default function MonitorPage() {
                                     <tr className="border-b border-surface-light bg-surface-light/30">
                                         <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">#</th>
                                         <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Page</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Timestamp</th>
-                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Screen</th>
+                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Visit Time</th>
+                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">IP</th>
+                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Browser</th>
+                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Device</th>
+                                        <th className="text-left px-6 py-3 text-text-muted text-xs font-semibold uppercase tracking-wider">Referrer</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -417,13 +438,22 @@ export default function MonitorPage() {
                                                 {new Date(visit.at).toLocaleString()}
                                             </td>
                                             <td className="px-6 py-3.5 text-text-muted text-sm font-mono">
-                                                {visit.screenWidth}px
+                                                {visit.ip || "Unknown"}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-text-muted text-sm">
+                                                {getBrowserName(visit.userAgent)}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-text-muted text-sm">
+                                                {getDeviceType(visit.userAgent, visit.screenWidth)}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-text-muted text-sm max-w-[240px] truncate" title={visit.referrer || "Direct / Unknown"}>
+                                                {visit.referrer || "Direct / Unknown"}
                                             </td>
                                         </motion.tr>
                                     ))}
                                     {history.length === 0 && (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-16 text-center">
+                                            <td colSpan={8} className="px-6 py-16 text-center">
                                                 <span className="text-5xl block mb-3">🔍</span>
                                                 <p className="text-text-muted">No visits recorded yet. Visit pages in the portfolio to see data here.</p>
                                             </td>

@@ -5,6 +5,19 @@ const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length > 0) {
+    return forwarded.split(",")[0].trim();
+  }
+
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    return String(forwarded[0]).split(",")[0].trim();
+  }
+
+  return req.ip || "";
+}
+
 function ensureAnalytics(store) {
   store.analytics = store.analytics || {};
   store.analytics.pageViews = store.analytics.pageViews || [];
@@ -46,6 +59,7 @@ router.post("/page-view", async (req, res) => {
     userAgent: parsed.data.userAgent || "",
     referrer: parsed.data.referrer || "",
     screenWidth: parsed.data.screenWidth || 0,
+    ip: getClientIp(req),
     at: new Date().toISOString(),
   });
   await writeStore(store);
@@ -92,7 +106,7 @@ router.post("/outbound-click", async (req, res) => {
     sourcePath: parsed.data.sourcePath || "unknown",
     referrer: parsed.data.referrer || "",
     userAgent: parsed.data.userAgent || "",
-    ip: req.ip || "",
+    ip: getClientIp(req),
     at: new Date().toISOString(),
   });
   await writeStore(store);
