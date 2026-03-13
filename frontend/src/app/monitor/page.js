@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminLogin from "@/components/AdminLogin";
 import NetworkBackground from "@/components/NetworkBackground";
@@ -56,20 +56,7 @@ export default function MonitorPage() {
         }
         : null;
 
-    useEffect(() => {
-        if (isAuthenticated()) {
-            setAuthed(true);
-            loadData().catch(() => {});
-        }
-    }, []);
-
-    // Live clock
-    useEffect(() => {
-        const timer = setInterval(() => setLiveTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         const [statsNext, historyNext, linkedinNext, behanceNext, popupNext, outboundSummaryNext, outboundHistoryNext] = await Promise.all([
             getVisitStats(),
             getVisitHistory(),
@@ -90,7 +77,20 @@ export default function MonitorPage() {
         setOutboundSummary(outboundSummaryNext);
         setOutboundHistory(ensureRecordArray(outboundHistoryNext));
         setContactMessages(ensureRecordArray(messagesNext));
-    };
+    }, []);
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            setAuthed(true);
+            loadData().catch(() => {});
+        }
+    }, [loadData]);
+
+    // Live clock
+    useEffect(() => {
+        const timer = setInterval(() => setLiveTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     const handleLinkedinSave = async () => {
         const { clicks: _trackedClicks, ...manualLinkedin } = linkedin;
@@ -142,18 +142,6 @@ export default function MonitorPage() {
         const maxValue = Math.max(1, ...days.flatMap((day) => [day.linkedin, day.behance]));
         return { days, maxValue };
     }, [outboundHistory]);
-
-    if (!authed) {
-        return (
-            <AdminLogin
-                title="Monitor Dashboard"
-                onSuccess={() => {
-                    setAuthed(true);
-                    loadData().catch(() => {});
-                }}
-            />
-        );
-    }
 
     const tabs = [
         { id: "overview", label: "Overview", icon: "📊" },
@@ -306,6 +294,18 @@ export default function MonitorPage() {
             [ip]: !prev[ip],
         }));
     };
+
+    if (!authed) {
+        return (
+            <AdminLogin
+                title="Monitor Dashboard"
+                onSuccess={() => {
+                    setAuthed(true);
+                    loadData().catch(() => {});
+                }}
+            />
+        );
+    }
 
     return (
         <div className="relative min-h-screen pt-28 pb-20">
