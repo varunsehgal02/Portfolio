@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
-import { Draggable } from "gsap/Draggable";
 import "./TargetCursor.css";
-
-gsap.registerPlugin(Draggable);
 
 const TargetCursor = ({
     targetSelector = ".cursor-target",

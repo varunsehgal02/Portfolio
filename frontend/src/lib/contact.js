@@ -2,6 +2,10 @@
 
 import { apiRequest } from "@/lib/api";
 
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 function withTimeout(promise, timeoutMs = 15000) {
   let timeoutId;
 
@@ -35,7 +39,7 @@ export async function submitContactMessage(payload) {
 
 export async function getContactMessages() {
   try {
-    return await apiRequest("/contact");
+    return ensureArray(await apiRequest("/contact"));
   } catch {
     return [];
   }

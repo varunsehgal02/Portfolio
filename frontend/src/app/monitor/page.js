@@ -39,6 +39,17 @@ export default function MonitorPage() {
     const [editingBehance, setEditingBehance] = useState(false);
     const [liveTime, setLiveTime] = useState(new Date());
 
+    const safeStats = stats && typeof stats === "object"
+        ? {
+            total: Number(stats.total) || 0,
+            today: Number(stats.today) || 0,
+            thisWeek: Number(stats.thisWeek) || 0,
+            thisMonth: Number(stats.thisMonth) || 0,
+            byPage: stats.byPage && typeof stats.byPage === "object" && !Array.isArray(stats.byPage) ? stats.byPage : {},
+            dailyCounts: stats.dailyCounts && typeof stats.dailyCounts === "object" && !Array.isArray(stats.dailyCounts) ? stats.dailyCounts : {},
+        }
+        : null;
+
     useEffect(() => {
         if (isAuthenticated()) {
             setAuthed(true);
@@ -144,11 +155,11 @@ export default function MonitorPage() {
         { id: "messages", label: "Messages", icon: "✉️" },
     ];
 
-    const statCards = stats ? [
-        { label: "Today", value: stats.today, icon: "📅", color: "from-primary to-secondary", textColor: "text-primary-light" },
-        { label: "This Week", value: stats.thisWeek, icon: "📊", color: "from-primary-light to-primary", textColor: "text-primary-light" },
-        { label: "This Month", value: stats.thisMonth, icon: "📈", color: "from-secondary to-primary", textColor: "text-primary-light" },
-        { label: "All Time", value: stats.total, icon: "🌟", color: "from-primary to-accent", textColor: "text-primary-light" },
+    const statCards = safeStats ? [
+        { label: "Today", value: safeStats.today, icon: "📅", color: "from-primary to-secondary", textColor: "text-primary-light" },
+        { label: "This Week", value: safeStats.thisWeek, icon: "📊", color: "from-primary-light to-primary", textColor: "text-primary-light" },
+        { label: "This Month", value: safeStats.thisMonth, icon: "📈", color: "from-secondary to-primary", textColor: "text-primary-light" },
+        { label: "All Time", value: safeStats.total, icon: "🌟", color: "from-primary to-accent", textColor: "text-primary-light" },
     ] : [];
 
     const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
@@ -367,7 +378,7 @@ export default function MonitorPage() {
 
             <AnimatePresence mode="wait">
                 {/* ===== OVERVIEW TAB ===== */}
-                {activeTab === "overview" && stats && (
+                {activeTab === "overview" && safeStats && (
                     <motion.div
                         key="overview"
                         initial={{ opacity: 0, y: 20 }}
@@ -429,11 +440,11 @@ export default function MonitorPage() {
                                     <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">📊</span>
                                     Page Views Breakdown
                                 </h3>
-                                <span className="text-text-muted text-xs">{Object.keys(stats.byPage || {}).length} pages tracked</span>
+                                <span className="text-text-muted text-xs">{Object.keys(safeStats.byPage).length} pages tracked</span>
                             </div>
                             <div className="space-y-4">
-                                {Object.entries(stats.byPage || {}).map(([page, count]) => {
-                                    const maxCount = Math.max(...Object.values(stats.byPage || { "/": 1 }));
+                                {Object.entries(safeStats.byPage).map(([page, count]) => {
+                                    const maxCount = Math.max(1, ...Object.values(safeStats.byPage));
                                     const percentage = (count / maxCount) * 100;
                                     return (
                                         <div key={page} className="group">
@@ -456,7 +467,7 @@ export default function MonitorPage() {
                                         </div>
                                     );
                                 })}
-                                {Object.keys(stats.byPage || {}).length === 0 && (
+                                {Object.keys(safeStats.byPage).length === 0 && (
                                     <div className="text-center py-8">
                                         <span className="text-4xl block mb-3">📭</span>
                                         <p className="text-text-muted text-sm">No page views recorded yet.</p>
@@ -475,10 +486,10 @@ export default function MonitorPage() {
                                 <span className="text-text-muted text-xs">Last 14 days</span>
                             </div>
                             <div className="flex items-end gap-2 h-40">
-                                {Object.entries(stats.dailyCounts || {})
+                                {Object.entries(safeStats.dailyCounts)
                                     .slice(-14)
                                     .map(([date, count], i) => {
-                                        const maxDaily = Math.max(...Object.values(stats.dailyCounts || { "": 1 }), 1);
+                                        const maxDaily = Math.max(1, ...Object.values(safeStats.dailyCounts));
                                         const height = (count / maxDaily) * 100;
                                         return (
                                             <div key={date} className="flex-1 flex flex-col items-center gap-1 group">
@@ -498,7 +509,7 @@ export default function MonitorPage() {
                                             </div>
                                         );
                                     })}
-                                {Object.keys(stats.dailyCounts || {}).length === 0 && (
+                                {Object.keys(safeStats.dailyCounts).length === 0 && (
                                     <div className="flex-1 flex items-center justify-center">
                                         <p className="text-text-muted text-sm">No data yet.</p>
                                     </div>

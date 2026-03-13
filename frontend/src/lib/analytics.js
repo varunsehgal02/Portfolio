@@ -5,6 +5,14 @@ import { getData, saveData } from "@/lib/editableData";
 
 const ANALYTICS_CLICK_URL = "/api/analytics/outbound-click";
 
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function ensureObject(value, fallback = {}) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
+}
+
 export async function trackPageView(page) {
   try {
     await apiRequest("/analytics/page-view", {
@@ -23,7 +31,7 @@ export async function trackPageView(page) {
 
 export async function getVisitHistory() {
   try {
-    return await apiRequest("/analytics/history");
+    return ensureArray(await apiRequest("/analytics/history"));
   } catch {
     return [];
   }
@@ -72,7 +80,13 @@ export async function getVisitStats() {
 }
 
 export async function getLinkedInStats() {
-  return getData("linkedinStats", { views: 0, clicks: 0, followers: 0, visitors: [] });
+  const stats = await getData("linkedinStats", { views: 0, clicks: 0, followers: 0, visitors: [] });
+  return {
+    views: Number(stats?.views) || 0,
+    clicks: Number(stats?.clicks) || 0,
+    followers: Number(stats?.followers) || 0,
+    visitors: ensureArray(stats?.visitors),
+  };
 }
 
 export async function setLinkedInStats(stats) {
@@ -80,7 +94,12 @@ export async function setLinkedInStats(stats) {
 }
 
 export async function getBehanceStats() {
-  return getData("behanceStats", { views: 0, appreciations: 0, followers: 0 });
+  const stats = await getData("behanceStats", { views: 0, appreciations: 0, followers: 0 });
+  return {
+    views: Number(stats?.views) || 0,
+    appreciations: Number(stats?.appreciations) || 0,
+    followers: Number(stats?.followers) || 0,
+  };
 }
 
 export async function setBehanceStats(stats) {
@@ -129,7 +148,15 @@ export function trackSocialOutboundClick(platform, url, sourcePath = "unknown") 
 
 export async function getOutboundClickSummary() {
   try {
-    return await apiRequest("/analytics/outbound-summary");
+    const summary = await apiRequest("/analytics/outbound-summary");
+    return {
+      total: Number(summary?.total) || 0,
+      byPlatform: {
+        linkedin: Number(summary?.byPlatform?.linkedin) || 0,
+        behance: Number(summary?.byPlatform?.behance) || 0,
+      },
+      recent: ensureArray(summary?.recent),
+    };
   } catch {
     return { total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] };
   }
@@ -138,7 +165,7 @@ export async function getOutboundClickSummary() {
 export async function getOutboundClickHistory(platform = "") {
   try {
     const query = platform ? `?platform=${encodeURIComponent(platform)}` : "";
-    return await apiRequest(`/analytics/outbound-history${query}`);
+    return ensureArray(await apiRequest(`/analytics/outbound-history${query}`));
   } catch {
     return [];
   }
@@ -156,8 +183,8 @@ export async function getAboutPopupStats() {
   try {
     const summary = await apiRequest("/analytics/summary");
     return {
-      totalOpens: summary.aboutPopupOpensTotal || 0,
-      byCard: summary.byCard || {},
+      totalOpens: Number(summary?.aboutPopupOpensTotal) || 0,
+      byCard: ensureObject(summary?.byCard),
       lastOpenedAt: null,
     };
   } catch {
