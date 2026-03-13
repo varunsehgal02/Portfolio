@@ -9,6 +9,10 @@ function ensureArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function ensureRecordArray(value) {
+  return ensureArray(value).filter((item) => item && typeof item === "object");
+}
+
 function ensureObject(value, fallback = {}) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
 }
@@ -31,15 +35,14 @@ export async function trackPageView(page) {
 
 export async function getVisitHistory() {
   try {
-    return ensureArray(await apiRequest("/analytics/history"));
+    return ensureRecordArray(await apiRequest("/analytics/history"));
   } catch {
     return [];
   }
 }
 
 export async function getVisitStats() {
-  const history = await getVisitHistory();
-  const visits = history || [];
+  const visits = ensureRecordArray(await getVisitHistory());
   const now = new Date();
 
   const today = visits.filter((v) => {
@@ -60,12 +63,13 @@ export async function getVisitStats() {
 
   const pages = {};
   visits.forEach((v) => {
-    pages[v.page] = (pages[v.page] || 0) + 1;
+    const page = typeof v.page === "string" && v.page.trim() ? v.page : "unknown";
+    pages[page] = (pages[page] || 0) + 1;
   });
 
   const dailyCounts = {};
   visits.forEach((v) => {
-    const day = new Date(v.at).toLocaleDateString();
+    const day = new Date(v.at || Date.now()).toLocaleDateString();
     dailyCounts[day] = (dailyCounts[day] || 0) + 1;
   });
 
@@ -155,7 +159,7 @@ export async function getOutboundClickSummary() {
         linkedin: Number(summary?.byPlatform?.linkedin) || 0,
         behance: Number(summary?.byPlatform?.behance) || 0,
       },
-      recent: ensureArray(summary?.recent),
+      recent: ensureRecordArray(summary?.recent),
     };
   } catch {
     return { total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] };
@@ -165,7 +169,7 @@ export async function getOutboundClickSummary() {
 export async function getOutboundClickHistory(platform = "") {
   try {
     const query = platform ? `?platform=${encodeURIComponent(platform)}` : "";
-    return ensureArray(await apiRequest(`/analytics/outbound-history${query}`));
+    return ensureRecordArray(await apiRequest(`/analytics/outbound-history${query}`));
   } catch {
     return [];
   }

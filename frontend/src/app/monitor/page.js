@@ -21,6 +21,12 @@ import {
 import { getContactMessages } from "@/lib/contact";
 
 export default function MonitorPage() {
+    const ensureRecordArray = (value) => (Array.isArray(value) ? value.filter((item) => item && typeof item === "object") : []);
+    const toSafeDate = (value) => {
+        const date = value ? new Date(value) : null;
+        return date && !Number.isNaN(date.getTime()) ? date : null;
+    };
+
     const [authed, setAuthed] = useState(false);
     const [stats, setStats] = useState(null);
     const [history, setHistory] = useState([]);
@@ -77,13 +83,13 @@ export default function MonitorPage() {
         const messagesNext = await getContactMessages();
 
         setStats(statsNext);
-        setHistory(historyNext);
+        setHistory(ensureRecordArray(historyNext));
         setLinkedin(linkedinNext);
         setBehance(behanceNext);
         setAboutPopupStats(popupNext);
         setOutboundSummary(outboundSummaryNext);
-        setOutboundHistory(outboundHistoryNext);
-        setContactMessages(messagesNext);
+        setOutboundHistory(ensureRecordArray(outboundHistoryNext));
+        setContactMessages(ensureRecordArray(messagesNext));
     };
 
     const handleLinkedinSave = async () => {
@@ -122,8 +128,9 @@ export default function MonitorPage() {
 
         const dayMap = Object.fromEntries(days.map((day) => [day.key, day]));
 
-        outboundHistory.forEach((entry) => {
-            const date = new Date(entry.at);
+        ensureRecordArray(outboundHistory).forEach((entry) => {
+            const date = toSafeDate(entry.at);
+            if (!date) return;
             const key = formatKey(date);
             const day = dayMap[key];
             if (!day) return;
@@ -230,7 +237,7 @@ export default function MonitorPage() {
     const groupedHistory = useMemo(() => {
         const grouped = {};
 
-        history.forEach((visit) => {
+        ensureRecordArray(history).forEach((visit) => {
             const ip = visit.ip || "Unknown";
             if (!grouped[ip]) grouped[ip] = [];
             grouped[ip].push(visit);
@@ -239,14 +246,14 @@ export default function MonitorPage() {
         return Object.entries(grouped)
             .map(([ip, visits]) => {
                 const lastVisit = visits[0];
-                const pageSet = Array.from(new Set(visits.map((v) => v.page).filter(Boolean))).slice(0, 5);
+                const pageSet = Array.from(new Set(visits.map((v) => v?.page).filter(Boolean))).slice(0, 5);
                 return {
                     ip,
                     visits,
                     count: visits.length,
                     lastVisitAt: lastVisit?.at || "",
-                    browsers: Array.from(new Set(visits.map((v) => getBrowserName(v.userAgent))).values()),
-                    devices: Array.from(new Set(visits.map((v) => getDeviceType(v.userAgent, v.screenWidth))).values()),
+                    browsers: Array.from(new Set(visits.map((v) => getBrowserName(v?.userAgent)).values())),
+                    devices: Array.from(new Set(visits.map((v) => getDeviceType(v?.userAgent, v?.screenWidth)).values())),
                     pages: pageSet,
                 };
             })
@@ -274,7 +281,7 @@ export default function MonitorPage() {
     const groupedMessages = useMemo(() => {
         const grouped = {};
 
-        contactMessages.forEach((msg) => {
+        ensureRecordArray(contactMessages).forEach((msg) => {
             const ip = msg.ip || "Unknown";
             if (!grouped[ip]) grouped[ip] = [];
             grouped[ip].push(msg);
@@ -286,7 +293,7 @@ export default function MonitorPage() {
                 messages,
                 count: messages.length,
                 lastMessageAt: messages[0]?.createdAt || "",
-                senders: Array.from(new Set(messages.map((m) => m.email).filter(Boolean))).slice(0, 4),
+                senders: Array.from(new Set(messages.map((m) => m?.email).filter(Boolean))).slice(0, 4),
             }))
             .sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
     }, [contactMessages]);
@@ -876,14 +883,14 @@ export default function MonitorPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {outboundHistory.slice(0, 20).map((entry) => (
-                                            <tr key={entry.id} className="border-b border-surface-light/40 last:border-0">
-                                                <td className="px-4 py-2.5 text-text-primary capitalize">{entry.platform}</td>
+                                        {ensureRecordArray(outboundHistory).slice(0, 20).map((entry, entryIndex) => (
+                                            <tr key={entry.id || `${entry.platform || "unknown"}-${entry.at || entryIndex}`} className="border-b border-surface-light/40 last:border-0">
+                                                <td className="px-4 py-2.5 text-text-primary capitalize">{entry.platform || "unknown"}</td>
                                                 <td className="px-4 py-2.5 text-text-secondary">{entry.sourcePath || "unknown"}</td>
-                                                <td className="px-4 py-2.5 text-text-muted">{new Date(entry.at).toLocaleString()}</td>
+                                                <td className="px-4 py-2.5 text-text-muted">{toSafeDate(entry.at)?.toLocaleString() || "Unknown"}</td>
                                             </tr>
                                         ))}
-                                        {outboundHistory.length === 0 && (
+                                        {ensureRecordArray(outboundHistory).length === 0 && (
                                             <tr>
                                                 <td colSpan={3} className="px-4 py-6 text-center text-text-muted">No outbound social clicks tracked yet.</td>
                                             </tr>
@@ -953,15 +960,15 @@ export default function MonitorPage() {
                                                         className="border-t border-surface-light/60"
                                                     >
                                                         <div className="divide-y divide-surface-light/40">
-                                                            {folder.messages.map((msg) => (
-                                                                <div key={msg.id} className="px-5 py-4">
+                                                            {folder.messages.map((msg, messageIndex) => (
+                                                                <div key={msg.id || `${folder.ip}-${msg.email || "message"}-${messageIndex}`} className="px-5 py-4">
                                                                     <div className="flex flex-wrap items-center gap-3 mb-2">
-                                                                        <span className="text-text-primary font-semibold">{msg.name}</span>
-                                                                        <a href={`mailto:${msg.email}`} className="text-primary-light text-sm">{msg.email}</a>
-                                                                        <span className="text-text-muted text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
+                                                                        <span className="text-text-primary font-semibold">{msg.name || "Unknown"}</span>
+                                                                        <a href={`mailto:${msg.email || ""}`} className="text-primary-light text-sm">{msg.email || "unknown"}</a>
+                                                                        <span className="text-text-muted text-xs">{toSafeDate(msg.createdAt)?.toLocaleString() || "Unknown"}</span>
                                                                         <span className="text-text-muted text-xs font-mono">{msg.sourcePath || "unknown"}</span>
                                                                     </div>
-                                                                    <p className="text-text-secondary text-sm whitespace-pre-wrap">{msg.message}</p>
+                                                                    <p className="text-text-secondary text-sm whitespace-pre-wrap">{msg.message || ""}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
