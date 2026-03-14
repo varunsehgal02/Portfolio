@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 
 const STORE_PATH = path.join(__dirname, "../../data/store.json");
+let writeQueue = Promise.resolve();
 
 const DEFAULT_STORE = {
   content: {},
@@ -31,6 +32,8 @@ function normalizeStore(input) {
 }
 
 async function ensureStore() {
+  await fs.mkdir(path.dirname(STORE_PATH), { recursive: true });
+
   try {
     await fs.access(STORE_PATH);
   } catch {
@@ -38,7 +41,7 @@ async function ensureStore() {
   }
 }
 
-async function readStore() {
+async function readStoreFromDisk() {
   await ensureStore();
   const raw = await fs.readFile(STORE_PATH, "utf8");
 
@@ -50,12 +53,38 @@ async function readStore() {
   }
 }
 
-async function writeStore(nextStore) {
+async function persistStore(nextStore) {
   const normalized = normalizeStore(nextStore);
-  await fs.writeFile(STORE_PATH, JSON.stringify(normalized, null, 2), "utf8");
+  const tempPath = `${STORE_PATH}.tmp`;
+  await fs.writeFile(tempPath, JSON.stringify(normalized, null, 2), "utf8");
+  await fs.rename(tempPath, STORE_PATH);
+}
+
+async function readStore() {
+  await writeQueue.catch(() => {});
+  return readStoreFromDisk();
+}
+
+async function writeStore(nextStore) {
+  writeQueue = writeQueue.catch(() => {}).then(() => persistStore(nextStore));
+  await writeQueue;
+}
+
+async function updateStore(mutator) {
+  let result;
+
+  writeQueue = writeQueue.catch(() => {}).then(async () => {
+    const store = await readStoreFromDisk();
+    result = await mutator(store);
+    await persistStore(store);
+  });
+
+  await writeQueue;
+  return result;
 }
 
 module.exports = {
   readStore,
   writeStore,
+  updateStore,
 };

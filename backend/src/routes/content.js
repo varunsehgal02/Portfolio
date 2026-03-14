@@ -1,6 +1,6 @@
 const express = require("express");
 const { z } = require("zod");
-const { readStore, writeStore } = require("../lib/store");
+const { readStore, updateStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
@@ -29,27 +29,27 @@ router.put("/:key", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "Invalid content payload" });
   }
 
-  const store = await readStore();
-  store.content = store.content || {};
-  store.content[req.params.key] = parsed.data.value;
-  await writeStore(store);
+  await updateStore((store) => {
+    store.content = store.content || {};
+    store.content[req.params.key] = parsed.data.value;
+  });
 
   return res.json({ ok: true, key: req.params.key });
 });
 
 router.delete("/:key", requireAuth, async (req, res) => {
-  const store = await readStore();
-  store.content = store.content || {};
-  delete store.content[req.params.key];
-  await writeStore(store);
+  await updateStore((store) => {
+    store.content = store.content || {};
+    delete store.content[req.params.key];
+  });
 
   return res.json({ ok: true, key: req.params.key });
 });
 
 router.delete("/", requireAuth, async (_req, res) => {
-  const store = await readStore();
-  store.content = {};
-  await writeStore(store);
+  await updateStore((store) => {
+    store.content = {};
+  });
 
   return res.json({ ok: true });
 });

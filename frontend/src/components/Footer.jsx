@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { personalInfo } from "@/data/personal";
 import { trackSocialOutboundClick } from "@/lib/analytics";
+import { useEditableData } from "@/lib/useEditableData";
 
 export default function Footer() {
+    const personal = useEditableData("personal", personalInfo);
+
     return (
         <footer className="relative z-10 border-t border-surface-light" style={{ backgroundColor: "#0a0a0a" }}>
             <div className="max-w-7xl mx-auto px-6 py-16">
@@ -50,19 +53,19 @@ export default function Footer() {
                         <h4 className="font-display font-semibold text-text-primary">Connect</h4>
                         <div className="flex flex-col gap-2">
                             <a
-                                href={`tel:${personalInfo.phone}`}
+                                href={`tel:${personal.phone}`}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
                                 </svg>
-                                {personalInfo.phone}
+                                {personal.phone}
                             </a>
                             <a
-                                href={personalInfo.socials.behance}
+                                href={personal.socials.behance}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                onClick={() => trackSocialOutboundClick("behance", personalInfo.socials.behance, "footer")}
+                                onClick={() => trackSocialOutboundClick("behance", personal.socials.behance, "footer")}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -71,10 +74,10 @@ export default function Footer() {
                                 Behance
                             </a>
                             <a
-                                href={personalInfo.socials.linkedin}
+                                href={personal.socials.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                onClick={() => trackSocialOutboundClick("linkedin", personalInfo.socials.linkedin, "footer")}
+                                onClick={() => trackSocialOutboundClick("linkedin", personal.socials.linkedin, "footer")}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -83,7 +86,7 @@ export default function Footer() {
                                 LinkedIn
                             </a>
                             <a
-                                href={`mailto:${personalInfo.email}`}
+                                href={`mailto:${personal.email}`}
                                 className="text-text-secondary text-sm hover:text-primary-light transition-colors duration-300 w-fit flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

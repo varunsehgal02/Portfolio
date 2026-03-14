@@ -1,6 +1,6 @@
 const express = require("express");
 const { z } = require("zod");
-const { readStore, writeStore } = require("../lib/store");
+const { readStore, updateStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
 const { contactLimiter } = require("../middleware/rateLimit");
 const { sendContactNotification } = require("../lib/mailer");
@@ -54,21 +54,22 @@ router.post("/", contactLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid contact payload" });
   }
 
-  const store = await readStore();
-  store.contacts = store.contacts || [];
+  const entry = await updateStore((store) => {
+    store.contacts = store.contacts || [];
 
-  const entry = {
-    id: Date.now(),
-    ...parsed.data,
-    ip: getClientIp(req),
-    userAgent: parsed.data.userAgent || req.headers["user-agent"] || "",
-    referrer: parsed.data.referrer || req.headers.referer || "",
-    sourcePath: parsed.data.sourcePath || "unknown",
-    createdAt: new Date().toISOString(),
-  };
+    const nextEntry = {
+      id: Date.now(),
+      ...parsed.data,
+      ip: getClientIp(req),
+      userAgent: parsed.data.userAgent || req.headers["user-agent"] || "",
+      referrer: parsed.data.referrer || req.headers.referer || "",
+      sourcePath: parsed.data.sourcePath || "unknown",
+      createdAt: new Date().toISOString(),
+    };
 
-  store.contacts.push(entry);
-  await writeStore(store);
+    store.contacts.push(nextEntry);
+    return nextEntry;
+  });
 
   const emailSendTimeoutMs = parseMs(process.env.CONTACT_EMAIL_SEND_TIMEOUT_MS, 5000);
   let emailSent = false;

@@ -1,6 +1,6 @@
 const express = require("express");
 const { z } = require("zod");
-const { readStore, writeStore } = require("../lib/store");
+const { readStore, updateStore } = require("../lib/store");
 const { requireAuth } = require("../middleware/auth");
 const { lookupGeoByIp } = require("../lib/geoip");
 
@@ -53,18 +53,18 @@ router.post("/page-view", async (req, res) => {
     return res.status(400).json({ error: "Invalid page-view payload" });
   }
 
-  const store = await readStore();
-  const analytics = ensureAnalytics(store);
-  analytics.pageViews.push({
-    id: Date.now(),
-    page: parsed.data.page,
-    userAgent: parsed.data.userAgent || "",
-    referrer: parsed.data.referrer || "",
-    screenWidth: parsed.data.screenWidth || 0,
-    ip: getClientIp(req),
-    at: new Date().toISOString(),
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.pageViews.push({
+      id: Date.now(),
+      page: parsed.data.page,
+      userAgent: parsed.data.userAgent || "",
+      referrer: parsed.data.referrer || "",
+      screenWidth: parsed.data.screenWidth || 0,
+      ip: getClientIp(req),
+      at: new Date().toISOString(),
+    });
   });
-  await writeStore(store);
 
   return res.json({ ok: true });
 });
@@ -82,13 +82,13 @@ router.post("/about-popup", async (req, res) => {
     return res.status(400).json({ error: "Invalid about-popup payload" });
   }
 
-  const store = await readStore();
-  const analytics = ensureAnalytics(store);
-  analytics.aboutPopupOpens.push({
-    cardTitle: parsed.data.cardTitle,
-    at: new Date().toISOString(),
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.aboutPopupOpens.push({
+      cardTitle: parsed.data.cardTitle,
+      at: new Date().toISOString(),
+    });
   });
-  await writeStore(store);
 
   return res.json({ ok: true });
 });
@@ -99,19 +99,19 @@ router.post("/outbound-click", async (req, res) => {
     return res.status(400).json({ error: "Invalid outbound-click payload" });
   }
 
-  const store = await readStore();
-  const analytics = ensureAnalytics(store);
-  analytics.outboundClicks.push({
-    id: Date.now(),
-    platform: parsed.data.platform,
-    url: parsed.data.url,
-    sourcePath: parsed.data.sourcePath || "unknown",
-    referrer: parsed.data.referrer || "",
-    userAgent: parsed.data.userAgent || "",
-    ip: getClientIp(req),
-    at: new Date().toISOString(),
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.outboundClicks.push({
+      id: Date.now(),
+      platform: parsed.data.platform,
+      url: parsed.data.url,
+      sourcePath: parsed.data.sourcePath || "unknown",
+      referrer: parsed.data.referrer || "",
+      userAgent: parsed.data.userAgent || "",
+      ip: getClientIp(req),
+      at: new Date().toISOString(),
+    });
   });
-  await writeStore(store);
 
   return res.json({ ok: true });
 });
@@ -182,8 +182,10 @@ router.get("/visitor", requireAuth, async (req, res) => {
   if (geoLookupEnabled && !geolocation) {
     geolocation = await lookupGeoByIp(ip);
     if (geolocation) {
-      analytics.ipGeoCache[ip] = geolocation;
-      await writeStore(store);
+      await updateStore((nextStore) => {
+        const nextAnalytics = ensureAnalytics(nextStore);
+        nextAnalytics.ipGeoCache[ip] = geolocation;
+      });
     }
   }
 
