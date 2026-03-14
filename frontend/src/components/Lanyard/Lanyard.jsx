@@ -92,6 +92,8 @@ function useCustomCardTexture() {
             // ── 1. CIRCLE PHOTO (top center) ──
             const photoY = 500;
             const photoR = 220;
+            const photoRadiusX = photoR * 0.8;
+            const photoRadiusY = photoR;
 
             // Glow behind photo
             const glow = ctx.createRadialGradient(cx, photoY, photoR * 0.3, cx, photoY, photoR * 2.2);
@@ -104,23 +106,28 @@ function useCustomCardTexture() {
             if (img) {
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(cx, photoY, photoR, 0, Math.PI * 2);
+                ctx.ellipse(cx, photoY, photoRadiusX, photoRadiusY, 0, 0, Math.PI * 2);
                 ctx.clip();
                 const imgAspect = img.width / img.height;
-                const circleSize = photoR * 2;
+                const frameWidth = photoRadiusX * 2;
+                const frameHeight = photoRadiusY * 2;
                 let dw, dh, dx, dy;
                 if (imgAspect > 1) {
-                    dh = circleSize; dw = circleSize * imgAspect;
-                    dx = cx - dw / 2; dy = photoY - photoR;
+                    dh = frameHeight;
+                    dw = frameHeight * imgAspect;
+                    dx = cx - dw / 2;
+                    dy = photoY - photoRadiusY;
                 } else {
-                    dw = circleSize; dh = circleSize / imgAspect;
-                    dx = cx - photoR; dy = photoY - dh / 2;
+                    dw = frameWidth;
+                    dh = frameWidth / imgAspect;
+                    dx = cx - photoRadiusX;
+                    dy = photoY - dh / 2;
                 }
                 ctx.drawImage(img, dx, dy, dw, dh);
                 ctx.restore();
             } else {
                 ctx.beginPath();
-                ctx.arc(cx, photoY, photoR, 0, Math.PI * 2);
+                ctx.ellipse(cx, photoY, photoRadiusX, photoRadiusY, 0, 0, Math.PI * 2);
                 ctx.fillStyle = '#151515';
                 ctx.fill();
                 ctx.fillStyle = '#E6FF00';
@@ -132,15 +139,15 @@ function useCustomCardTexture() {
 
             // Photo ring — outer
             ctx.beginPath();
-            ctx.arc(cx, photoY, photoR + 14, 0, Math.PI * 2);
+            ctx.ellipse(cx, photoY, photoRadiusX + 14, photoRadiusY + 14, 0, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(230, 255, 0, 0.12)';
             ctx.lineWidth = 3;
             ctx.stroke();
 
             // Photo ring — main
             ctx.beginPath();
-            ctx.arc(cx, photoY, photoR + 6, 0, Math.PI * 2);
-            const ringGr = ctx.createLinearGradient(cx - photoR, photoY - photoR, cx + photoR, photoY + photoR);
+            ctx.ellipse(cx, photoY, photoRadiusX + 6, photoRadiusY + 6, 0, 0, Math.PI * 2);
+            const ringGr = ctx.createLinearGradient(cx - photoRadiusY, photoY - photoRadiusY, cx + photoRadiusY, photoY + photoRadiusY);
             ringGr.addColorStop(0, '#C4DB00');
             ringGr.addColorStop(0.5, '#E6FF00');
             ringGr.addColorStop(1, '#F2FF73');
@@ -237,15 +244,15 @@ function useCustomCardTexture() {
             // ── 7. TOOL BADGES ──
             curY += 55;
             const badges = ['Figma', 'Ps', 'AE', 'Ai'];
-            const badgeW = 160;
-            const badgeH = 64;
-            const badgeGap = 18;
+            const badgeW = 190;
+            const badgeH = 82;
+            const badgeGap = 16;
             const totalBW = badges.length * badgeW + (badges.length - 1) * badgeGap;
             let bx = cx - totalBW / 2;
             const badgeY = curY;
             badges.forEach((badge) => {
                 ctx.fillStyle = 'rgba(230, 255, 0, 0.1)';
-                const r = 14;
+                const r = 18;
                 ctx.beginPath();
                 ctx.moveTo(bx + r, badgeY);
                 ctx.lineTo(bx + badgeW - r, badgeY);
@@ -263,8 +270,8 @@ function useCustomCardTexture() {
                 ctx.stroke();
 
                 ctx.fillStyle = '#E6FF00';
-                ctx.font = `bold 34px "Satoshi", "Inter", system-ui, sans-serif`;
-                ctx.fillText(badge, bx + badgeW / 2, badgeY + badgeH / 2 + 11);
+                ctx.font = `bold 42px "Satoshi", "Inter", system-ui, sans-serif`;
+                ctx.fillText(badge, bx + badgeW / 2, badgeY + badgeH / 2 + 14);
                 bx += badgeW + badgeGap;
             });
 
@@ -397,10 +404,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     <BallCollider args={[0.1]} />
                 </RigidBody>
                 <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
-                    <CuboidCollider args={[0.8, 1.125, 0.01]} />
+                    <CuboidCollider args={[0.9, 1.25, 0.01]} />
                     <group
-                        scale={2.25}
-                        position={[0, -1.2, -0.05]}
+                        scale={2.45}
+                        position={[0, -1.3, -0.05]}
                         onPointerOver={() => hover(true)}
                         onPointerOut={() => hover(false)}
                         onPointerUp={(e) => (e.target.releasePointerCapture(e.pointerId), drag(false))}

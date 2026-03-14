@@ -165,7 +165,7 @@ export default function AboutPage() {
 
             {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
-                <Lanyard position={[0, 0, 14]} gravity={[0, -40, 0]} fov={26} />
+                <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} />
                 <div
                     className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     style={{ zIndex: 10 }}

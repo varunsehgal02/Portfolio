@@ -28,12 +28,15 @@ const CardSwap = ({
     easing = 'elastic',
     children
 }) => {
-    const config = easing === 'elastic'
-        ? { ease: 'elastic.out(0.6,0.9)', durDrop: 2, durMove: 2, durReturn: 2, promoteOverlap: 0.9, returnDelay: 0.05 }
-        : { ease: 'power1.inOut', durDrop: 0.8, durMove: 0.8, durReturn: 0.8, promoteOverlap: 0.45, returnDelay: 0.2 };
+    const config = useMemo(() => (
+        easing === 'elastic'
+            ? { ease: 'elastic.out(0.6,0.9)', durDrop: 2, durMove: 2, durReturn: 2, promoteOverlap: 0.9, returnDelay: 0.05 }
+            : { ease: 'power1.inOut', durDrop: 0.8, durMove: 0.8, durReturn: 0.8, promoteOverlap: 0.45, returnDelay: 0.2 }
+    ), [easing]);
 
     const childArr = useMemo(() => Children.toArray(children), [children]);
-    const refs = useMemo(() => childArr.map(() => React.createRef()), [childArr.length]);
+    const childCount = childArr.length;
+    const refs = useMemo(() => Array.from({ length: childCount }, () => React.createRef()), [childCount]);
     const order = useRef(Array.from({ length: childArr.length }, (_, i) => i));
     const tlRef = useRef(null);
     const intervalRef = useRef();
@@ -86,7 +89,7 @@ const CardSwap = ({
             return () => { node.removeEventListener('mouseenter', pause); node.removeEventListener('mouseleave', resume); clearInterval(intervalRef.current); clearTimeout(t); };
         }
         return () => { clearInterval(intervalRef.current); clearTimeout(t); };
-    }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing]);
+    }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, config, refs]);
 
     const rendered = childArr.map((child, i) =>
         isValidElement(child)
