@@ -136,6 +136,8 @@ export default function AboutPage() {
     const personal = useEditableData("personal", personalInfo);
     const skillsData = useEditableData("skills", skills);
     const experienceData = useEditableData("experience", experience);
+    const educationRaw = useEditableData("education", education);
+    const educationData = Array.isArray(educationRaw) ? educationRaw : [educationRaw];
     const content = useEditableData("aboutContent", aboutPageContent);
     const aboutBentoCards = useEditableData("aboutBentoCards", defaultAboutBentoCards);
 
@@ -290,6 +292,41 @@ export default function AboutPage() {
                                             </li>
                                         ))}
                                     </ul>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="h-px w-full mb-16" style={{ background: dividerGradient }} />
+
+                    {/* ── Education ── */}
+                    <div className="mb-16">
+                        <motion.h2
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={fadeLeft}
+                            className="font-display font-bold text-3xl sm:text-4xl text-text-primary mb-8 flex items-center gap-3"
+                        >
+                            <span className="text-3xl">🎓</span> Education
+                        </motion.h2>
+
+                        <div className="space-y-6">
+                            {educationData.map((edu, i) => (
+                                <motion.div
+                                    key={i}
+                                    custom={i}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={fadeLeft}
+                                    className="relative rounded-xl p-6"
+                                    style={glassCardAccent}
+                                >
+                                    <h3 className="font-display font-bold text-xl text-text-primary">{edu.degree}</h3>
+                                    <p className="text-primary-light text-base font-medium mt-1">
+                                        {edu.institution} · {edu.period}
+                                    </p>
                                 </motion.div>
                             ))}
                         </div>

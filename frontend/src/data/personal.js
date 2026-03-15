@@ -73,11 +73,13 @@ export const experience = [
     },
 ];
 
-export const education = {
-    degree: "Bachelor of Technology in Computer Science and Engineering",
-    institution: "Jaypee University of Engineering and Technology, Guna",
-    period: "2023 – 2027",
-};
+export const education = [
+    {
+        degree: "Bachelor of Technology in Computer Science and Engineering",
+        institution: "Jaypee University of Engineering and Technology, Guna",
+        period: "2023 – 2027",
+    },
+];
 
 export const certifications = [
     "UI/UX Design with Figma – Udemy (2025)",

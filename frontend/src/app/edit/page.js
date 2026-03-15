@@ -6,7 +6,7 @@ import AdminLogin from "@/components/AdminLogin";
 import NetworkBackground from "@/components/NetworkBackground";
 import TargetCursor from "@/components/TargetCursor/TargetCursor";
 import { isAuthenticated, logout } from "@/lib/auth";
-import { saveData, getData, resetData, resetAllData } from "@/lib/editableData";
+import { saveData, getData, resetData } from "@/lib/editableData";
 import {
     personalInfo as defaultPersonal,
     skills as defaultSkills,
@@ -176,7 +176,7 @@ export default function EditPage() {
         setPersonal(personalNext);
         setSkillsData(skillsNext);
         setExperienceData(experienceNext);
-        setEducation(educationNext);
+        setEducation(Array.isArray(educationNext) ? educationNext : [educationNext]);
         setCertifications(certsNext);
         setProjectsData(projectsNext);
         setProjectCategories(categoriesNext);
@@ -283,11 +283,10 @@ export default function EditPage() {
                             onClick={async () => {
                                 await runEditorAction(
                                     async () => {
-                                        await resetAllData();
                                         await loadSavedData();
                                     },
-                                    "All edits reset",
-                                    "Failed to reset all edits."
+                                    "Reloaded last saved",
+                                    "Failed to reload saved data."
                                 );
                             }}
                             className="px-4 py-2 rounded-xl glass text-text-secondary text-sm hover:text-amber-400"
@@ -706,12 +705,57 @@ export default function EditPage() {
                         )}
 
                         {activeTab === "education" && (
-                            <SectionCard title="Education" subtitle="Edit education fields displayed on site">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Field label="Degree" value={education.degree} onChange={(v) => setEducation({ ...education, degree: v })} />
-                                    <Field label="Institution" value={education.institution} onChange={(v) => setEducation({ ...education, institution: v })} />
-                                    <Field label="Period" value={education.period} onChange={(v) => setEducation({ ...education, period: v })} />
+                            <SectionCard title="Education" subtitle="Add, edit, or remove education entries displayed on site">
+                                <div className="space-y-4">
+                                    {education.map((edu, i) => (
+                                        <div key={i} className="glass rounded-xl p-4 space-y-3 border border-primary/10">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-text-secondary text-xs font-medium">Education #{i + 1}</span>
+                                                <button
+                                                    onClick={() => setEducation(education.filter((_, idx) => idx !== i))}
+                                                    className="px-3 py-1 rounded-lg bg-red-500/10 text-red-300 text-xs"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <Field
+                                                    label="Degree"
+                                                    value={edu.degree || ""}
+                                                    onChange={(v) => {
+                                                        const next = [...education];
+                                                        next[i] = { ...next[i], degree: v };
+                                                        setEducation(next);
+                                                    }}
+                                                />
+                                                <Field
+                                                    label="Institution"
+                                                    value={edu.institution || ""}
+                                                    onChange={(v) => {
+                                                        const next = [...education];
+                                                        next[i] = { ...next[i], institution: v };
+                                                        setEducation(next);
+                                                    }}
+                                                />
+                                                <Field
+                                                    label="Period"
+                                                    value={edu.period || ""}
+                                                    onChange={(v) => {
+                                                        const next = [...education];
+                                                        next[i] = { ...next[i], period: v };
+                                                        setEducation(next);
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                                <button
+                                    onClick={() => setEducation([...education, { degree: "New Degree", institution: "Institution Name", period: "Year – Year" }])}
+                                    className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
+                                >
+                                    + Add Education
+                                </button>
                                 <div className="flex gap-3">
                                     <button onClick={() => runEditorAction(async () => saveData("education", education), "Education saved", "Failed to save education.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Education</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("education"); setEducation(defaultEducation); }, "Education reset", "Failed to reset education.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
