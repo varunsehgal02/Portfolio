@@ -15,7 +15,7 @@ export const projects = [
         gradient: "from-indigo-500 via-purple-500 to-pink-500",
         icon: "📊",
         link: "",
-        image: "/projects/saas-dashboard.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-man-working-on-a-laptop-5174/1080p.mp4",
     },
     {
@@ -53,7 +53,7 @@ export const projects = [
         gradient: "from-orange-500 via-red-500 to-pink-500",
         icon: "🎨",
         link: "",
-        image: "/projects/social-media.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-designers-brainstorming-1572/1080p.mp4",
     },
     {
@@ -72,7 +72,7 @@ export const projects = [
         gradient: "from-green-500 via-emerald-500 to-teal-500",
         icon: "🎬",
         link: "",
-        image: "/projects/mobile-app.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-video-editing-workflow-4894/1080p.mp4",
     },
     {
@@ -91,7 +91,7 @@ export const projects = [
         gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
         icon: "✨",
         link: "",
-        image: "/projects/social-media.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-brand-strategy-meeting-7856/1080p.mp4",
     },
     {
@@ -110,7 +110,7 @@ export const projects = [
         gradient: "from-yellow-500 via-orange-500 to-red-500",
         icon: "🔥",
         link: "",
-        image: "/projects/mobile-app.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-neon-motion-graphics-loop-1608/1080p.mp4",
     },
 ];
