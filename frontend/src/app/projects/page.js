@@ -128,7 +128,12 @@ export default function ProjectsPage() {
         }),
         [projectsData]
     );
-    const featuredProject = bestByCategory[activeBestCategory] || projectsData[0] || null;
+    const featuredProjectById = useMemo(() => {
+        if (!content?.bestProjectId) return null;
+        return projectsData.find((p) => p?.id === content.bestProjectId) || null;
+    }, [projectsData, content?.bestProjectId]);
+
+    const featuredProject = featuredProjectById || bestByCategory[activeBestCategory] || projectsData[0] || null;
 
     const revealThumbs = [
         { id: "uiux", label: "UI/UX", image: revealByCategory.uiux },

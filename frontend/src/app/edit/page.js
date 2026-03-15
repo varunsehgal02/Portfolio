@@ -27,7 +27,7 @@ import {
 const inputClass =
     "w-full px-4 py-2.5 rounded-xl bg-surface-light border border-surface-light/80 text-text-primary text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-text-muted/50";
 
-function Field({ label, value, onChange, type = "text", rows = 0, placeholder = "" }) {
+function Field({ label, value, onChange, type = "text", rows = 0, placeholder = "", helpText = "Updates this value on the related page after you click Save." }) {
     return (
         <div>
             <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">{label}</label>
@@ -48,6 +48,7 @@ function Field({ label, value, onChange, type = "text", rows = 0, placeholder = 
                     placeholder={placeholder}
                 />
             )}
+            <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>
         </div>
     );
 }
@@ -752,6 +753,74 @@ export default function EditPage() {
 
                         {activeTab === "projects" && (
                             <SectionCard title="Projects" subtitle="Edit each project card fields, tools, highlights, and media URLs/uploads">
+                                <div className="glass rounded-xl p-4 space-y-3 border border-primary/15">
+                                    <h3 className="text-text-primary font-semibold">Best Project Settings</h3>
+                                    <p className="text-xs text-text-muted">Controls the featured block shown near the top of the Projects page.</p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <Field
+                                            label="Best Project Label"
+                                            value={projectsContent.bestProjectLabel ?? "Best Project"}
+                                            onChange={(v) => setProjectsContent({ ...projectsContent, bestProjectLabel: v })}
+                                            helpText="Shown as the section heading above the featured project card on /projects."
+                                        />
+
+                                        <div>
+                                            <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project (By ID)</label>
+                                            <select
+                                                value={projectsContent.bestProjectId ?? ""}
+                                                onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectId: e.target.value })}
+                                                className={inputClass}
+                                            >
+                                                <option value="">Auto by category</option>
+                                                {projectsData.map((project) => (
+                                                    <option key={project.id} value={project.id}>{project.title} ({project.id})</option>
+                                                ))}
+                                            </select>
+                                            <p className="mt-1 text-[11px] text-text-muted">Select a specific project to always feature in the Best Project panel.</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project Default Category</label>
+                                            <select
+                                                value={projectsContent.bestProjectDefaultCategory ?? "uiux"}
+                                                onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectDefaultCategory: e.target.value })}
+                                                className={inputClass}
+                                            >
+                                                <option value="uiux">UI/UX</option>
+                                                <option value="graphic">Graphic Design</option>
+                                                <option value="motion">Motion Design</option>
+                                            </select>
+                                            <p className="mt-1 text-[11px] text-text-muted">Used when "Best Project (By ID)" is empty.</p>
+                                        </div>
+
+                                        <Field
+                                            label="Featured Prefix"
+                                            value={projectsContent.featuredPrefix ?? "Featured:"}
+                                            onChange={(v) => setProjectsContent({ ...projectsContent, featuredPrefix: v })}
+                                            helpText="Small badge text displayed on the featured preview image."
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Best project settings saved", "Failed to save best project settings.")}
+                                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
+                                        >
+                                            Save Best Project Settings
+                                        </button>
+                                        <button
+                                            onClick={() => runEditorAction(async () => {
+                                                await resetData("projectsContent");
+                                                setProjectsContent(defaultProjectsContent);
+                                            }, "Best project settings reset", "Failed to reset best project settings.")}
+                                            className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm"
+                                        >
+                                            Reset Best Project Settings
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-text-primary font-semibold">Project Items</h3>
                                     <button
