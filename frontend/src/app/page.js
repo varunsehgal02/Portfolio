@@ -159,7 +159,7 @@ export default function Home() {
                                 {content.ctaSecondary}
                             </Link>
                             <a
-                                href="/resume/Varun_Sehgal.pdf"
+                                href={personal.resumeUrl || "/resume/Varun_Sehgal.pdf"}
                                 download
                                 onClick={() => trackResumeDownload("/")}
                                 className="px-8 py-4 rounded-2xl border border-primary/30 text-primary-light font-semibold text-lg hover:bg-primary/10 hover:text-text-primary transition-all duration-300 hover:scale-105"

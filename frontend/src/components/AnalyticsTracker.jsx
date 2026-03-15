@@ -11,10 +11,20 @@ export default function AnalyticsTracker() {
     const pathname = usePathname();
     const enterTimeRef = useRef(null);
     const reportedDepthsRef = useRef(new Set());
+    const lastTrackedRef = useRef({ path: null, time: 0 });
 
     useEffect(() => {
         if (SKIP_PATHS.has(pathname)) return;
-        trackPageView(pathname).catch(() => {});
+
+        // React 18 Strict Mode double-invokes effects — deduplicate rapid re-fires
+        const now = Date.now();
+        const alreadyTracked =
+            lastTrackedRef.current.path === pathname &&
+            now - lastTrackedRef.current.time < 500;
+        if (!alreadyTracked) {
+            lastTrackedRef.current = { path: pathname, time: now };
+            trackPageView(pathname).catch(() => {});
+        }
 
         // Reset per-page state
         enterTimeRef.current = Date.now();

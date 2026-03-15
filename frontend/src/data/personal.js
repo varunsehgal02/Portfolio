@@ -5,9 +5,13 @@ export const personalInfo = {
     email: "varun.sehgal02@gmail.com",
     phone: "+91-9399361193",
     location: "Gwalior, Madhya Pradesh, India",
+    resumeUrl: "/resume/Varun_Sehgal.pdf",
+    rotatingRoles: ["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"],
     socials: {
         behance: "https://behance.net/varunsehgal3",
         linkedin: "https://linkedin.com/in/varunsehgal02",
+        github: "",
+        instagram: "",
     },
     summary:
         "UI/UX Designer and Graphic Designer with 2+ years of experience creating user-centered web and mobile interfaces, motion graphics, and branding assets. Skilled in Figma, Adobe Creative Suite, wireframing, prototyping, usability testing, and responsive design. Proven ability to improve engagement, conversion rates, and user satisfaction through data-driven design solutions. Seeking UI/UX and Product Design roles.",

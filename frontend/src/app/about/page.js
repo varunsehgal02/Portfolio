@@ -212,7 +212,7 @@ export default function AboutPage() {
                         <div className="flex items-center justify-center gap-3 text-2xl sm:text-3xl md:text-4xl font-display font-semibold text-text-secondary">
                             <span>I&apos;m a</span>
                             <RotatingText
-                                texts={["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"]}
+                                texts={personal.rotatingRoles?.length ? personal.rotatingRoles : ["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"]}
                                 mainClassName="px-3 py-1 bg-primary/20 text-primary-light overflow-hidden rounded-lg"
                                 staggerFrom="last"
                                 initial={{ y: "100%" }}

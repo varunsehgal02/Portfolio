@@ -21,6 +21,7 @@ import {
     aboutBentoCards as defaultAboutBentoCards,
     projectsPageContent as defaultProjectsContent,
     contactPageContent as defaultContactContent,
+    footerPageContent as defaultFooterContent,
 } from "@/data/pageContent";
 
 const inputClass =
@@ -82,6 +83,7 @@ export default function EditPage() {
     const [aboutBentoCards, setAboutBentoCards] = useState(defaultAboutBentoCards);
     const [projectsContent, setProjectsContent] = useState(defaultProjectsContent);
     const [contactContent, setContactContent] = useState(defaultContactContent);
+    const [footerContent, setFooterContent] = useState(defaultFooterContent);
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -103,6 +105,7 @@ export default function EditPage() {
             { id: "aboutContent", label: "About Page Text", icon: "✨" },
             { id: "projectsContent", label: "Projects Page Text", icon: "🚀" },
             { id: "contactContent", label: "Contact Page Text", icon: "✉️" },
+            { id: "footerContent", label: "Footer", icon: "🧩" },
         ],
         []
     );
@@ -152,6 +155,7 @@ export default function EditPage() {
             aboutCardsNext,
             projectsContentNext,
             contactNext,
+            footerNext,
         ] = await Promise.all([
             getData("personal", defaultPersonal),
             getData("skills", defaultSkills),
@@ -165,6 +169,7 @@ export default function EditPage() {
             getData("aboutBentoCards", defaultAboutBentoCards),
             getData("projectsContent", defaultProjectsContent),
             getData("contactContent", defaultContactContent),
+            getData("footerContent", defaultFooterContent),
         ]);
 
         setPersonal(personalNext);
@@ -179,6 +184,7 @@ export default function EditPage() {
         setAboutBentoCards(aboutCardsNext);
         setProjectsContent(projectsContentNext);
         setContactContent(contactNext);
+        setFooterContent(footerNext);
     };
 
     const handleFileUpload = async (file, projectIndex, fieldName) => {
@@ -195,6 +201,35 @@ export default function EditPage() {
         } catch (err) {
             console.error("Upload failed:", err);
         }
+    };
+
+    const handleProjectGalleryUpload = async (files, projectIndex) => {
+        if (!files?.length) return;
+
+        const uploadedUrls = [];
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch("/api/upload", { method: "POST", body: formData });
+                const data = await res.json();
+                if (data.url) uploadedUrls.push(data.url);
+            } catch (err) {
+                console.error("Gallery upload failed:", err);
+            }
+        }
+
+        if (!uploadedUrls.length) return;
+
+        const updated = [...projectsData];
+        const existingGallery = Array.isArray(updated[projectIndex].images) ? updated[projectIndex].images : [];
+        updated[projectIndex] = {
+            ...updated[projectIndex],
+            images: [...existingGallery, ...uploadedUrls],
+            image: updated[projectIndex].image || uploadedUrls[0],
+        };
+        setProjectsData(updated);
     };
 
     if (!authed) {
@@ -310,9 +345,65 @@ export default function EditPage() {
                                         value={personal.socials.linkedin}
                                         onChange={(v) => setPersonal({ ...personal, socials: { ...personal.socials, linkedin: v } })}
                                     />
+                                    <Field
+                                        label="GitHub URL"
+                                        value={personal.socials?.github ?? ""}
+                                        onChange={(v) => setPersonal({ ...personal, socials: { ...personal.socials, github: v } })}
+                                    />
+                                    <Field
+                                        label="Instagram URL"
+                                        value={personal.socials?.instagram ?? ""}
+                                        onChange={(v) => setPersonal({ ...personal, socials: { ...personal.socials, instagram: v } })}
+                                    />
+                                    <Field
+                                        label="Resume PDF URL"
+                                        value={personal.resumeUrl ?? "/resume/Varun_Sehgal.pdf"}
+                                        onChange={(v) => setPersonal({ ...personal, resumeUrl: v })}
+                                        placeholder="/resume/Your_Name.pdf"
+                                    />
                                 </div>
 
                                 <Field label="Summary" rows={5} value={personal.summary} onChange={(v) => setPersonal({ ...personal, summary: v })} />
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-text-primary font-semibold">Rotating Roles</h3>
+                                        <button
+                                            onClick={() =>
+                                                setPersonal({
+                                                    ...personal,
+                                                    rotatingRoles: [...(personal.rotatingRoles || []), "New Role"],
+                                                })
+                                            }
+                                            className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
+                                        >
+                                            + Add Role
+                                        </button>
+                                    </div>
+                                    <p className="text-text-muted text-xs">Shown in the rotating text on the About page ("I&apos;m a [role]").</p>
+                                    {(personal.rotatingRoles || []).map((role, i) => (
+                                        <div key={i} className="grid grid-cols-[1fr_auto] gap-2">
+                                            <input
+                                                value={role}
+                                                onChange={(e) => {
+                                                    const next = [...(personal.rotatingRoles || [])];
+                                                    next[i] = e.target.value;
+                                                    setPersonal({ ...personal, rotatingRoles: next });
+                                                }}
+                                                className={inputClass}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const next = (personal.rotatingRoles || []).filter((_, idx) => idx !== i);
+                                                    setPersonal({ ...personal, rotatingRoles: next });
+                                                }}
+                                                className="px-3 rounded-lg bg-red-500/10 text-red-300 text-sm"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
 
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
@@ -842,6 +933,22 @@ export default function EditPage() {
                                                             setProjectsData(next);
                                                         }}
                                                     />
+                                                    <Field
+                                                        label="Gallery Images (comma separated URLs)"
+                                                        value={Array.isArray(project.images) ? project.images.join(", ") : ""}
+                                                        onChange={(v) => {
+                                                            const next = [...projectsData];
+                                                            next[index] = {
+                                                                ...next[index],
+                                                                images: v
+                                                                    .split(",")
+                                                                    .map((item) => item.trim())
+                                                                    .filter(Boolean),
+                                                            };
+                                                            setProjectsData(next);
+                                                        }}
+                                                        placeholder="/projects/design-1.png, /projects/design-2.png"
+                                                    />
                                                     <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/15 text-primary-light text-xs cursor-pointer">
                                                         Upload Image
                                                         <input
@@ -851,6 +958,20 @@ export default function EditPage() {
                                                             onChange={(e) => {
                                                                 if (e.target.files?.[0]) {
                                                                     handleFileUpload(e.target.files[0], index, "image");
+                                                                }
+                                                            }}
+                                                        />
+                                                    </label>
+                                                    <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/15 text-primary-light text-xs cursor-pointer">
+                                                        Upload Gallery Images
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            multiple
+                                                            className="hidden"
+                                                            onChange={(e) => {
+                                                                if (e.target.files?.length) {
+                                                                    handleProjectGalleryUpload(Array.from(e.target.files), index);
                                                                 }
                                                             }}
                                                         />
@@ -1172,6 +1293,127 @@ export default function EditPage() {
                                 <div className="flex gap-3">
                                     <button onClick={() => runEditorAction(async () => saveData("contactContent", contactContent), "Contact content saved", "Failed to save contact content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Contact Content</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("contactContent"); setContactContent(defaultContactContent); }, "Contact content reset", "Failed to reset contact content.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {activeTab === "footerContent" && (
+                            <SectionCard title="Footer" subtitle="Edit footer brand text, section headings, links, and copyright lines">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Field
+                                        label="Brand Name"
+                                        value={footerContent.brandName}
+                                        onChange={(v) => setFooterContent({ ...footerContent, brandName: v })}
+                                    />
+                                    <Field
+                                        label="Quick Links Title"
+                                        value={footerContent.quickLinksTitle}
+                                        onChange={(v) => setFooterContent({ ...footerContent, quickLinksTitle: v })}
+                                    />
+                                    <Field
+                                        label="Connect Title"
+                                        value={footerContent.connectTitle}
+                                        onChange={(v) => setFooterContent({ ...footerContent, connectTitle: v })}
+                                    />
+                                    <Field
+                                        label="Copyright Name"
+                                        value={footerContent.copyrightName}
+                                        onChange={(v) => setFooterContent({ ...footerContent, copyrightName: v })}
+                                    />
+                                    <Field
+                                        label="Copyright Suffix"
+                                        value={footerContent.copyrightSuffix}
+                                        onChange={(v) => setFooterContent({ ...footerContent, copyrightSuffix: v })}
+                                    />
+                                    <Field
+                                        label="Bottom Right Text"
+                                        value={footerContent.builtWithText}
+                                        onChange={(v) => setFooterContent({ ...footerContent, builtWithText: v })}
+                                    />
+                                </div>
+
+                                <Field
+                                    label="Brand Description"
+                                    rows={3}
+                                    value={footerContent.brandDescription}
+                                    onChange={(v) => setFooterContent({ ...footerContent, brandDescription: v })}
+                                />
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-text-primary font-semibold">Quick Links</h3>
+                                        <button
+                                            onClick={() =>
+                                                setFooterContent({
+                                                    ...footerContent,
+                                                    quickLinks: [...(footerContent.quickLinks || []), { href: "/", label: "New Link" }],
+                                                })
+                                            }
+                                            className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
+                                        >
+                                            + Add Link
+                                        </button>
+                                    </div>
+
+                                    {(footerContent.quickLinks || []).map((link, i) => (
+                                        <div key={`${link.href}-${i}`} className="grid grid-cols-1 md:grid-cols-[220px_1fr_auto] gap-2 items-end">
+                                            <Field
+                                                label="Path"
+                                                value={link.href}
+                                                onChange={(v) => {
+                                                    const next = [...(footerContent.quickLinks || [])];
+                                                    next[i] = { ...next[i], href: v };
+                                                    setFooterContent({ ...footerContent, quickLinks: next });
+                                                }}
+                                                placeholder="/about"
+                                            />
+                                            <Field
+                                                label="Label"
+                                                value={link.label}
+                                                onChange={(v) => {
+                                                    const next = [...(footerContent.quickLinks || [])];
+                                                    next[i] = { ...next[i], label: v };
+                                                    setFooterContent({ ...footerContent, quickLinks: next });
+                                                }}
+                                                placeholder="About"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const next = (footerContent.quickLinks || []).filter((_, idx) => idx !== i);
+                                                    setFooterContent({ ...footerContent, quickLinks: next });
+                                                }}
+                                                className="h-11 px-3 rounded-lg bg-red-500/10 text-red-300 text-sm"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => runEditorAction(
+                                            async () => saveData("footerContent", footerContent),
+                                            "Footer saved",
+                                            "Failed to save footer content."
+                                        )}
+                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
+                                    >
+                                        Save Footer
+                                    </button>
+                                    <button
+                                        onClick={() => runEditorAction(
+                                            async () => {
+                                                await resetData("footerContent");
+                                                setFooterContent(defaultFooterContent);
+                                            },
+                                            "Footer reset",
+                                            "Failed to reset footer content."
+                                        )}
+                                        className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm"
+                                    >
+                                        Reset
+                                    </button>
                                 </div>
                             </SectionCard>
                         )}

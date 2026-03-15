@@ -351,7 +351,7 @@ export default function ContactPage() {
                                 ))}
                             </div>
                             <a
-                                href="/resume/Varun_Sehgal.pdf"
+                                href={personal.resumeUrl || "/resume/Varun_Sehgal.pdf"}
                                 download
                                 onClick={() => trackResumeDownload("/contact")}
                                 className="inline-flex mt-4 items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 text-primary-light text-sm font-medium hover:bg-primary/10 transition-all duration-300"

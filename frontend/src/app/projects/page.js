@@ -44,9 +44,18 @@ export default function ProjectsPage() {
             : projectsData.filter((p) => p.category === activeCategory);
 
     const revealByCategory = useMemo(() => {
-        const uiux = projectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
-        const graphic = projectsData.find((p) => p.category === "graphic" && p.image)?.image || "/projects/social-media.png";
-        const motion = projectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
+        const pickProjectImage = (project) => {
+            if (!project) return "";
+            if (Array.isArray(project.images)) {
+                const firstGalleryImage = project.images.find((img) => typeof img === "string" && img.trim() !== "");
+                if (firstGalleryImage) return firstGalleryImage;
+            }
+            return project.image || "";
+        };
+
+        const uiux = pickProjectImage(projectsData.find((p) => p.category === "uiux")) || "/projects/saas-dashboard.png";
+        const graphic = pickProjectImage(projectsData.find((p) => p.category === "graphic")) || "/projects/social-media.png";
+        const motion = pickProjectImage(projectsData.find((p) => p.category === "motion")) || "/projects/mobile-app.png";
 
         return {
             uiux,
@@ -79,10 +88,13 @@ export default function ProjectsPage() {
             motion: ["/projects/mobile-app.png", "/projects/social-media.png"],
         };
 
+        const gallery = Array.isArray(project?.images)
+            ? project.images.filter((img) => typeof img === "string" && img.trim() !== "")
+            : [];
         const base = project?.image ? [project.image] : [];
         const fallbacks = categoryFallback[project?.category] || [];
-        const merged = [...base, ...fallbacks];
-        return [...new Set(merged)].slice(0, 3);
+        const merged = [...gallery, ...base, ...fallbacks];
+        return [...new Set(merged)].slice(0, 9);
     };
 
     const openProjectModal = (project) => {
@@ -285,8 +297,12 @@ export default function ProjectsPage() {
                         </div>
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
-                            {featuredProject.image ? (
-                                <img src={featuredProject.image} alt={featuredProject.title} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+                            {(Array.isArray(featuredProject.images) && featuredProject.images[0]) || featuredProject.image ? (
+                                <img
+                                    src={(Array.isArray(featuredProject.images) && featuredProject.images[0]) || featuredProject.image}
+                                    alt={featuredProject.title}
+                                    className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
                             )}

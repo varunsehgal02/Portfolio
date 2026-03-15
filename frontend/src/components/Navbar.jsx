@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
 const StaggeredMenu = dynamic(() => import("@/components/StaggeredMenu"), { ssr: false });
+import { personalInfo } from "@/data/personal";
+import { useEditableData } from "@/lib/useEditableData";
 
 const navLinks = [
     { href: "/", label: "Home" },
@@ -22,16 +24,22 @@ const menuItems = [
     { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];
 
-const socialItems = [
-    { label: "LinkedIn", link: "https://linkedin.com" },
-    { label: "GitHub", link: "https://github.com" },
-    { label: "Instagram", link: "https://instagram.com" },
-];
+const DEFAULT_SOCIALS = {
+    linkedin: "https://linkedin.com",
+    github: "https://github.com",
+    instagram: "https://instagram.com",
+};
 
 export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const [isScrolled, setIsScrolled] = useState(false);
+    const personal = useEditableData("personal", personalInfo);
+    const socialItems = [
+        { label: "LinkedIn", link: personal.socials?.linkedin || DEFAULT_SOCIALS.linkedin },
+        { label: "GitHub", link: personal.socials?.github || DEFAULT_SOCIALS.github },
+        { label: "Instagram", link: personal.socials?.instagram || DEFAULT_SOCIALS.instagram },
+    ];
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);

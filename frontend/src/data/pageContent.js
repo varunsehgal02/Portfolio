@@ -122,3 +122,19 @@ export const contactPageContent = {
     formSubmitLabel: "Send Message",
     formSubmitSuccess: "Message Sent!",
 };
+
+export const footerPageContent = {
+    brandName: "Varun Sehgal",
+    brandDescription: "Crafting user-centered digital experiences that blend aesthetics with functionality.",
+    quickLinksTitle: "Quick Links",
+    connectTitle: "Connect",
+    quickLinks: [
+        { href: "/", label: "Home" },
+        { href: "/about", label: "About" },
+        { href: "/projects", label: "Projects" },
+        { href: "/contact", label: "Contact" },
+    ],
+    copyrightName: "Varun Sehgal",
+    copyrightSuffix: "All rights reserved.",
+    builtWithText: "Designed & Built with intent",
+};

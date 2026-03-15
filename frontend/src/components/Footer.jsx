@@ -2,11 +2,17 @@
 
 import Link from "next/link";
 import { personalInfo } from "@/data/personal";
+import { footerPageContent } from "@/data/pageContent";
 import { trackSocialOutboundClick } from "@/lib/analytics";
 import { useEditableData } from "@/lib/useEditableData";
 
 export default function Footer() {
     const personal = useEditableData("personal", personalInfo);
+    const footerContent = useEditableData("footerContent", footerPageContent);
+    const brandInitial = (footerContent.brandName || personal.name || "V").charAt(0).toUpperCase();
+    const quickLinks = Array.isArray(footerContent.quickLinks) && footerContent.quickLinks.length
+        ? footerContent.quickLinks
+        : footerPageContent.quickLinks;
 
     return (
         <footer className="relative z-10 border-t border-surface-light" style={{ backgroundColor: "#0a0a0a" }}>
@@ -16,27 +22,22 @@ export default function Footer() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-black font-display font-bold text-lg">
-                                V
+                                {brandInitial}
                             </div>
                             <span className="font-display font-bold text-xl text-text-primary">
-                                Varun Sehgal
+                                {footerContent.brandName || personal.name}
                             </span>
                         </div>
                         <p className="text-text-secondary text-sm leading-relaxed max-w-xs">
-                            Crafting user-centered digital experiences that blend aesthetics with functionality.
+                            {footerContent.brandDescription}
                         </p>
                     </div>
 
                     {/* Quick Links */}
                     <div className="space-y-4">
-                        <h4 className="font-display font-semibold text-text-primary">Quick Links</h4>
+                        <h4 className="font-display font-semibold text-text-primary">{footerContent.quickLinksTitle}</h4>
                         <div className="flex flex-col gap-2">
-                            {[
-                                { href: "/", label: "Home" },
-                                { href: "/about", label: "About" },
-                                { href: "/projects", label: "Projects" },
-                                { href: "/contact", label: "Contact" },
-                            ].map((link) => (
+                            {quickLinks.map((link) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
@@ -50,7 +51,7 @@ export default function Footer() {
 
                     {/* Connect */}
                     <div className="space-y-4">
-                        <h4 className="font-display font-semibold text-text-primary">Connect</h4>
+                        <h4 className="font-display font-semibold text-text-primary">{footerContent.connectTitle}</h4>
                         <div className="flex flex-col gap-2">
                             <a
                                 href={`tel:${personal.phone}`}
@@ -102,10 +103,10 @@ export default function Footer() {
                 {/* Divider & Copyright */}
                 <div className="mt-12 pt-8 border-t border-surface-light flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-text-muted text-sm">
-                        © {new Date().getFullYear()} Varun Sehgal. All rights reserved.
+                        © {new Date().getFullYear()} {footerContent.copyrightName || footerContent.brandName || personal.name}. {footerContent.copyrightSuffix}
                     </p>
                     <p className="text-text-muted text-xs">
-                        Designed & Built with intent
+                        {footerContent.builtWithText}
                     </p>
                 </div>
             </div>

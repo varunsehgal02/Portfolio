@@ -5,7 +5,11 @@ import TiltedCard from "@/components/TiltedCard/TiltedCard";
 import { trackProjectClick } from "@/lib/analytics";
 
 export default function ProjectCard({ project, index, onOpen }) {
-    const hasImage = project.image && project.image.trim() !== "";
+    const primaryImage =
+        (Array.isArray(project.images) && project.images.find((img) => typeof img === "string" && img.trim() !== "")) ||
+        project.image ||
+        "";
+    const hasImage = typeof primaryImage === "string" && primaryImage.trim() !== "";
     const hasVideo = project.video && project.video.trim() !== "";
     const hasMedia = hasImage || hasVideo;
 
@@ -32,18 +36,9 @@ export default function ProjectCard({ project, index, onOpen }) {
         >
             {/* Media / Gradient Top Bar */}
             <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${project.gradient}`}`}>
-                {hasVideo ? (
-                    <video
-                        src={project.video}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-56 object-cover"
-                    />
-                ) : (
+                {hasImage ? (
                     <TiltedCard
-                        imageSrc={hasImage ? project.image : ""}
+                        imageSrc={primaryImage}
                         altText={project.title}
                         captionText={project.title}
                         containerHeight="224px"
@@ -60,6 +55,19 @@ export default function ProjectCard({ project, index, onOpen }) {
                             </div>
                         }
                     />
+                ) : hasVideo ? (
+                    <video
+                        src={project.video}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-56 object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-56 flex items-center justify-center">
+                        <span className="text-6xl">{project.icon}</span>
+                    </div>
                 )}
 
                 {/* Overlay gradient on media */}
