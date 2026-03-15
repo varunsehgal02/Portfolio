@@ -34,7 +34,10 @@ export default function ProjectsPage() {
             (Array.isArray(projectsData) ? projectsData : []).map((project) => {
                 if (project?.id !== "club-id-cards") return project;
 
-                const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
+                const removedImage = "/projects/xlnc-6.png";
+                const currentGallery = Array.isArray(project.gallery)
+                    ? project.gallery.filter((img) => Boolean(img) && img !== removedImage)
+                    : [];
                 const fullGallery = [...new Set([...requiredClubGallery, ...currentGallery])];
 
                 return {
