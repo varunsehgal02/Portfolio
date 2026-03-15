@@ -754,7 +754,38 @@ export default function EditPage() {
                         {activeTab === "projects" && (
                             <SectionCard title="Projects" subtitle="Edit each project card fields, tools, highlights, and media URLs/uploads">
                                 <div className="glass rounded-xl p-4 space-y-3 border border-primary/15">
-                                    <h3 className="text-text-primary font-semibold">Best Project Settings</h3>
+                                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                                        <h3 className="text-text-primary font-semibold">Best Project Settings</h3>
+                                        <button
+                                            onClick={() => {
+                                                const bestProjectId = `best-project-${Date.now()}`;
+                                                const newBestProject = {
+                                                    id: bestProjectId,
+                                                    title: "Best Project",
+                                                    category: "uiux",
+                                                    description: "Featured project description",
+                                                    highlights: ["High impact result", "User-focused solution"],
+                                                    tools: ["Figma"],
+                                                    gradient: "from-indigo-500 via-purple-500 to-pink-500",
+                                                    icon: "⭐",
+                                                    link: "",
+                                                    image: "/lanyard.png",
+                                                    images: ["/lanyard.png"],
+                                                    video: "",
+                                                };
+
+                                                setProjectsData([...projectsData, newBestProject]);
+                                                setProjectsContent({
+                                                    ...projectsContent,
+                                                    bestProjectId,
+                                                    bestProjectDefaultCategory: "uiux",
+                                                });
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
+                                        >
+                                            + Add Best Project
+                                        </button>
+                                    </div>
                                     <p className="text-xs text-text-muted">Controls the featured block shown near the top of the Projects page.</p>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
