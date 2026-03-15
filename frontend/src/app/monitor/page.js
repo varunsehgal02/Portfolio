@@ -18,6 +18,9 @@ import {
     getOutboundClickHistory,
     getVisitorProfile,
     getEngagementStats,
+    resetPageAnalytics,
+    deletePageViewById,
+    clearAllAnalytics,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -105,6 +108,29 @@ export default function MonitorPage() {
     const handleBehanceSave = async () => {
         await setBehanceStats(behance);
         setEditingBehance(false);
+    };
+
+    const handleResetPage = async (page) => {
+        if (!page) return;
+        const confirmed = window.confirm(`Restart analytics for ${page}? This clears tracked data for this page only.`);
+        if (!confirmed) return;
+        await resetPageAnalytics(page);
+        await loadData();
+    };
+
+    const handleDeleteVisit = async (id) => {
+        if (!id) return;
+        const confirmed = window.confirm("Delete this visit record?");
+        if (!confirmed) return;
+        await deletePageViewById(id);
+        await loadData();
+    };
+
+    const handleDeleteAllAnalytics = async () => {
+        const confirmed = window.confirm("Delete ALL analytics data? This action cannot be undone.");
+        if (!confirmed) return;
+        await clearAllAnalytics();
+        await loadData();
     };
 
     const socialTrend = useMemo(() => {
@@ -453,7 +479,15 @@ export default function MonitorPage() {
                                     <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">📊</span>
                                     Page Views Breakdown
                                 </h3>
-                                <span className="text-text-muted text-xs">{Object.keys(safeStats.byPage).length} pages tracked</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-text-muted text-xs">{Object.keys(safeStats.byPage).length} pages tracked</span>
+                                    <button
+                                        onClick={() => handleDeleteAllAnalytics().catch(() => {})}
+                                        className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20 transition-colors"
+                                    >
+                                        Delete All
+                                    </button>
+                                </div>
                             </div>
                             <div className="space-y-4">
                                 {Object.entries(safeStats.byPage).map(([page, count]) => {
@@ -465,9 +499,23 @@ export default function MonitorPage() {
                                                 <span className="text-text-secondary text-sm font-mono group-hover:text-primary-light transition-colors">
                                                     {page}
                                                 </span>
-                                                <span className="text-text-primary text-sm font-bold">
-                                                    {count} <span className="text-text-muted font-normal text-xs">visits</span>
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-text-primary text-sm font-bold">
+                                                        {count} <span className="text-text-muted font-normal text-xs">visits</span>
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleResetPage(page).catch(() => {})}
+                                                        className="px-2 py-0.5 rounded text-[11px] border border-primary/30 text-primary-light hover:bg-primary/10 transition-colors"
+                                                    >
+                                                        Restart
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleResetPage(page).catch(() => {})}
+                                                        className="px-2 py-0.5 rounded text-[11px] border border-red-500/30 text-red-300 hover:bg-red-500/10 transition-colors"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="flex-1 h-2.5 rounded-full bg-surface-light overflow-hidden">
                                                 <motion.div
@@ -831,6 +879,7 @@ export default function MonitorPage() {
                                                                     <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Browser</th>
                                                                     <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Device</th>
                                                                     <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Referrer</th>
+                                                                    <th className="text-left px-4 py-2 text-text-muted text-[11px] uppercase tracking-wider">Delete</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -847,6 +896,14 @@ export default function MonitorPage() {
                                                                         <td className="px-4 py-2.5 text-text-muted">{getDeviceType(visit.userAgent, visit.screenWidth)}</td>
                                                                         <td className="px-4 py-2.5 text-text-muted max-w-[260px] truncate" title={visit.referrer || "Direct / Unknown"}>
                                                                             {visit.referrer || "Direct / Unknown"}
+                                                                        </td>
+                                                                        <td className="px-4 py-2.5">
+                                                                            <button
+                                                                                onClick={() => handleDeleteVisit(visit.id).catch(() => {})}
+                                                                                className="px-2 py-1 rounded text-[11px] border border-red-500/30 text-red-300 hover:bg-red-500/10 transition-colors"
+                                                                            >
+                                                                                Delete
+                                                                            </button>
                                                                         </td>
                                                                     </tr>
                                                                 ))}

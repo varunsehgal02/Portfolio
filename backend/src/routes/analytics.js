@@ -195,6 +195,75 @@ router.post("/resume-download", async (req, res) => {
   return res.json({ ok: true });
 });
 
+router.delete("/page/:page", requireAuth, async (req, res) => {
+  const page = decodeURIComponent(String(req.params.page || "")).trim();
+  if (!page) {
+    return res.status(400).json({ error: "Missing page parameter" });
+  }
+
+  const removed = await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+
+    const beforePageViews = analytics.pageViews.length;
+    const beforeTimeOnPage = analytics.timeOnPage.length;
+    const beforeScrollDepths = analytics.scrollDepths.length;
+    const beforeProjectClicks = analytics.projectClicks.length;
+    const beforeResumeDownloads = analytics.resumeDownloads.length;
+
+    analytics.pageViews = analytics.pageViews.filter((row) => row.page !== page);
+    analytics.timeOnPage = analytics.timeOnPage.filter((row) => row.page !== page);
+    analytics.scrollDepths = analytics.scrollDepths.filter((row) => row.page !== page);
+    analytics.projectClicks = analytics.projectClicks.filter((row) => row.sourcePath !== page);
+    analytics.resumeDownloads = analytics.resumeDownloads.filter((row) => row.sourcePage !== page);
+
+    return {
+      pageViews: beforePageViews - analytics.pageViews.length,
+      timeOnPage: beforeTimeOnPage - analytics.timeOnPage.length,
+      scrollDepths: beforeScrollDepths - analytics.scrollDepths.length,
+      projectClicks: beforeProjectClicks - analytics.projectClicks.length,
+      resumeDownloads: beforeResumeDownloads - analytics.resumeDownloads.length,
+    };
+  });
+
+  return res.json({ ok: true, page, removed });
+});
+
+router.delete("/page-view/:id", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id) || id <= 0) {
+    return res.status(400).json({ error: "Invalid page-view id" });
+  }
+
+  const deleted = await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    const before = analytics.pageViews.length;
+    analytics.pageViews = analytics.pageViews.filter((row) => Number(row.id) !== id);
+    return before !== analytics.pageViews.length;
+  });
+
+  if (!deleted) {
+    return res.status(404).json({ error: "Page-view entry not found" });
+  }
+
+  return res.json({ ok: true, id });
+});
+
+router.delete("/all", requireAuth, async (_req, res) => {
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.pageViews = [];
+    analytics.aboutPopupOpens = [];
+    analytics.outboundClicks = [];
+    analytics.timeOnPage = [];
+    analytics.scrollDepths = [];
+    analytics.projectClicks = [];
+    analytics.resumeDownloads = [];
+    analytics.ipGeoCache = {};
+  });
+
+  return res.json({ ok: true });
+});
+
 router.get("/history", requireAuth, async (_req, res) => {
   const store = await readStore();
   const analytics = ensureAnalytics(store);

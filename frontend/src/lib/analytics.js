@@ -111,7 +111,23 @@ export async function setBehanceStats(stats) {
 }
 
 export async function clearAllAnalytics() {
-  // Keep this available for compatibility; can be expanded with backend reset route.
+  await apiRequest("/analytics/all", {
+    method: "DELETE",
+  });
+}
+
+export async function resetPageAnalytics(page) {
+  if (!page) return { ok: false };
+  return apiRequest(`/analytics/page/${encodeURIComponent(page)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function deletePageViewById(id) {
+  if (!id) return { ok: false };
+  return apiRequest(`/analytics/page-view/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 export function trackTimeOnPage(page, seconds) {
@@ -240,7 +256,7 @@ export async function getOutboundClickSummary() {
       recent: ensureRecordArray(summary?.recent),
     };
   } catch {
-    return { total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] };
+    return { total: 0, byPlatform: { linkedin: 0, behance: 0, github: 0 }, recent: [] };
   }
 }
 
