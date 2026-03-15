@@ -34,7 +34,7 @@ export const projects = [
         gradient: "from-primary via-secondary to-primary-light",
         icon: "📱",
         link: "",
-        image: "/projects/mobile-app.png",
+        image: "/lanyard.png",
         video: "https://cdn.coverr.co/videos/coverr-app-development-1579/1080p.mp4",
     },
     {

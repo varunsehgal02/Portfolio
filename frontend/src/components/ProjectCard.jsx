@@ -5,12 +5,13 @@ import TiltedCard from "@/components/TiltedCard/TiltedCard";
 import { trackProjectClick } from "@/lib/analytics";
 
 export default function ProjectCard({ project, index, onOpen }) {
+    const safeProject = project && typeof project === "object" ? project : {};
     const primaryImage =
-        (Array.isArray(project.images) && project.images.find((img) => typeof img === "string" && img.trim() !== "")) ||
-        project.image ||
+        (Array.isArray(safeProject.images) && safeProject.images.find((img) => typeof img === "string" && img.trim() !== "")) ||
+        safeProject.image ||
         "";
     const hasImage = typeof primaryImage === "string" && primaryImage.trim() !== "";
-    const hasVideo = project.video && project.video.trim() !== "";
+    const hasVideo = safeProject.video && safeProject.video.trim() !== "";
     const hasMedia = hasImage || hasVideo;
 
     return (
@@ -23,24 +24,24 @@ export default function ProjectCard({ project, index, onOpen }) {
             role="button"
             tabIndex={0}
             onClick={() => {
-                trackProjectClick(project.title, project.slug || "");
-                onOpen?.(project);
+                trackProjectClick(safeProject.title || "Untitled Project", safeProject.slug || "");
+                onOpen?.(safeProject);
             }}
             onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    trackProjectClick(project.title, project.slug || "");
-                    onOpen?.(project);
+                    trackProjectClick(safeProject.title || "Untitled Project", safeProject.slug || "");
+                    onOpen?.(safeProject);
                 }
             }}
         >
             {/* Media / Gradient Top Bar */}
-            <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${project.gradient}`}`}>
+            <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${safeProject.gradient || "from-primary via-secondary to-primary-light"}`}`}>
                 {hasImage ? (
                     <TiltedCard
                         imageSrc={primaryImage}
-                        altText={project.title}
-                        captionText={project.title}
+                        altText={safeProject.title || "Project"}
+                        captionText={safeProject.title || "Project"}
                         containerHeight="224px"
                         containerWidth="100%"
                         imageHeight="224px"
@@ -51,13 +52,13 @@ export default function ProjectCard({ project, index, onOpen }) {
                         displayOverlayContent={!hasImage}
                         overlayContent={
                             <div className="w-full h-full flex items-center justify-center">
-                                <span className="text-6xl">{project.icon}</span>
+                                <span className="text-6xl">{safeProject.icon || "✨"}</span>
                             </div>
                         }
                     />
                 ) : hasVideo ? (
                     <video
-                        src={project.video}
+                        src={safeProject.video}
                         autoPlay
                         loop
                         muted
@@ -66,7 +67,7 @@ export default function ProjectCard({ project, index, onOpen }) {
                     />
                 ) : (
                     <div className="w-full h-56 flex items-center justify-center">
-                        <span className="text-6xl">{project.icon}</span>
+                        <span className="text-6xl">{safeProject.icon || "✨"}</span>
                     </div>
                 )}
 
@@ -78,9 +79,9 @@ export default function ProjectCard({ project, index, onOpen }) {
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/40 backdrop-blur-sm text-primary-light border border-primary/20">
-                        {project.category === "uiux"
+                        {safeProject.category === "uiux"
                             ? "UI/UX"
-                            : project.category === "graphic"
+                            : safeProject.category === "graphic"
                                 ? "Graphic"
                                 : "Motion"}
                     </span>
@@ -90,15 +91,15 @@ export default function ProjectCard({ project, index, onOpen }) {
             {/* Content */}
             <div className="p-6 space-y-4">
                 <h3 className="font-display font-bold text-xl text-text-primary group-hover:text-primary-light transition-colors duration-300">
-                    {project.title}
+                    {safeProject.title || "Untitled Project"}
                 </h3>
                 <p className="text-text-secondary text-sm leading-relaxed">
-                    {project.description}
+                    {safeProject.description || ""}
                 </p>
 
                 {/* Highlights */}
                 <div className="grid grid-cols-2 gap-2">
-                    {project.highlights.map((highlight, i) => (
+                    {(Array.isArray(safeProject.highlights) ? safeProject.highlights : []).map((highlight, i) => (
                         <div
                             key={i}
                             className="flex items-center gap-2 text-xs text-text-secondary"
@@ -111,7 +112,7 @@ export default function ProjectCard({ project, index, onOpen }) {
 
                 {/* Tools */}
                 <div className="flex flex-wrap gap-2 pt-2">
-                    {project.tools.map((tool) => (
+                    {(Array.isArray(safeProject.tools) ? safeProject.tools : []).map((tool) => (
                         <span
                             key={tool}
                             className="px-3 py-1 rounded-lg text-xs font-medium bg-surface-light text-text-secondary border border-surface-light hover:border-primary/30 transition-colors"
@@ -122,10 +123,10 @@ export default function ProjectCard({ project, index, onOpen }) {
                 </div>
 
                 {/* View Project Link */}
-                {project.link && (
+                {safeProject.link && (
                     <div className="pt-2">
                         <a
-                            href={project.link}
+                            href={safeProject.link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 group/btn"
