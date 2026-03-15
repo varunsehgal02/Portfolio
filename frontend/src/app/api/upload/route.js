@@ -3,13 +3,20 @@ import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
+export const runtime = "nodejs";
+
 export async function POST(request) {
     try {
         const formData = await request.formData();
         const file = formData.get("file");
 
-        if (!file) {
+        if (!file || typeof file === "string") {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+        }
+
+        const maxBytes = 20 * 1024 * 1024;
+        if (file.size > maxBytes) {
+            return NextResponse.json({ error: "File too large. Max size is 20MB." }, { status: 400 });
         }
 
         const bytes = await file.arrayBuffer();

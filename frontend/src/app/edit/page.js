@@ -6,7 +6,7 @@ import AdminLogin from "@/components/AdminLogin";
 import NetworkBackground from "@/components/NetworkBackground";
 import TargetCursor from "@/components/TargetCursor/TargetCursor";
 import { isAuthenticated, logout } from "@/lib/auth";
-import { saveData, getData, resetData } from "@/lib/editableData";
+import { saveData, getData, resetData, resetAllData } from "@/lib/editableData";
 import {
     personalInfo as defaultPersonal,
     skills as defaultSkills,
@@ -27,7 +27,129 @@ import {
 const inputClass =
     "w-full px-4 py-2.5 rounded-xl bg-surface-light border border-surface-light/80 text-text-primary text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-text-muted/50";
 
-function Field({ label, value, onChange, type = "text", rows = 0, placeholder = "", helpText = "Updates this value on the related page after you click Save." }) {
+const graphicProjectsTemplate = [
+    {
+        id: "graphic-mitansh-birthday",
+        title: "Mitansh Birthday Poster",
+        category: "graphic",
+        description: "Birthday-themed gaming poster design for creator branding and engagement.",
+        highlights: ["Poster Design", "Character Composition", "Brand Alignment", "Social-ready Format"],
+        tools: ["Photoshop", "Illustrator", "Canva"],
+        gradient: "from-purple-700 via-fuchsia-700 to-slate-800",
+        icon: "🎂",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-mitansh-welcome",
+        title: "Mitansh Welcome Poster",
+        category: "graphic",
+        description: "Welcome visual announcing creator onboarding with clean tournament-style typography.",
+        highlights: ["Welcome Campaign", "Creator Onboarding", "Clean Layout", "Gaming Theme"],
+        tools: ["Photoshop", "Canva"],
+        gradient: "from-red-600 via-rose-500 to-zinc-700",
+        icon: "🎮",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-boomboom-omchakra-set",
+        title: "Creator Welcome Set (3 + 4)",
+        category: "graphic",
+        description: "Dual-poster creator welcome set. Keep image 3 and image 4 in this single project gallery.",
+        highlights: ["2-image Project", "Character Art Poster", "Esports Branding", "Welcome Announcement"],
+        tools: ["Photoshop", "Illustrator", "Canva"],
+        gradient: "from-amber-600 via-red-700 to-zinc-900",
+        icon: "🎨",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-fang-owner-manager",
+        title: "FANG Owner & Manager Spotlight",
+        category: "graphic",
+        description: "Profile-style spotlight poster focused on leadership identity and team positioning.",
+        highlights: ["Profile Poster", "Leadership Theme", "Brand Story Frame", "QR/CTA Placement"],
+        tools: ["Photoshop", "Illustrator"],
+        gradient: "from-cyan-700 via-slate-700 to-zinc-900",
+        icon: "🛡️",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-xlnc-campaign-set",
+        title: "Graphic Set (6 + 7 + 8 + 9)",
+        category: "graphic",
+        description: "Grouped multi-image project for images 6, 7, 8, and 9 as requested.",
+        highlights: ["4-image Project", "Campaign Narrative", "Esports Visual Language", "Poster Series"],
+        tools: ["Photoshop", "Illustrator", "Canva"],
+        gradient: "from-slate-700 via-zinc-700 to-black",
+        icon: "🧩",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-team-bhrama-core",
+        title: "Team Bhrama Hero Poster",
+        category: "graphic",
+        description: "Team identity hero poster design with high-contrast red/black visual direction.",
+        highlights: ["Team Branding", "Hero Composition", "Event-ready Creative", "Social Poster"],
+        tools: ["Photoshop", "Canva"],
+        gradient: "from-red-700 via-black to-zinc-900",
+        icon: "🏆",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-team-bhrama-members",
+        title: "Team Bhrama Member Intro",
+        category: "graphic",
+        description: "Member-introduction poster focused on roles and profile presentation.",
+        highlights: ["Member Intro", "Role Highlight", "Clean Typography", "Event Branding"],
+        tools: ["Photoshop", "Canva"],
+        gradient: "from-red-700 via-zinc-900 to-black",
+        icon: "👥",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+    {
+        id: "graphic-team-bhrama-skills",
+        title: "Team Bhrama Skills Spotlight",
+        category: "graphic",
+        description: "Skill-centric profile poster showcasing strengths and competencies.",
+        highlights: ["Skill Matrix", "Profile Poster", "High Contrast", "Social-ready Format"],
+        tools: ["Photoshop", "Canva"],
+        gradient: "from-red-700 via-zinc-900 to-black",
+        icon: "⚡",
+        link: "",
+        image: "",
+        gallery: [],
+        video: "",
+    },
+];
+
+function normalizeProjectLink(raw) {
+    const value = (raw || "").trim();
+    if (!value) return "";
+    if (value.startsWith("/") || value.startsWith("http://") || value.startsWith("https://")) return value;
+    return `https://${value}`;
+}
+
+function Field({ label, value, onChange, type = "text", rows = 0, placeholder = "" }) {
     return (
         <div>
             <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">{label}</label>
@@ -48,7 +170,6 @@ function Field({ label, value, onChange, type = "text", rows = 0, placeholder = 
                     placeholder={placeholder}
                 />
             )}
-            <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>
         </div>
     );
 }
@@ -176,7 +297,7 @@ export default function EditPage() {
         setPersonal(personalNext);
         setSkillsData(skillsNext);
         setExperienceData(experienceNext);
-        setEducation(Array.isArray(educationNext) ? educationNext : [educationNext]);
+        setEducation(educationNext);
         setCertifications(certsNext);
         setProjectsData(projectsNext);
         setProjectCategories(categoriesNext);
@@ -194,43 +315,46 @@ export default function EditPage() {
         try {
             const res = await fetch("/api/upload", { method: "POST", body: formData });
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data?.error || "Upload failed");
+            }
+
             if (data.url) {
                 const updated = [...projectsData];
                 updated[projectIndex] = { ...updated[projectIndex], [fieldName]: data.url };
                 setProjectsData(updated);
+                announceSaved("File uploaded");
             }
         } catch (err) {
-            console.error("Upload failed:", err);
+            const message = err instanceof Error ? err.message : "Upload failed";
+            setActionError(message);
         }
     };
 
-    const handleProjectGalleryUpload = async (files, projectIndex) => {
-        if (!files?.length) return;
+    const handleGalleryUpload = async (file, projectIndex, galleryIndex) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            const data = await res.json();
 
-        const uploadedUrls = [];
-        for (const file of files) {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            try {
-                const res = await fetch("/api/upload", { method: "POST", body: formData });
-                const data = await res.json();
-                if (data.url) uploadedUrls.push(data.url);
-            } catch (err) {
-                console.error("Gallery upload failed:", err);
+            if (!res.ok) {
+                throw new Error(data?.error || "Upload failed");
             }
+
+            if (data.url) {
+                const updated = [...projectsData];
+                const gallery = Array.isArray(updated[projectIndex].gallery) ? [...updated[projectIndex].gallery] : [];
+                gallery[galleryIndex] = data.url;
+                updated[projectIndex] = { ...updated[projectIndex], gallery };
+                setProjectsData(updated);
+                announceSaved("Gallery image uploaded");
+            }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Upload failed";
+            setActionError(message);
         }
-
-        if (!uploadedUrls.length) return;
-
-        const updated = [...projectsData];
-        const existingGallery = Array.isArray(updated[projectIndex].images) ? updated[projectIndex].images : [];
-        updated[projectIndex] = {
-            ...updated[projectIndex],
-            images: [...existingGallery, ...uploadedUrls],
-            image: updated[projectIndex].image || uploadedUrls[0],
-        };
-        setProjectsData(updated);
     };
 
     if (!authed) {
@@ -283,10 +407,11 @@ export default function EditPage() {
                             onClick={async () => {
                                 await runEditorAction(
                                     async () => {
+                                        await resetAllData();
                                         await loadSavedData();
                                     },
-                                    "Reloaded last saved",
-                                    "Failed to reload saved data."
+                                    "All edits reset",
+                                    "Failed to reset all edits."
                                 );
                             }}
                             className="px-4 py-2 rounded-xl glass text-text-secondary text-sm hover:text-amber-400"
@@ -705,57 +830,12 @@ export default function EditPage() {
                         )}
 
                         {activeTab === "education" && (
-                            <SectionCard title="Education" subtitle="Add, edit, or remove education entries displayed on site">
-                                <div className="space-y-4">
-                                    {education.map((edu, i) => (
-                                        <div key={i} className="glass rounded-xl p-4 space-y-3 border border-primary/10">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-text-secondary text-xs font-medium">Education #{i + 1}</span>
-                                                <button
-                                                    onClick={() => setEducation(education.filter((_, idx) => idx !== i))}
-                                                    className="px-3 py-1 rounded-lg bg-red-500/10 text-red-300 text-xs"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <Field
-                                                    label="Degree"
-                                                    value={edu.degree || ""}
-                                                    onChange={(v) => {
-                                                        const next = [...education];
-                                                        next[i] = { ...next[i], degree: v };
-                                                        setEducation(next);
-                                                    }}
-                                                />
-                                                <Field
-                                                    label="Institution"
-                                                    value={edu.institution || ""}
-                                                    onChange={(v) => {
-                                                        const next = [...education];
-                                                        next[i] = { ...next[i], institution: v };
-                                                        setEducation(next);
-                                                    }}
-                                                />
-                                                <Field
-                                                    label="Period"
-                                                    value={edu.period || ""}
-                                                    onChange={(v) => {
-                                                        const next = [...education];
-                                                        next[i] = { ...next[i], period: v };
-                                                        setEducation(next);
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
+                            <SectionCard title="Education" subtitle="Edit education fields displayed on site">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Field label="Degree" value={education.degree} onChange={(v) => setEducation({ ...education, degree: v })} />
+                                    <Field label="Institution" value={education.institution} onChange={(v) => setEducation({ ...education, institution: v })} />
+                                    <Field label="Period" value={education.period} onChange={(v) => setEducation({ ...education, period: v })} />
                                 </div>
-                                <button
-                                    onClick={() => setEducation([...education, { degree: "New Degree", institution: "Institution Name", period: "Year – Year" }])}
-                                    className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
-                                >
-                                    + Add Education
-                                </button>
                                 <div className="flex gap-3">
                                     <button onClick={() => runEditorAction(async () => saveData("education", education), "Education saved", "Failed to save education.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Education</button>
                                     <button onClick={() => runEditorAction(async () => { await resetData("education"); setEducation(defaultEducation); }, "Education reset", "Failed to reset education.")} className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm">Reset</button>
@@ -797,130 +877,40 @@ export default function EditPage() {
 
                         {activeTab === "projects" && (
                             <SectionCard title="Projects" subtitle="Edit each project card fields, tools, highlights, and media URLs/uploads">
-                                <div className="glass rounded-xl p-4 space-y-3 border border-primary/15">
-                                    <div className="flex items-center justify-between gap-3 flex-wrap">
-                                        <h3 className="text-text-primary font-semibold">Best Project Settings</h3>
-                                        <button
-                                            onClick={() => {
-                                                const bestProjectId = `best-project-${Date.now()}`;
-                                                const newBestProject = {
-                                                    id: bestProjectId,
-                                                    title: "Best Project",
-                                                    category: "uiux",
-                                                    description: "Featured project description",
-                                                    highlights: ["High impact result", "User-focused solution"],
-                                                    tools: ["Figma"],
-                                                    gradient: "from-indigo-500 via-purple-500 to-pink-500",
-                                                    icon: "⭐",
-                                                    link: "",
-                                                    image: "/lanyard.png",
-                                                    images: ["/lanyard.png"],
-                                                    video: "",
-                                                };
-
-                                                setProjectsData([...projectsData, newBestProject]);
-                                                setProjectsContent({
-                                                    ...projectsContent,
-                                                    bestProjectId,
-                                                    bestProjectDefaultCategory: "uiux",
-                                                });
-                                            }}
-                                            className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
-                                        >
-                                            + Add Best Project
-                                        </button>
-                                    </div>
-                                    <p className="text-xs text-text-muted">Controls the featured block shown near the top of the Projects page.</p>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <Field
-                                            label="Best Project Label"
-                                            value={projectsContent.bestProjectLabel ?? "Best Project"}
-                                            onChange={(v) => setProjectsContent({ ...projectsContent, bestProjectLabel: v })}
-                                            helpText="Shown as the section heading above the featured project card on /projects."
-                                        />
-
-                                        <div>
-                                            <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project (By ID)</label>
-                                            <select
-                                                value={projectsContent.bestProjectId ?? ""}
-                                                onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectId: e.target.value })}
-                                                className={inputClass}
-                                            >
-                                                <option value="">Auto by category</option>
-                                                {projectsData.map((project) => (
-                                                    <option key={project.id} value={project.id}>{project.title} ({project.id})</option>
-                                                ))}
-                                            </select>
-                                            <p className="mt-1 text-[11px] text-text-muted">Select a specific project to always feature in the Best Project panel.</p>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project Default Category</label>
-                                            <select
-                                                value={projectsContent.bestProjectDefaultCategory ?? "uiux"}
-                                                onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectDefaultCategory: e.target.value })}
-                                                className={inputClass}
-                                            >
-                                                <option value="uiux">UI/UX</option>
-                                                <option value="graphic">Graphic Design</option>
-                                                <option value="motion">Motion Design</option>
-                                            </select>
-                                            <p className="mt-1 text-[11px] text-text-muted">Used when "Best Project (By ID)" is empty.</p>
-                                        </div>
-
-                                        <Field
-                                            label="Featured Prefix"
-                                            value={projectsContent.featuredPrefix ?? "Featured:"}
-                                            onChange={(v) => setProjectsContent({ ...projectsContent, featuredPrefix: v })}
-                                            helpText="Small badge text displayed on the featured preview image."
-                                        />
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Best project settings saved", "Failed to save best project settings.")}
-                                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
-                                        >
-                                            Save Best Project Settings
-                                        </button>
-                                        <button
-                                            onClick={() => runEditorAction(async () => {
-                                                await resetData("projectsContent");
-                                                setProjectsContent(defaultProjectsContent);
-                                            }, "Best project settings reset", "Failed to reset best project settings.")}
-                                            className="px-5 py-2.5 rounded-xl glass text-text-secondary text-sm"
-                                        >
-                                            Reset Best Project Settings
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-text-primary font-semibold">Project Items</h3>
-                                    <button
-                                        onClick={() =>
-                                            setProjectsData([
-                                                ...projectsData,
-                                                {
-                                                    id: `project-${Date.now()}`,
-                                                    title: "New Project",
-                                                    category: "uiux",
-                                                    description: "Project description",
-                                                    highlights: ["New highlight"],
-                                                    tools: ["Figma"],
-                                                    gradient: "from-indigo-500 via-purple-500 to-pink-500",
-                                                    icon: "🆕",
-                                                    link: "",
-                                                    image: "",
-                                                    video: "",
-                                                },
-                                            ])
-                                        }
-                                        className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
-                                    >
-                                        + Add Project
-                                    </button>
+                                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                                        <button
+                                            onClick={() => setProjectsData(graphicProjectsTemplate)}
+                                            className="px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-300 text-xs"
+                                        >
+                                            Replace with New Graphic Set
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setProjectsData([
+                                                    ...projectsData,
+                                                    {
+                                                        id: `project-${Date.now()}`,
+                                                        title: "New Project",
+                                                        category: "graphic",
+                                                        description: "Project description",
+                                                        highlights: ["New highlight"],
+                                                        tools: ["Photoshop"],
+                                                        gradient: "from-indigo-500 via-purple-500 to-pink-500",
+                                                        icon: "🆕",
+                                                        link: "",
+                                                        image: "",
+                                                        gallery: [],
+                                                        video: "",
+                                                    },
+                                                ])
+                                            }
+                                            className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary-light text-xs"
+                                        >
+                                            + Add Project
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-5">
@@ -965,7 +955,7 @@ export default function EditPage() {
                                                 }} />
                                                 <Field label="Project Link" value={project.link || ""} onChange={(v) => {
                                                     const next = [...projectsData];
-                                                    next[index] = { ...next[index], link: v };
+                                                    next[index] = { ...next[index], link: normalizeProjectLink(v) };
                                                     setProjectsData(next);
                                                 }} />
                                             </div>
@@ -1077,22 +1067,6 @@ export default function EditPage() {
                                                             setProjectsData(next);
                                                         }}
                                                     />
-                                                    <Field
-                                                        label="Gallery Images (comma separated URLs)"
-                                                        value={Array.isArray(project.images) ? project.images.join(", ") : ""}
-                                                        onChange={(v) => {
-                                                            const next = [...projectsData];
-                                                            next[index] = {
-                                                                ...next[index],
-                                                                images: v
-                                                                    .split(",")
-                                                                    .map((item) => item.trim())
-                                                                    .filter(Boolean),
-                                                            };
-                                                            setProjectsData(next);
-                                                        }}
-                                                        placeholder="/projects/design-1.png, /projects/design-2.png"
-                                                    />
                                                     <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/15 text-primary-light text-xs cursor-pointer">
                                                         Upload Image
                                                         <input
@@ -1102,20 +1076,6 @@ export default function EditPage() {
                                                             onChange={(e) => {
                                                                 if (e.target.files?.[0]) {
                                                                     handleFileUpload(e.target.files[0], index, "image");
-                                                                }
-                                                            }}
-                                                        />
-                                                    </label>
-                                                    <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/15 text-primary-light text-xs cursor-pointer">
-                                                        Upload Gallery Images
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            multiple
-                                                            className="hidden"
-                                                            onChange={(e) => {
-                                                                if (e.target.files?.length) {
-                                                                    handleProjectGalleryUpload(Array.from(e.target.files), index);
                                                                 }
                                                             }}
                                                         />
@@ -1146,6 +1106,64 @@ export default function EditPage() {
                                                         />
                                                     </label>
                                                 </div>
+                                            </div>
+
+                                            <div className="space-y-3 pt-2 border-t border-primary/10">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-text-secondary text-xs uppercase tracking-wider">Gallery Images (for grouped projects)</p>
+                                                    <button
+                                                        onClick={() => {
+                                                            const next = [...projectsData];
+                                                            const gallery = Array.isArray(next[index].gallery) ? [...next[index].gallery] : [];
+                                                            gallery.push("");
+                                                            next[index] = { ...next[index], gallery };
+                                                            setProjectsData(next);
+                                                        }}
+                                                        className="px-2 py-1 rounded bg-primary/15 text-primary-light text-xs"
+                                                    >
+                                                        + Add Gallery Image
+                                                    </button>
+                                                </div>
+
+                                                {(Array.isArray(project.gallery) ? project.gallery : []).map((img, gi) => (
+                                                    <div key={`${project.id || index}-gallery-${gi}`} className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2 items-end">
+                                                        <Field
+                                                            label={`Gallery ${gi + 1} URL`}
+                                                            value={img || ""}
+                                                            onChange={(v) => {
+                                                                const next = [...projectsData];
+                                                                const gallery = Array.isArray(next[index].gallery) ? [...next[index].gallery] : [];
+                                                                gallery[gi] = v;
+                                                                next[index] = { ...next[index], gallery };
+                                                                setProjectsData(next);
+                                                            }}
+                                                        />
+                                                        <label className="h-11 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/15 text-primary-light text-xs cursor-pointer">
+                                                            Upload
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                className="hidden"
+                                                                onChange={(e) => {
+                                                                    if (e.target.files?.[0]) {
+                                                                        handleGalleryUpload(e.target.files[0], index, gi);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </label>
+                                                        <button
+                                                            onClick={() => {
+                                                                const next = [...projectsData];
+                                                                const gallery = (Array.isArray(next[index].gallery) ? next[index].gallery : []).filter((_, idx) => idx !== gi);
+                                                                next[index] = { ...next[index], gallery };
+                                                                setProjectsData(next);
+                                                            }}
+                                                            className="h-11 px-3 rounded-lg bg-red-500/10 text-red-300 text-sm"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                ))}
                                             </div>
 
                                             <button
@@ -1416,36 +1434,9 @@ export default function EditPage() {
                         {activeTab === "projectsContent" && (
                             <SectionCard title="Projects Page Text" subtitle="Edit all projects page headings and helper text">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Field
-                                        label="Best Project Label"
-                                        value={projectsContent.bestProjectLabel ?? "Best Project"}
-                                        onChange={(v) => setProjectsContent({ ...projectsContent, bestProjectLabel: v })}
-                                    />
-                                    <div>
-                                        <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project Default Category</label>
-                                        <select
-                                            value={projectsContent.bestProjectDefaultCategory ?? "uiux"}
-                                            onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectDefaultCategory: e.target.value })}
-                                            className={inputClass}
-                                        >
-                                            <option value="uiux">UI/UX</option>
-                                            <option value="graphic">Graphic Design</option>
-                                            <option value="motion">Motion Design</option>
-                                        </select>
-                                    </div>
-                                    <Field
-                                        label="Featured Prefix"
-                                        value={projectsContent.featuredPrefix ?? "Featured:"}
-                                        onChange={(v) => setProjectsContent({ ...projectsContent, featuredPrefix: v })}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {Object.entries(projectsContent)
-                                        .filter(([key]) => !["bestProjectLabel", "bestProjectDefaultCategory", "featuredPrefix"].includes(key))
-                                        .map(([key, value]) => (
+                                    {Object.entries(projectsContent).map(([key, value]) => (
                                         <Field key={key} label={key} value={value} onChange={(v) => setProjectsContent({ ...projectsContent, [key]: v })} />
-                                        ))}
+                                    ))}
                                 </div>
                                 <div className="flex gap-3">
                                     <button onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Projects content saved", "Failed to save projects content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Projects Content</button>

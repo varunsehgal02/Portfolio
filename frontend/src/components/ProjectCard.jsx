@@ -5,14 +5,14 @@ import TiltedCard from "@/components/TiltedCard/TiltedCard";
 import { trackProjectClick } from "@/lib/analytics";
 
 export default function ProjectCard({ project, index, onOpen }) {
-    const safeProject = project && typeof project === "object" ? project : {};
-    const primaryImage =
-        (Array.isArray(safeProject.images) && safeProject.images.find((img) => typeof img === "string" && img.trim() !== "")) ||
-        safeProject.image ||
-        "";
-    const hasImage = typeof primaryImage === "string" && primaryImage.trim() !== "";
-    const hasVideo = safeProject.video && safeProject.video.trim() !== "";
+    const hasImage = project.image && project.image.trim() !== "";
+    const hasVideo = project.video && project.video.trim() !== "";
     const hasMedia = hasImage || hasVideo;
+    const normalizedProjectLink = project.link
+        ? (project.link.startsWith("http://") || project.link.startsWith("https://") || project.link.startsWith("/")
+            ? project.link
+            : `https://${project.link}`)
+        : "";
 
     return (
         <motion.div
@@ -24,24 +24,33 @@ export default function ProjectCard({ project, index, onOpen }) {
             role="button"
             tabIndex={0}
             onClick={() => {
-                trackProjectClick(safeProject.title || "Untitled Project", safeProject.slug || "");
-                onOpen?.(safeProject);
+                trackProjectClick(project.title, project.slug || "");
+                onOpen?.(project);
             }}
             onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    trackProjectClick(safeProject.title || "Untitled Project", safeProject.slug || "");
-                    onOpen?.(safeProject);
+                    trackProjectClick(project.title, project.slug || "");
+                    onOpen?.(project);
                 }
             }}
         >
             {/* Media / Gradient Top Bar */}
-            <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${safeProject.gradient || "from-primary via-secondary to-primary-light"}`}`}>
-                {hasImage ? (
+            <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${project.gradient}`}`}>
+                {hasVideo ? (
+                    <video
+                        src={project.video}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-56 object-cover"
+                    />
+                ) : (
                     <TiltedCard
-                        imageSrc={primaryImage}
-                        altText={safeProject.title || "Project"}
-                        captionText={safeProject.title || "Project"}
+                        imageSrc={hasImage ? project.image : ""}
+                        altText={project.title}
+                        captionText={project.title}
                         containerHeight="224px"
                         containerWidth="100%"
                         imageHeight="224px"
@@ -52,23 +61,10 @@ export default function ProjectCard({ project, index, onOpen }) {
                         displayOverlayContent={!hasImage}
                         overlayContent={
                             <div className="w-full h-full flex items-center justify-center">
-                                <span className="text-6xl">{safeProject.icon || "✨"}</span>
+                                <span className="text-6xl">{project.icon}</span>
                             </div>
                         }
                     />
-                ) : hasVideo ? (
-                    <video
-                        src={safeProject.video}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-56 object-cover"
-                    />
-                ) : (
-                    <div className="w-full h-56 flex items-center justify-center">
-                        <span className="text-6xl">{safeProject.icon || "✨"}</span>
-                    </div>
                 )}
 
                 {/* Overlay gradient on media */}
@@ -79,9 +75,9 @@ export default function ProjectCard({ project, index, onOpen }) {
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/40 backdrop-blur-sm text-primary-light border border-primary/20">
-                        {safeProject.category === "uiux"
+                        {project.category === "uiux"
                             ? "UI/UX"
-                            : safeProject.category === "graphic"
+                            : project.category === "graphic"
                                 ? "Graphic"
                                 : "Motion"}
                     </span>
@@ -91,15 +87,15 @@ export default function ProjectCard({ project, index, onOpen }) {
             {/* Content */}
             <div className="p-6 space-y-4">
                 <h3 className="font-display font-bold text-xl text-text-primary group-hover:text-primary-light transition-colors duration-300">
-                    {safeProject.title || "Untitled Project"}
+                    {project.title}
                 </h3>
                 <p className="text-text-secondary text-sm leading-relaxed">
-                    {safeProject.description || ""}
+                    {project.description}
                 </p>
 
                 {/* Highlights */}
                 <div className="grid grid-cols-2 gap-2">
-                    {(Array.isArray(safeProject.highlights) ? safeProject.highlights : []).map((highlight, i) => (
+                    {project.highlights.map((highlight, i) => (
                         <div
                             key={i}
                             className="flex items-center gap-2 text-xs text-text-secondary"
@@ -112,7 +108,7 @@ export default function ProjectCard({ project, index, onOpen }) {
 
                 {/* Tools */}
                 <div className="flex flex-wrap gap-2 pt-2">
-                    {(Array.isArray(safeProject.tools) ? safeProject.tools : []).map((tool) => (
+                    {project.tools.map((tool) => (
                         <span
                             key={tool}
                             className="px-3 py-1 rounded-lg text-xs font-medium bg-surface-light text-text-secondary border border-surface-light hover:border-primary/30 transition-colors"
@@ -123,12 +119,13 @@ export default function ProjectCard({ project, index, onOpen }) {
                 </div>
 
                 {/* View Project Link */}
-                {safeProject.link && (
+                {project.link && (
                     <div className="pt-2">
                         <a
-                            href={safeProject.link}
+                            href={normalizedProjectLink}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 group/btn"
                         >
                             <span>View Project</span>

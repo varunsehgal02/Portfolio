@@ -13,57 +13,9 @@ const GradualBlur = dynamic(() => import("@/components/GradualBlur/GradualBlur")
 const FluidGlass = dynamic(() => import("@/components/FluidGlass/FluidGlass"), { ssr: false });
 
 export default function ProjectsPage() {
-    const allowedBestCategories = ["uiux", "graphic", "motion"];
-    const projectsDataValue = useEditableData("projects", projects);
-    const categoriesDataValue = useEditableData("projectCategories", categories);
-    const contentValue = useEditableData("projectsContent", projectsPageContent);
-
-    const projectsData = useMemo(() => {
-        const uploadedProjectImage = "/lanyard.png";
-        const source = Array.isArray(projectsDataValue) ? projectsDataValue : projects;
-        const normalized = source
-            .filter((item) => item && typeof item === "object")
-            .map((projectItem, index) => ({
-                id: projectItem.id || `project-${index}`,
-                title: projectItem.title || "Untitled Project",
-                category: projectItem.category || "uiux",
-                description: projectItem.description || "",
-                highlights: Array.isArray(projectItem.highlights)
-                    ? projectItem.highlights.filter((h) => typeof h === "string" && h.trim() !== "")
-                    : [],
-                tools: Array.isArray(projectItem.tools)
-                    ? projectItem.tools.filter((tool) => typeof tool === "string" && tool.trim() !== "")
-                    : [],
-                gradient: projectItem.gradient || "from-primary via-secondary to-primary-light",
-                icon: projectItem.icon || "✨",
-                link: projectItem.link || "",
-                image: uploadedProjectImage,
-                images: [uploadedProjectImage],
-                video: projectItem.video || "",
-                slug: projectItem.slug || "",
-            }));
-
-        return normalized.length ? normalized : projects;
-    }, [projectsDataValue]);
-
-    const categoriesData = useMemo(() => {
-        const source = Array.isArray(categoriesDataValue) ? categoriesDataValue : categories;
-        const normalized = source
-            .filter((item) => item && typeof item === "object")
-            .map((cat, index) => ({
-                id: typeof cat.id === "string" && cat.id.trim() ? cat.id : `category-${index}`,
-                label: typeof cat.label === "string" && cat.label.trim() ? cat.label : "Category",
-            }));
-
-        return normalized.length ? normalized : categories;
-    }, [categoriesDataValue]);
-
-    const content = useMemo(() => {
-        if (!contentValue || typeof contentValue !== "object" || Array.isArray(contentValue)) {
-            return projectsPageContent;
-        }
-        return { ...projectsPageContent, ...contentValue };
-    }, [contentValue]);
+    const projectsData = useEditableData("projects", projects);
+    const categoriesData = useEditableData("projectCategories", categories);
+    const content = useEditableData("projectsContent", projectsPageContent);
 
     const [activeCategory, setActiveCategory] = useState("all");
     const [activeRevealCategory, setActiveRevealCategory] = useState("uiux");
@@ -86,31 +38,15 @@ export default function ProjectsPage() {
         }
     }, [activeCategory]);
 
-    useEffect(() => {
-        const nextDefault = typeof content.bestProjectDefaultCategory === "string" ? content.bestProjectDefaultCategory : "uiux";
-        if (allowedBestCategories.includes(nextDefault)) {
-            setActiveBestCategory(nextDefault);
-        }
-    }, [content.bestProjectDefaultCategory]);
-
     const filteredProjects =
         activeCategory === "all"
             ? projectsData
-            : projectsData.filter((p) => p?.category === activeCategory);
+            : projectsData.filter((p) => p.category === activeCategory);
 
     const revealByCategory = useMemo(() => {
-        const pickProjectImage = (project) => {
-            if (!project) return "";
-            if (Array.isArray(project.images)) {
-                const firstGalleryImage = project.images.find((img) => typeof img === "string" && img.trim() !== "");
-                if (firstGalleryImage) return firstGalleryImage;
-            }
-            return project.image || "";
-        };
-
-        const uiux = pickProjectImage(projectsData.find((p) => p.category === "uiux")) || "/projects/saas-dashboard.png";
-        const graphic = pickProjectImage(projectsData.find((p) => p.category === "graphic")) || "/projects/social-media.png";
-        const motion = pickProjectImage(projectsData.find((p) => p.category === "motion")) || "/projects/mobile-app.png";
+        const uiux = projectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
+        const graphic = projectsData.find((p) => p.category === "graphic" && p.image)?.image || "/projects/social-media.png";
+        const motion = projectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
 
         return {
             uiux,
@@ -122,18 +58,13 @@ export default function ProjectsPage() {
     const revealImage = revealByCategory[activeRevealCategory];
     const bestByCategory = useMemo(
         () => ({
-            uiux: projectsData.find((p) => p?.category === "uiux") || projectsData[0] || null,
-            graphic: projectsData.find((p) => p?.category === "graphic") || projectsData[0] || null,
-            motion: projectsData.find((p) => p?.category === "motion") || projectsData[0] || null,
+            uiux: projectsData.find((p) => p.category === "uiux") || projectsData[0],
+            graphic: projectsData.find((p) => p.category === "graphic") || projectsData[0],
+            motion: projectsData.find((p) => p.category === "motion") || projectsData[0],
         }),
         [projectsData]
     );
-    const featuredProjectById = useMemo(() => {
-        if (!content?.bestProjectId) return null;
-        return projectsData.find((p) => p?.id === content.bestProjectId) || null;
-    }, [projectsData, content?.bestProjectId]);
-
-    const featuredProject = featuredProjectById || bestByCategory[activeBestCategory] || projectsData[0] || null;
+    const featuredProject = bestByCategory[activeBestCategory] || projectsData[0];
 
     const revealThumbs = [
         { id: "uiux", label: "UI/UX", image: revealByCategory.uiux },
@@ -148,14 +79,18 @@ export default function ProjectsPage() {
             motion: ["/projects/mobile-app.png", "/projects/social-media.png"],
         };
 
-        const gallery = Array.isArray(project?.images)
-            ? project.images.filter((img) => typeof img === "string" && img.trim() !== "")
-            : [];
+        const gallery = Array.isArray(project?.gallery) ? project.gallery.filter(Boolean) : [];
         const base = project?.image ? [project.image] : [];
         const fallbacks = categoryFallback[project?.category] || [];
         const merged = [...gallery, ...base, ...fallbacks];
-        return [...new Set(merged)].slice(0, 9);
+        return [...new Set(merged)].slice(0, 3);
     };
+
+    const normalizedSelectedProjectLink = selectedProject?.link
+        ? (selectedProject.link.startsWith("http://") || selectedProject.link.startsWith("https://") || selectedProject.link.startsWith("/")
+            ? selectedProject.link
+            : `https://${selectedProject.link}`)
+        : "";
 
     const openProjectModal = (project) => {
         setSelectedProject(project);
@@ -310,18 +245,18 @@ export default function ProjectsPage() {
 
                     <div
                         className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 h-full items-center cursor-pointer"
-                        onClick={() => featuredProject && openProjectModal(featuredProject)}
+                        onClick={() => openProjectModal(featuredProject)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
-                                if (featuredProject) openProjectModal(featuredProject);
+                                openProjectModal(featuredProject);
                             }
                         }}
                     >
                         <div className="relative z-10">
-                            <p className="text-primary-light text-sm uppercase tracking-[0.22em] mb-2">✨ {content.bestProjectLabel || "Best Project"}</p>
+                            <p className="text-primary-light text-sm uppercase tracking-[0.22em] mb-2">✨ Best Project</p>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {[
                                     { id: "uiux", label: "UI/UX" },
@@ -344,11 +279,11 @@ export default function ProjectsPage() {
                                 ))}
                             </div>
                             <h2 className="font-display text-3xl sm:text-4xl text-text-primary font-bold mb-4">
-                                {featuredProject?.title || "Featured Project"}
+                                {featuredProject.title}
                             </h2>
-                            <p className="text-text-secondary leading-relaxed mb-5">{featuredProject?.description || ""}</p>
+                            <p className="text-text-secondary leading-relaxed mb-5">{featuredProject.description}</p>
                             <div className="flex flex-wrap gap-2">
-                                {(Array.isArray(featuredProject?.tools) ? featuredProject.tools : []).map((tool) => (
+                                {featuredProject.tools.map((tool) => (
                                     <span key={tool} className="px-3 py-1 text-xs rounded-lg border border-primary/20 bg-primary/10 text-primary-light">
                                         {tool}
                                     </span>
@@ -357,14 +292,10 @@ export default function ProjectsPage() {
                         </div>
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
-                            {(Array.isArray(featuredProject?.images) && featuredProject.images[0]) || featuredProject?.image ? (
-                                <img
-                                    src={(Array.isArray(featuredProject?.images) && featuredProject.images[0]) || featuredProject?.image}
-                                    alt={featuredProject?.title || "Featured project"}
-                                    className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
-                                />
+                            {featuredProject.image ? (
+                                <img src={featuredProject.image} alt={featuredProject.title} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject?.icon || "✨"}</div>
+                                <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
                             <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs bg-black/45 border border-primary/30 text-primary-light">
@@ -385,12 +316,12 @@ export default function ProjectsPage() {
                         transition={{ duration: 0.3 }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                            {filteredProjects.map((project, i) => (
+                        {filteredProjects.map((project, i) => (
                             <ProjectCard
-                                    key={project.id}
-                                    project={project}
-                                    index={i}
-                                    onOpen={openProjectModal}
+                                key={project.id}
+                                project={project}
+                                index={i}
+                                onOpen={openProjectModal}
                             />
                         ))}
                     </motion.div>
@@ -465,7 +396,7 @@ export default function ProjectsPage() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2">
-                                            {(Array.isArray(selectedProject.highlights) ? selectedProject.highlights : []).map((h) => (
+                                            {selectedProject.highlights.map((h) => (
                                                 <div key={h} className="text-sm text-text-secondary bg-surface-light/70 border border-primary/15 rounded-lg px-3 py-2">
                                                     {h}
                                                 </div>
@@ -473,12 +404,25 @@ export default function ProjectsPage() {
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
-                                            {(Array.isArray(selectedProject.tools) ? selectedProject.tools : []).map((tool) => (
+                                            {selectedProject.tools.map((tool) => (
                                                 <span key={tool} className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary-light border border-primary/20">
                                                     {tool}
                                                 </span>
                                             ))}
                                         </div>
+
+                                        {normalizedSelectedProjectLink && (
+                                            <div className="mt-5">
+                                                <a
+                                                    href={normalizedSelectedProjectLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold"
+                                                >
+                                                    Open Project Link
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
