@@ -16,6 +16,36 @@ export default function ProjectsPage() {
     const projectsData = useEditableData("projects", projects);
     const categoriesData = useEditableData("projectCategories", categories);
     const content = useEditableData("projectsContent", projectsPageContent);
+    const requiredClubGallery = useMemo(
+        () => [
+            "/projects/xlnc-1.png",
+            "/projects/xlnc-2.png",
+            "/projects/xlnc-3.png",
+            "/projects/xlnc-4.png",
+            "/projects/xlnc-5.png",
+            "/projects/xlnc-7.png",
+            "/projects/xlnc-8.png",
+            "/projects/xlnc-9.png",
+        ],
+        []
+    );
+    const normalizedProjectsData = useMemo(
+        () =>
+            (Array.isArray(projectsData) ? projectsData : []).map((project) => {
+                if (project?.id !== "club-id-cards") return project;
+
+                const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
+                const fullGallery = [...new Set([...requiredClubGallery, ...currentGallery])];
+
+                return {
+                    ...project,
+                    coverFit: "contain",
+                    image: project.image || "/projects/xlnc-7.png",
+                    gallery: fullGallery,
+                };
+            }),
+        [projectsData, requiredClubGallery]
+    );
 
     const [activeCategory, setActiveCategory] = useState("all");
     const [activeRevealCategory, setActiveRevealCategory] = useState("uiux");
@@ -40,31 +70,31 @@ export default function ProjectsPage() {
 
     const filteredProjects =
         activeCategory === "all"
-            ? projectsData
-            : projectsData.filter((p) => p.category === activeCategory);
+            ? normalizedProjectsData
+            : normalizedProjectsData.filter((p) => p.category === activeCategory);
 
     const revealByCategory = useMemo(() => {
-        const uiux = projectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
-        const graphic = projectsData.find((p) => p.category === "graphic" && p.image)?.image || "/projects/social-media.png";
-        const motion = projectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
+        const uiux = normalizedProjectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
+        const graphic = normalizedProjectsData.find((p) => p.category === "graphic" && p.image)?.image || "/projects/social-media.png";
+        const motion = normalizedProjectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
 
         return {
             uiux,
             graphic,
             motion,
         };
-    }, [projectsData]);
+    }, [normalizedProjectsData]);
 
     const revealImage = revealByCategory[activeRevealCategory];
     const bestByCategory = useMemo(
         () => ({
-            uiux: projectsData.find((p) => p.category === "uiux") || projectsData[0],
-            graphic: projectsData.find((p) => p.category === "graphic") || projectsData[0],
-            motion: projectsData.find((p) => p.category === "motion") || projectsData[0],
+            uiux: normalizedProjectsData.find((p) => p.category === "uiux") || normalizedProjectsData[0],
+            graphic: normalizedProjectsData.find((p) => p.category === "graphic") || normalizedProjectsData[0],
+            motion: normalizedProjectsData.find((p) => p.category === "motion") || normalizedProjectsData[0],
         }),
-        [projectsData]
+        [normalizedProjectsData]
     );
-    const featuredProject = bestByCategory[activeBestCategory] || projectsData[0];
+    const featuredProject = bestByCategory[activeBestCategory] || normalizedProjectsData[0];
     const featuredImageFit = featuredProject?.coverFit === "contain" ? "object-contain bg-black/55 p-3" : "object-cover";
 
     const revealThumbs = [
@@ -82,9 +112,12 @@ export default function ProjectsPage() {
 
         const gallery = Array.isArray(project?.gallery) ? project.gallery.filter(Boolean) : [];
         const base = project?.image ? [project.image] : [];
+        if (gallery.length > 0) {
+            return [...new Set([...gallery, ...base])];
+        }
         const fallbacks = categoryFallback[project?.category] || [];
         const merged = [...gallery, ...base, ...fallbacks];
-        return [...new Set(merged)].slice(0, 3);
+        return [...new Set(merged)];
     };
 
     const normalizedSelectedProjectLink = selectedProject?.link
@@ -99,6 +132,9 @@ export default function ProjectsPage() {
     };
 
     const modalGallery = selectedProject ? getProjectGallery(selectedProject) : [];
+    const modalImageClass = selectedProject?.coverFit === "contain"
+        ? "w-full h-full object-contain bg-black p-2"
+        : "w-full h-full object-cover";
 
     return (
         <div className="relative pt-0 pb-20">
@@ -351,19 +387,19 @@ export default function ProjectsPage() {
                                             <img
                                                 src={modalGallery[activeModalImage]}
                                                 alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
-                                                className="w-full h-full object-cover"
+                                                className={modalImageClass}
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-7xl">{selectedProject.icon}</div>
                                         )}
-                                        <div className="absolute bottom-3 left-3 right-3 flex gap-2">
+                                        <div className="absolute bottom-3 left-3 right-3 flex gap-2 overflow-x-auto pb-1 pr-1">
                                             {modalGallery.map((item, i) => (
                                                 <button
                                                     key={`${item}-${i}`}
                                                     onClick={() => setActiveModalImage(i)}
-                                                    className={`w-16 h-12 rounded-md overflow-hidden border ${activeModalImage === i ? "border-primary shadow-[0_0_0_1px_rgba(230,255,0,0.25)]" : "border-border"}`}
+                                                    className={`w-16 h-12 shrink-0 rounded-md overflow-hidden border ${activeModalImage === i ? "border-primary shadow-[0_0_0_1px_rgba(230,255,0,0.25)]" : "border-border"}`}
                                                 >
-                                                    <img src={item} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" />
+                                                    <img src={item} alt={`thumb ${i + 1}`} className={selectedProject?.coverFit === "contain" ? "w-full h-full object-contain bg-black/60" : "w-full h-full object-cover"} />
                                                 </button>
                                             ))}
                                         </div>
@@ -382,19 +418,15 @@ export default function ProjectsPage() {
                                         </div>
                                         <p className="text-text-secondary mb-4">{selectedProject.description}</p>
 
-                                        <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
-                                            {selectedProject.video ? (
+                                        {selectedProject.video ? (
+                                            <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
                                                 <video
                                                     src={selectedProject.video}
                                                     controls
                                                     className="w-full h-[220px] object-cover"
                                                 />
-                                            ) : (
-                                                <div className="h-[220px] flex items-center justify-center text-text-secondary">
-                                                    Video preview coming soon
-                                                </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        ) : null}
 
                                         <div className="grid grid-cols-2 gap-2">
                                             {selectedProject.highlights.map((h) => (
@@ -457,7 +489,7 @@ export default function ProjectsPage() {
 
             <section className="relative z-[1] max-w-7xl mx-auto px-6 mt-16 text-center">
                 <p className="text-text-muted text-sm">
-                    Showing {filteredProjects.length} of {projectsData.length} projects
+                    Showing {filteredProjects.length} of {normalizedProjectsData.length} projects
                 </p>
             </section>
         </div>
