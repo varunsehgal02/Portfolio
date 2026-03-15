@@ -8,6 +8,7 @@ export default function ProjectCard({ project, index, onOpen }) {
     const hasImage = project.image && project.image.trim() !== "";
     const hasVideo = project.video && project.video.trim() !== "";
     const hasMedia = hasImage || hasVideo;
+    const isComingSoon = !!project.comingSoon;
     const normalizedProjectLink = project.link
         ? (project.link.startsWith("http://") || project.link.startsWith("https://") || project.link.startsWith("/")
             ? project.link
@@ -20,14 +21,16 @@ export default function ProjectCard({ project, index, onOpen }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group relative rounded-2xl overflow-hidden glass card-hover cursor-pointer"
-            role="button"
-            tabIndex={0}
+            className={`group relative rounded-2xl overflow-hidden glass ${isComingSoon ? "cursor-default opacity-75" : "card-hover cursor-pointer"}`}
+            role={isComingSoon ? undefined : "button"}
+            tabIndex={isComingSoon ? -1 : 0}
             onClick={() => {
+                if (isComingSoon) return;
                 trackProjectClick(project.title, project.slug || "");
                 onOpen?.(project);
             }}
             onKeyDown={(e) => {
+                if (isComingSoon) return;
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     trackProjectClick(project.title, project.slug || "");
@@ -37,7 +40,12 @@ export default function ProjectCard({ project, index, onOpen }) {
         >
             {/* Media / Gradient Top Bar */}
             <div className={`relative overflow-hidden h-56 ${hasMedia ? "" : `bg-gradient-to-br ${project.gradient}`}`}>
-                {hasVideo ? (
+                {isComingSoon ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-zinc-900">
+                        <span className="text-5xl mb-3">🎬</span>
+                        <span className="text-primary-light text-sm font-semibold tracking-widest uppercase">Coming Soon</span>
+                    </div>
+                ) : hasVideo ? (
                     <video
                         src={project.video}
                         autoPlay
@@ -68,7 +76,7 @@ export default function ProjectCard({ project, index, onOpen }) {
                 )}
 
                 {/* Overlay gradient on media */}
-                {hasMedia && (
+                {hasMedia && !isComingSoon && (
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 )}
 
