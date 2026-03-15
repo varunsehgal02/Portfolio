@@ -13,6 +13,7 @@ const GradualBlur = dynamic(() => import("@/components/GradualBlur/GradualBlur")
 const FluidGlass = dynamic(() => import("@/components/FluidGlass/FluidGlass"), { ssr: false });
 
 export default function ProjectsPage() {
+    const allowedBestCategories = ["uiux", "graphic", "motion"];
     const projectsDataValue = useEditableData("projects", projects);
     const categoriesDataValue = useEditableData("projectCategories", categories);
     const contentValue = useEditableData("projectsContent", projectsPageContent);
@@ -84,6 +85,13 @@ export default function ProjectsPage() {
             setActiveBestCategory(activeCategory);
         }
     }, [activeCategory]);
+
+    useEffect(() => {
+        const nextDefault = typeof content.bestProjectDefaultCategory === "string" ? content.bestProjectDefaultCategory : "uiux";
+        if (allowedBestCategories.includes(nextDefault)) {
+            setActiveBestCategory(nextDefault);
+        }
+    }, [content.bestProjectDefaultCategory]);
 
     const filteredProjects =
         activeCategory === "all"
@@ -308,7 +316,7 @@ export default function ProjectsPage() {
                         }}
                     >
                         <div className="relative z-10">
-                            <p className="text-primary-light text-sm uppercase tracking-[0.22em] mb-2">✨ Best Project</p>
+                            <p className="text-primary-light text-sm uppercase tracking-[0.22em] mb-2">✨ {content.bestProjectLabel || "Best Project"}</p>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {[
                                     { id: "uiux", label: "UI/UX" },

@@ -1272,9 +1272,36 @@ export default function EditPage() {
                         {activeTab === "projectsContent" && (
                             <SectionCard title="Projects Page Text" subtitle="Edit all projects page headings and helper text">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {Object.entries(projectsContent).map(([key, value]) => (
+                                    <Field
+                                        label="Best Project Label"
+                                        value={projectsContent.bestProjectLabel ?? "Best Project"}
+                                        onChange={(v) => setProjectsContent({ ...projectsContent, bestProjectLabel: v })}
+                                    />
+                                    <div>
+                                        <label className="block text-text-muted text-xs mb-1.5 font-medium uppercase tracking-wider">Best Project Default Category</label>
+                                        <select
+                                            value={projectsContent.bestProjectDefaultCategory ?? "uiux"}
+                                            onChange={(e) => setProjectsContent({ ...projectsContent, bestProjectDefaultCategory: e.target.value })}
+                                            className={inputClass}
+                                        >
+                                            <option value="uiux">UI/UX</option>
+                                            <option value="graphic">Graphic Design</option>
+                                            <option value="motion">Motion Design</option>
+                                        </select>
+                                    </div>
+                                    <Field
+                                        label="Featured Prefix"
+                                        value={projectsContent.featuredPrefix ?? "Featured:"}
+                                        onChange={(v) => setProjectsContent({ ...projectsContent, featuredPrefix: v })}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {Object.entries(projectsContent)
+                                        .filter(([key]) => !["bestProjectLabel", "bestProjectDefaultCategory", "featuredPrefix"].includes(key))
+                                        .map(([key, value]) => (
                                         <Field key={key} label={key} value={value} onChange={(v) => setProjectsContent({ ...projectsContent, [key]: v })} />
-                                    ))}
+                                        ))}
                                 </div>
                                 <div className="flex gap-3">
                                     <button onClick={() => runEditorAction(async () => saveData("projectsContent", projectsContent), "Projects content saved", "Failed to save projects content.")} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-sm font-semibold">Save Projects Content</button>

@@ -105,6 +105,7 @@ export const projectsPageContent = {
     heroTitleHighlight: "Projects",
     heroSubtitle: "Explore my work across UI/UX, graphic design, and motion graphics. Click a category thumbnail to reveal that project mood.",
     bestProjectLabel: "Best Project",
+    bestProjectDefaultCategory: "uiux",
     featuredPrefix: "Featured:",
     emptyCategoryText: "No projects in this category yet.",
 };
