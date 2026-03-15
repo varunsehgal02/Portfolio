@@ -1,12 +1,12 @@
 export const projects = [
     {
         id: "club-id-cards",
-        title: "XLNC Member ID Cards",
+        title: "XLNC Club Member ID Cards",
         category: "graphic",
-        description: "Official XLNC member ID card concepts crafted for player/profile identity and roster presentation.",
+        description: "Official XLNC club member ID card concepts crafted for role identity, profile presentation, and club branding.",
         highlights: [
-            "ID Card Design",
-            "Member Profiles",
+            "Club ID Card Design",
+            "Member Role Profiles",
             "Club Branding",
             "2-Card Set",
         ],
