@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import TiltedCard from "@/components/TiltedCard/TiltedCard";
+import { trackProjectClick } from "@/lib/analytics";
 
 export default function ProjectCard({ project, index, onOpen }) {
     const hasImage = project.image && project.image.trim() !== "";
@@ -17,10 +18,14 @@ export default function ProjectCard({ project, index, onOpen }) {
             className="group relative rounded-2xl overflow-hidden glass card-hover cursor-pointer"
             role="button"
             tabIndex={0}
-            onClick={() => onOpen?.(project)}
+            onClick={() => {
+                trackProjectClick(project.title, project.slug || "");
+                onOpen?.(project);
+            }}
             onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
+                    trackProjectClick(project.title, project.slug || "");
                     onOpen?.(project);
                 }
             }}

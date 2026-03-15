@@ -17,6 +17,7 @@ import {
     getOutboundClickSummary,
     getOutboundClickHistory,
     getVisitorProfile,
+    getEngagementStats,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -36,6 +37,7 @@ export default function MonitorPage() {
     const [outboundSummary, setOutboundSummary] = useState({ total: 0, byPlatform: { linkedin: 0, behance: 0 }, recent: [] });
     const [outboundHistory, setOutboundHistory] = useState([]);
     const [contactMessages, setContactMessages] = useState([]);
+    const [engagement, setEngagement] = useState(null);
     const [openIpFolders, setOpenIpFolders] = useState({});
     const [openMessageIpFolders, setOpenMessageIpFolders] = useState({});
     const [ipLocations, setIpLocations] = useState({});
@@ -57,7 +59,7 @@ export default function MonitorPage() {
         : null;
 
     const loadData = useCallback(async () => {
-        const [statsNext, historyNext, linkedinNext, behanceNext, popupNext, outboundSummaryNext, outboundHistoryNext] = await Promise.all([
+        const [statsNext, historyNext, linkedinNext, behanceNext, popupNext, outboundSummaryNext, outboundHistoryNext, engagementNext] = await Promise.all([
             getVisitStats(),
             getVisitHistory(),
             getLinkedInStats(),
@@ -65,6 +67,7 @@ export default function MonitorPage() {
             getAboutPopupStats(),
             getOutboundClickSummary(),
             getOutboundClickHistory(),
+            getEngagementStats(),
         ]);
 
         const messagesNext = await getContactMessages();
@@ -77,6 +80,7 @@ export default function MonitorPage() {
         setOutboundSummary(outboundSummaryNext);
         setOutboundHistory(ensureRecordArray(outboundHistoryNext));
         setContactMessages(ensureRecordArray(messagesNext));
+        setEngagement(engagementNext);
     }, []);
 
     useEffect(() => {
@@ -145,6 +149,7 @@ export default function MonitorPage() {
 
     const tabs = [
         { id: "overview", label: "Overview", icon: "📊" },
+        { id: "engagement", label: "Engagement", icon: "🎯" },
         { id: "history", label: "Visit Log", icon: "📋" },
         { id: "social", label: "Social Stats", icon: "🔗" },
         { id: "messages", label: "Messages", icon: "✉️" },
@@ -159,6 +164,7 @@ export default function MonitorPage() {
 
     const trackedLinkedinClicks = outboundSummary.byPlatform?.linkedin || 0;
     const trackedBehanceClicks = outboundSummary.byPlatform?.behance || 0;
+    const trackedGithubClicks = outboundSummary.byPlatform?.github || 0;
 
     const getBrowserName = (userAgent = "") => {
         const ua = String(userAgent).toLowerCase();
@@ -520,6 +526,235 @@ export default function MonitorPage() {
                                     <div className="flex-1 flex items-center justify-center">
                                         <p className="text-text-muted text-sm">No data yet.</p>
                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ===== ENGAGEMENT TAB ===== */}
+                {activeTab === "engagement" && (
+                    <motion.div
+                        key="engagement"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-6"
+                    >
+                        {/* Device + Browser Breakdown */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="glass rounded-2xl p-6">
+                                <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2 mb-4">
+                                    <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">📱</span>
+                                    Device Breakdown
+                                </h3>
+                                <div className="space-y-3">
+                                    {Object.entries(engagement?.devices || { Desktop: 0, Mobile: 0, Tablet: 0 }).map(([device, count]) => {
+                                        const total = Object.values(engagement?.devices || {}).reduce((a, b) => a + b, 0) || 1;
+                                        const pct = Math.round((count / total) * 100);
+                                        const icons = { Desktop: "🖥️", Mobile: "📱", Tablet: "📋" };
+                                        return (
+                                            <div key={device}>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-text-secondary text-sm">{icons[device] || "💻"} {device}</span>
+                                                    <span className="text-text-primary text-sm font-semibold">{count} <span className="text-text-muted font-normal text-xs">({pct}%)</span></span>
+                                                </div>
+                                                <div className="h-2 rounded-full bg-surface-light overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${pct}%` }}
+                                                        transition={{ duration: 0.8 }}
+                                                        className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="glass rounded-2xl p-6">
+                                <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2 mb-4">
+                                    <span className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-sm">🌐</span>
+                                    Browser Breakdown
+                                </h3>
+                                <div className="space-y-3">
+                                    {Object.keys(engagement?.browsers || {}).length === 0 && (
+                                        <p className="text-text-muted text-sm">No data yet.</p>
+                                    )}
+                                    {Object.entries(engagement?.browsers || {})
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([browser, count]) => {
+                                            const total = Object.values(engagement?.browsers || {}).reduce((a, b) => a + b, 0) || 1;
+                                            const pct = Math.round((count / total) * 100);
+                                            return (
+                                                <div key={browser}>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className="text-text-secondary text-sm">{browser}</span>
+                                                        <span className="text-text-primary text-sm font-semibold">{count} <span className="text-text-muted font-normal text-xs">({pct}%)</span></span>
+                                                    </div>
+                                                    <div className="h-2 rounded-full bg-surface-light overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${pct}%` }}
+                                                            transition={{ duration: 0.8 }}
+                                                            className="h-full rounded-full bg-gradient-to-r from-secondary to-primary"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Avg Time on Page */}
+                        <div className="glass rounded-2xl p-6">
+                            <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2 mb-4">
+                                <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">⏱️</span>
+                                Avg Time on Page
+                            </h3>
+                            {Object.keys(engagement?.avgTimeByPage || {}).length === 0 ? (
+                                <p className="text-text-muted text-sm">No data yet. Visitors need to spend ≥2s on a page.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {Object.entries(engagement?.avgTimeByPage || {})
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([page, secs]) => {
+                                            const maxSecs = Math.max(1, ...Object.values(engagement?.avgTimeByPage || {}));
+                                            const pct = (secs / maxSecs) * 100;
+                                            const display = secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
+                                            return (
+                                                <div key={page}>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className="text-text-secondary text-sm font-mono">{page}</span>
+                                                        <span className="text-primary-light text-sm font-semibold">{display}</span>
+                                                    </div>
+                                                    <div className="h-2 rounded-full bg-surface-light overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${pct}%` }}
+                                                            transition={{ duration: 0.8 }}
+                                                            className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Scroll Depth */}
+                        <div className="glass rounded-2xl p-6">
+                            <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2 mb-4">
+                                <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">📜</span>
+                                Scroll Depth by Page
+                            </h3>
+                            {Object.keys(engagement?.scrollByPage || {}).length === 0 ? (
+                                <p className="text-text-muted text-sm">No scroll data yet.</p>
+                            ) : (
+                                <div className="space-y-6">
+                                    {Object.entries(engagement?.scrollByPage || {}).map(([page, data]) => (
+                                        <div key={page}>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-text-secondary text-sm font-mono">{page}</span>
+                                                <span className="text-text-muted text-xs">{data.total} sessions</span>
+                                            </div>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {[25, 50, 75, 100].map((milestone) => {
+                                                    const pct = data.total > 0 ? Math.round((data[milestone] / data.total) * 100) : 0;
+                                                    return (
+                                                        <div key={milestone} className="text-center rounded-lg bg-surface-light/50 px-2 py-3">
+                                                            <div className="text-primary-light font-bold text-lg">{pct}%</div>
+                                                            <div className="text-text-muted text-xs">reached {milestone}%</div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Project Clicks */}
+                        <div className="glass rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">🗂️</span>
+                                    Project Card Clicks
+                                </h3>
+                                <span className="text-text-muted text-xs">Total: {engagement?.projectClicksTotal || 0}</span>
+                            </div>
+                            {Object.keys(engagement?.projectClicksByTitle || {}).length === 0 ? (
+                                <p className="text-text-muted text-sm">No project card clicks yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {Object.entries(engagement?.projectClicksByTitle || {})
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([title, count]) => {
+                                            const maxCount = Math.max(1, ...Object.values(engagement?.projectClicksByTitle || {}));
+                                            const pct = (count / maxCount) * 100;
+                                            return (
+                                                <div key={title}>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className="text-text-secondary text-sm">{title}</span>
+                                                        <span className="text-text-primary text-sm font-bold">{count}</span>
+                                                    </div>
+                                                    <div className="h-2 rounded-full bg-surface-light overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${pct}%` }}
+                                                            transition={{ duration: 0.8 }}
+                                                            className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Resume Downloads */}
+                        <div className="glass rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-sm">📄</span>
+                                    Resume Downloads
+                                </h3>
+                                <span className="text-text-muted text-xs">Total: {engagement?.resumeDownloadsTotal || 0}</span>
+                            </div>
+                            {Object.keys(engagement?.resumeDownloadsByPage || {}).length === 0 ? (
+                                <p className="text-text-muted text-sm">No resume downloads tracked yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {Object.entries(engagement?.resumeDownloadsByPage || {})
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([page, count]) => (
+                                            <div key={page} className="flex items-center justify-between rounded-lg bg-surface-light/50 px-3 py-2">
+                                                <span className="text-text-secondary text-sm font-mono">{page}</span>
+                                                <span className="text-primary-light text-sm font-semibold">{count}</span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* GitHub Clicks (from outbound summary) */}
+                        <div className="glass rounded-2xl p-6">
+                            <h3 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2 mb-4">
+                                <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">⚙️</span>
+                                GitHub Link Clicks
+                            </h3>
+                            <div className="flex items-center gap-4">
+                                <div className="rounded-xl bg-surface-light/50 px-6 py-4 text-center">
+                                    <div className="text-text-primary font-bold text-3xl">{trackedGithubClicks}</div>
+                                    <div className="text-text-muted text-xs mt-1">total clicks</div>
+                                </div>
+                                {trackedGithubClicks === 0 && (
+                                    <p className="text-text-muted text-sm">No GitHub link clicks yet. Add a GitHub link to trigger tracking.</p>
                                 )}
                             </div>
                         </div>

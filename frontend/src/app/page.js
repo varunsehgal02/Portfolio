@@ -10,6 +10,7 @@ import { useEditableData } from "@/lib/useEditableData";
 import SectionHeading from "@/components/SectionHeading";
 import Squares from "@/components/Squares";
 import dynamic from "next/dynamic";
+import { trackResumeDownload } from "@/lib/analytics";
 
 const DecryptedText = dynamic(() => import("@/components/DecryptedText"), { ssr: false });
 const Folder = dynamic(() => import("@/components/Folder"), { ssr: false });
@@ -160,6 +161,7 @@ export default function Home() {
                             <a
                                 href="/resume/Varun_Sehgal.pdf"
                                 download
+                                onClick={() => trackResumeDownload("/")}
                                 className="px-8 py-4 rounded-2xl border border-primary/30 text-primary-light font-semibold text-lg hover:bg-primary/10 hover:text-text-primary transition-all duration-300 hover:scale-105"
                             >
                                 {content.ctaResume || "Download Resume"}

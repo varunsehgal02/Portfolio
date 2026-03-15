@@ -10,7 +10,7 @@ import LightRays from "@/components/LightRays";
 import StickerPeel from "@/components/StickerPeel/StickerPeel";
 import TargetCursor from "@/components/TargetCursor/TargetCursor";
 import { submitContactMessage } from "@/lib/contact";
-import { trackSocialOutboundClick } from "@/lib/analytics";
+import { trackSocialOutboundClick, trackResumeDownload } from "@/lib/analytics";
 
 export default function ContactPage() {
     const personal = useEditableData("personal", personalInfo);
@@ -353,6 +353,7 @@ export default function ContactPage() {
                             <a
                                 href="/resume/Varun_Sehgal.pdf"
                                 download
+                                onClick={() => trackResumeDownload("/contact")}
                                 className="inline-flex mt-4 items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 text-primary-light text-sm font-medium hover:bg-primary/10 transition-all duration-300"
                             >
                                 Download Resume

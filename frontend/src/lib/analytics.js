@@ -114,6 +114,83 @@ export async function clearAllAnalytics() {
   // Keep this available for compatibility; can be expanded with backend reset route.
 }
 
+export function trackTimeOnPage(page, seconds) {
+  if (!page || seconds <= 0) return;
+  const payload = { page, seconds };
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    navigator.sendBeacon("/api/analytics/time-on-page", blob);
+    return;
+  }
+  fetch("/api/analytics/time-on-page", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {});
+}
+
+export function trackScrollDepth(page, depth) {
+  if (!page || depth <= 0) return;
+  const payload = { page, depth };
+  fetch("/api/analytics/scroll-depth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
+export function trackProjectClick(title, slug, sourcePath) {
+  const payload = {
+    title,
+    slug: slug || "",
+    sourcePath: sourcePath || (typeof window !== "undefined" ? window.location.pathname : "unknown"),
+  };
+  fetch("/api/analytics/project-click", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
+export function trackResumeDownload(sourcePage) {
+  const payload = {
+    sourcePage: sourcePage || (typeof window !== "undefined" ? window.location.pathname : "unknown"),
+  };
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    navigator.sendBeacon("/api/analytics/resume-download", blob);
+    return;
+  }
+  fetch("/api/analytics/resume-download", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {});
+}
+
+export async function getEngagementStats() {
+  try {
+    return await apiRequest("/analytics/engagement");
+  } catch {
+    return {
+      avgTimeByPage: {},
+      scrollByPage: {},
+      projectClicksByTitle: {},
+      projectClicksTotal: 0,
+      resumeDownloadsTotal: 0,
+      resumeDownloadsByPage: {},
+      recentTimeOnPage: [],
+      recentScrollDepths: [],
+      recentProjectClicks: [],
+      recentResumeDownloads: [],
+      devices: { Desktop: 0, Mobile: 0, Tablet: 0 },
+      browsers: {},
+    };
+  }
+}
+
 export async function trackAboutPopupOpen(cardTitle = "Unknown") {
   try {
     await apiRequest("/analytics/about-popup", {
@@ -158,6 +235,7 @@ export async function getOutboundClickSummary() {
       byPlatform: {
         linkedin: Number(summary?.byPlatform?.linkedin) || 0,
         behance: Number(summary?.byPlatform?.behance) || 0,
+        github: Number(summary?.byPlatform?.github) || 0,
       },
       recent: ensureRecordArray(summary?.recent),
     };
