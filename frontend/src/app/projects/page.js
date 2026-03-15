@@ -18,6 +18,7 @@ export default function ProjectsPage() {
     const contentValue = useEditableData("projectsContent", projectsPageContent);
 
     const projectsData = useMemo(() => {
+        const uploadedProjectImage = "/lanyard.png";
         const source = Array.isArray(projectsDataValue) ? projectsDataValue : projects;
         const normalized = source
             .filter((item) => item && typeof item === "object")
@@ -35,10 +36,8 @@ export default function ProjectsPage() {
                 gradient: projectItem.gradient || "from-primary via-secondary to-primary-light",
                 icon: projectItem.icon || "✨",
                 link: projectItem.link || "",
-                image: projectItem.image || "",
-                images: Array.isArray(projectItem.images)
-                    ? projectItem.images.filter((img) => typeof img === "string" && img.trim() !== "")
-                    : [],
+                image: uploadedProjectImage,
+                images: [uploadedProjectImage],
                 video: projectItem.video || "",
                 slug: projectItem.slug || "",
             }));
