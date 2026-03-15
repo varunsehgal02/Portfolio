@@ -65,6 +65,7 @@ export default function ProjectsPage() {
         [projectsData]
     );
     const featuredProject = bestByCategory[activeBestCategory] || projectsData[0];
+    const featuredImageFit = featuredProject?.coverFit === "contain" ? "object-contain bg-black/55 p-3" : "object-cover";
 
     const revealThumbs = [
         { id: "uiux", label: "UI/UX", image: revealByCategory.uiux },
@@ -293,7 +294,7 @@ export default function ProjectsPage() {
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
                             {featuredProject.image ? (
-                                <img src={featuredProject.image} alt={featuredProject.title} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+                                <img src={featuredProject.image} alt={featuredProject.title} className={`w-full h-full ${featuredImageFit} scale-105 group-hover:scale-110 transition-transform duration-700`} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
                             )}

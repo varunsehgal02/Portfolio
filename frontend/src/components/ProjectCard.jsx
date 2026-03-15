@@ -9,6 +9,8 @@ export default function ProjectCard({ project, index, onOpen }) {
     const hasVideo = project.video && project.video.trim() !== "";
     const hasMedia = hasImage || hasVideo;
     const isComingSoon = !!project.comingSoon;
+    const imageFit = project.coverFit === "contain" ? "contain" : "cover";
+    const imagePosition = project.coverFit === "contain" ? "center top" : "center";
     const normalizedProjectLink = project.link
         ? (project.link.startsWith("http://") || project.link.startsWith("https://") || project.link.startsWith("/")
             ? project.link
@@ -66,6 +68,8 @@ export default function ProjectCard({ project, index, onOpen }) {
                         rotateAmplitude={12}
                         scaleOnHover={1.04}
                         showTooltip={false}
+                        imageFit={imageFit}
+                        imagePosition={imagePosition}
                         displayOverlayContent={!hasImage}
                         overlayContent={
                             <div className="w-full h-full flex items-center justify-center">

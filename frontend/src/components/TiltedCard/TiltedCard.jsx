@@ -23,6 +23,8 @@ export default function TiltedCard({
     showTooltip = false,
     overlayContent = null,
     displayOverlayContent = false,
+    imageFit = 'cover',
+    imagePosition = 'center',
     className = ''
 }) {
     const ref = useRef(null);
@@ -86,7 +88,7 @@ export default function TiltedCard({
                         src={imageSrc}
                         alt={altText}
                         className="tilted-card-img"
-                        style={{ width: imageWidth, height: imageHeight }}
+                        style={{ width: imageWidth, height: imageHeight, objectFit: imageFit, objectPosition: imagePosition }}
                     />
                 ) : (
                     <div className="tilted-card-fallback" aria-label={altText} />
