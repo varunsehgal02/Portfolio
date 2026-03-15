@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { projects, categories } from "@/data/projects";
@@ -52,6 +52,7 @@ export default function ProjectsPage() {
     const [activeBestCategory, setActiveBestCategory] = useState("uiux");
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeModalImage, setActiveModalImage] = useState(0);
+    const [slideDirection, setSlideDirection] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
     const revealImgRef = useRef(null);
 
@@ -129,12 +130,48 @@ export default function ProjectsPage() {
     const openProjectModal = (project) => {
         setSelectedProject(project);
         setActiveModalImage(0);
+        setSlideDirection(1);
     };
 
     const modalGallery = selectedProject ? getProjectGallery(selectedProject) : [];
     const modalImageClass = selectedProject?.coverFit === "contain"
         ? "w-full h-full object-contain bg-black p-2"
         : "w-full h-full object-cover";
+
+    const navigateModalImage = useCallback(
+        (direction) => {
+            if (modalGallery.length <= 1) return;
+            setSlideDirection(direction);
+            setActiveModalImage((prev) => (prev + direction + modalGallery.length) % modalGallery.length);
+        },
+        [modalGallery.length]
+    );
+
+    const selectModalImage = useCallback(
+        (nextIndex) => {
+            if (nextIndex === activeModalImage) return;
+            setSlideDirection(nextIndex > activeModalImage ? 1 : -1);
+            setActiveModalImage(nextIndex);
+        },
+        [activeModalImage]
+    );
+
+    useEffect(() => {
+        if (!selectedProject || modalGallery.length <= 1) return;
+
+        const handleKeyDown = (event) => {
+            if (event.key === "ArrowRight") {
+                event.preventDefault();
+                navigateModalImage(1);
+            } else if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                navigateModalImage(-1);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [selectedProject, modalGallery.length, navigateModalImage]);
 
     return (
         <div className="relative pt-0 pb-20">
@@ -384,19 +421,44 @@ export default function ProjectsPage() {
                                 <div className="h-full grid grid-cols-1 lg:grid-cols-2">
                                     <div className="relative bg-[#0c0c0c] min-h-[260px] border-r border-border/80">
                                         {modalGallery[activeModalImage] ? (
-                                            <img
-                                                src={modalGallery[activeModalImage]}
-                                                alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
-                                                className={modalImageClass}
-                                            />
+                                            <AnimatePresence mode="wait" initial={false}>
+                                                <motion.img
+                                                    key={`${modalGallery[activeModalImage]}-${activeModalImage}`}
+                                                    src={modalGallery[activeModalImage]}
+                                                    alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
+                                                    className={modalImageClass}
+                                                    initial={{ opacity: 0, x: slideDirection * 42, scale: 0.985 }}
+                                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, x: slideDirection * -42, scale: 0.985 }}
+                                                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                                                />
+                                            </AnimatePresence>
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-7xl">{selectedProject.icon}</div>
+                                        )}
+                                        {modalGallery.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={() => navigateModalImage(-1)}
+                                                    className="absolute top-1/2 left-3 -translate-y-1/2 w-10 h-10 rounded-full border border-primary/30 bg-black/55 text-primary-light hover:bg-black/75 transition-colors"
+                                                    aria-label="Previous image"
+                                                >
+                                                    &lt;
+                                                </button>
+                                                <button
+                                                    onClick={() => navigateModalImage(1)}
+                                                    className="absolute top-1/2 right-3 -translate-y-1/2 w-10 h-10 rounded-full border border-primary/30 bg-black/55 text-primary-light hover:bg-black/75 transition-colors"
+                                                    aria-label="Next image"
+                                                >
+                                                    &gt;
+                                                </button>
+                                            </>
                                         )}
                                         <div className="absolute bottom-3 left-3 right-3 flex gap-2 overflow-x-auto pb-1 pr-1">
                                             {modalGallery.map((item, i) => (
                                                 <button
                                                     key={`${item}-${i}`}
-                                                    onClick={() => setActiveModalImage(i)}
+                                                    onClick={() => selectModalImage(i)}
                                                     className={`w-16 h-12 shrink-0 rounded-md overflow-hidden border ${activeModalImage === i ? "border-primary shadow-[0_0_0_1px_rgba(230,255,0,0.25)]" : "border-border"}`}
                                                 >
                                                     <img src={item} alt={`thumb ${i + 1}`} className={selectedProject?.coverFit === "contain" ? "w-full h-full object-contain bg-black/60" : "w-full h-full object-cover"} />
