@@ -18,19 +18,14 @@ export default function ProjectsPage() {
     const content = useEditableData("projectsContent", projectsPageContent);
     const requiredClubGallery = useMemo(
         () => [
-            "/projects/xlnc-1.png",
-            "/projects/xlnc-2.png",
-        ],
-        []
-    );
-    const requiredPosterGallery = useMemo(
-        () => [
-            "/projects/xlnc-3.png",
-            "/projects/xlnc-4.png",
-            "/projects/xlnc-5.png",
-            "/projects/xlnc-7.png",
-            "/projects/xlnc-8.png",
-            "/projects/xlnc-9.png",
+            "/projects/club-member-id-1.png",
+            "/projects/club-member-id-2.png",
+            "/projects/club-member-id-3.png",
+            "/projects/club-member-id-4.png",
+            "/projects/club-member-id-5.png",
+            "/projects/club-member-id-6.png",
+            "/projects/club-member-id-7.png",
+            "/projects/club-member-id-8.png",
         ],
         []
     );
@@ -46,34 +41,22 @@ export default function ProjectsPage() {
             });
 
             return merged.map((project) => {
-                if (project?.id === "club-id-cards") {
-                    const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
-                    const fullGallery = [...new Set([...requiredClubGallery, ...currentGallery])].filter((img) => img !== "/projects/xlnc-6.png");
+                if (project?.id !== "club-id-cards") return project;
 
-                    return {
-                        ...project,
-                        coverFit: "contain",
-                        image: requiredClubGallery[0],
-                        gallery: fullGallery,
-                    };
-                }
+                const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
+                const sanitizedGallery = currentGallery.filter((img) => !img.includes("/projects/xlnc-"));
+                const gallery = [...new Set([...requiredClubGallery, ...sanitizedGallery])];
+                const image = requiredClubGallery[0];
 
-                if (project?.id === "gaming-team-posters") {
-                    const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
-                    const fullGallery = [...new Set([...requiredPosterGallery, ...currentGallery])].filter((img) => img !== "/projects/xlnc-6.png");
-
-                    return {
-                        ...project,
-                        coverFit: "contain",
-                        image: requiredPosterGallery[0],
-                        gallery: fullGallery,
-                    };
-                }
-
-                return project;
+                return {
+                    ...project,
+                    coverFit: "contain",
+                    image,
+                    gallery,
+                };
             });
         },
-        [projectsData, requiredClubGallery, requiredPosterGallery]
+        [projectsData, requiredClubGallery]
     );
 
     const [activeCategory, setActiveCategory] = useState("all");
