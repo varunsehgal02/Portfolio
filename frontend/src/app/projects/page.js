@@ -43,6 +43,32 @@ export default function ProjectsPage() {
         ],
         []
     );
+    const requiredCollegeEventGallery = useMemo(
+        () => [
+            "/projects/project-3-college-event/project-3-placeholder.svg",
+            "/projects/project-3-college-event/p3-01.png",
+            "/projects/project-3-college-event/p3-02.png",
+            "/projects/project-3-college-event/p3-03.png",
+            "/projects/project-3-college-event/p3-04.png",
+            "/projects/project-3-college-event/p3-05.png",
+            "/projects/project-3-college-event/p3-06.png",
+            "/projects/project-3-college-event/p3-07.png",
+            "/projects/project-3-college-event/p3-08.png",
+            "/projects/project-3-college-event/p3-09.png",
+            "/projects/project-3-college-event/p3-10.png",
+            "/projects/project-3-college-event/p3-11.png",
+            "/projects/project-3-college-event/p3-12.png",
+            "/projects/project-3-college-event/p3-13.png",
+            "/projects/project-3-college-event/p3-14.png",
+            "/projects/project-3-college-event/p3-15.png",
+            "/projects/project-3-college-event/p3-16.png",
+            "/projects/project-3-college-event/p3-17.png",
+            "/projects/project-3-college-event/p3-18.png",
+            "/projects/project-3-college-event/p3-19.png",
+            "/projects/project-3-college-event/p3-20.png",
+        ],
+        []
+    );
     const normalizedProjectsData = useMemo(
         () => {
             const source = Array.isArray(projectsData) ? projectsData : [];
@@ -81,10 +107,25 @@ export default function ProjectsPage() {
                     };
                 }
 
+                if (project?.id === "college-event-merch") {
+                    const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
+                    const sanitizedGallery = currentGallery.filter(
+                        (img) => !img.includes("/projects/club-member-id-") && !img.includes("/projects/xlnc-")
+                    );
+                    const gallery = [...new Set([...requiredCollegeEventGallery, ...sanitizedGallery])];
+
+                    return {
+                        ...project,
+                        coverFit: "contain",
+                        image: requiredCollegeEventGallery[0],
+                        gallery,
+                    };
+                }
+
                 return project;
             });
         },
-        [projectsData, requiredClubGallery, requiredGamingGallery]
+        [projectsData, requiredClubGallery, requiredGamingGallery, requiredCollegeEventGallery]
     );
 
     const [activeCategory, setActiveCategory] = useState("all");
@@ -324,7 +365,14 @@ export default function ProjectsPage() {
                                     }`}
                                 aria-label={`Show ${item.label} reveal`}
                             >
-                                <img src={item.image} alt={item.label} className="w-full h-full object-cover" />
+                                <img
+                                    src={item.image}
+                                    alt={item.label}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                    fetchPriority="low"
+                                />
                                 <div className="absolute inset-0 bg-black/35 group-hover:bg-black/10 transition-colors" />
                             </button>
                         ))}
@@ -354,6 +402,9 @@ export default function ProjectsPage() {
                         src={revealImage}
                         alt="Project reveal"
                         className={revealMedia?.fit === "contain" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
                         style={{
                             objectPosition: revealMedia?.position || "center",
                             padding: revealMedia?.fit === "contain" ? "2rem 8vw" : 0,
@@ -448,7 +499,14 @@ export default function ProjectsPage() {
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
                             {featuredProject.image ? (
-                                <img src={featuredProject.image} alt={featuredProject.title} className={`w-full h-full ${featuredImageFit} scale-105 group-hover:scale-110 transition-transform duration-700`} />
+                                <img
+                                    src={featuredProject.image}
+                                    alt={featuredProject.title}
+                                    className={`w-full h-full ${featuredImageFit} scale-105 group-hover:scale-110 transition-transform duration-700`}
+                                    loading="eager"
+                                    decoding="async"
+                                    fetchPriority="high"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
                             )}
@@ -508,6 +566,9 @@ export default function ProjectsPage() {
                                                     src={modalGallery[activeModalImage]}
                                                     alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
                                                     className={modalImageClass}
+                                                    loading="eager"
+                                                    decoding="async"
+                                                    fetchPriority="high"
                                                     initial={{ opacity: 0, x: slideDirection * 42, scale: 0.985 }}
                                                     animate={{ opacity: 1, x: 0, scale: 1 }}
                                                     exit={{ opacity: 0, x: slideDirection * -42, scale: 0.985 }}
@@ -542,7 +603,14 @@ export default function ProjectsPage() {
                                                     onClick={() => selectModalImage(i)}
                                                     className={`w-16 h-12 shrink-0 rounded-md overflow-hidden border ${activeModalImage === i ? "border-primary shadow-[0_0_0_1px_rgba(230,255,0,0.25)]" : "border-border"}`}
                                                 >
-                                                    <img src={item} alt={`thumb ${i + 1}`} className={selectedProject?.coverFit === "contain" ? "w-full h-full object-contain bg-black/60" : "w-full h-full object-cover"} />
+                                                    <img
+                                                        src={item}
+                                                        alt={`thumb ${i + 1}`}
+                                                        className={selectedProject?.coverFit === "contain" ? "w-full h-full object-contain bg-black/60" : "w-full h-full object-cover"}
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                        fetchPriority="low"
+                                                    />
                                                 </button>
                                             ))}
                                         </div>

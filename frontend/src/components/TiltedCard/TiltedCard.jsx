@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import './TiltedCard.css';
 
@@ -28,6 +28,11 @@ export default function TiltedCard({
     className = ''
 }) {
     const ref = useRef(null);
+    const [hasImageError, setHasImageError] = useState(false);
+
+    useEffect(() => {
+        setHasImageError(false);
+    }, [imageSrc]);
 
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -83,11 +88,15 @@ export default function TiltedCard({
                     scale
                 }}
             >
-                {imageSrc ? (
+                {imageSrc && !hasImageError ? (
                     <motion.img
                         src={imageSrc}
                         alt={altText}
                         className="tilted-card-img"
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
+                        onError={() => setHasImageError(true)}
                         style={{ width: imageWidth, height: imageHeight, objectFit: imageFit, objectPosition: imagePosition }}
                     />
                 ) : (
