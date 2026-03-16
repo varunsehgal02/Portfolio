@@ -257,7 +257,7 @@ export default function ContactPage() {
                     <div className="relative w-full h-full">
                         <StickerPeel
                             className="pointer-events-auto"
-                            imageSrc="/projects/social-media.png"
+                            imageSrc="/stickers/please-hire-me-heavy-tf2.png"
                             dragHandleLabel="Pull & Move"
                             width={190}
                             rotate={0}

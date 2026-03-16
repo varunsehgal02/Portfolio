@@ -31,15 +31,15 @@ export default function ProjectsPage() {
     );
     const requiredGamingGallery = useMemo(
         () => [
-            "/projects/xlnc-1.png",
-            "/projects/xlnc-2.png",
-            "/projects/xlnc-3.png",
-            "/projects/xlnc-4.png",
-            "/projects/xlnc-5.png",
-            "/projects/xlnc-6.png",
-            "/projects/xlnc-7.png",
-            "/projects/xlnc-8.png",
-            "/projects/xlnc-9.png",
+            "/projects/xlnc-1.jpg",
+            "/projects/xlnc-2.jpg",
+            "/projects/xlnc-3.jpg",
+            "/projects/xlnc-4.jpg",
+            "/projects/xlnc-5.jpg",
+            "/projects/xlnc-6.jpg",
+            "/projects/xlnc-7.jpg",
+            "/projects/xlnc-8.jpg",
+            "/projects/xlnc-9.jpg",
         ],
         []
     );
@@ -116,7 +116,17 @@ export default function ProjectsPage() {
 
     const revealByCategory = useMemo(() => {
         const uiux = normalizedProjectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
-        const graphic = normalizedProjectsData.find((p) => p.category === "graphic" && p.image)?.image || "/projects/social-media.png";
+        const graphicPool = normalizedProjectsData
+            .filter((p) => p.category === "graphic")
+            .flatMap((p) => {
+                const gallery = Array.isArray(p.gallery) ? p.gallery.filter(Boolean) : [];
+                const cover = p.image ? [p.image] : [];
+                return [...gallery, ...cover];
+            });
+        const uniqueGraphicPool = [...new Set(graphicPool)];
+        const graphic = uniqueGraphicPool.length > 0
+            ? uniqueGraphicPool[Math.floor(Math.random() * uniqueGraphicPool.length)]
+            : "/projects/social-media.png";
         const motion = normalizedProjectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
 
         return {
