@@ -114,20 +114,46 @@ export default function ProjectsPage() {
             ? normalizedProjectsData
             : normalizedProjectsData.filter((p) => p.category === activeCategory);
 
+    const pickRandomItem = (items) => items[Math.floor(Math.random() * items.length)];
+
+    function getProjectGallery(project) {
+        const categoryFallback = {
+            uiux: ["/projects/saas-dashboard.png", "/projects/mobile-app.png"],
+            graphic: ["/projects/social-media.png", "/projects/saas-dashboard.png"],
+            motion: ["/projects/mobile-app.png", "/projects/social-media.png"],
+        };
+
+        const gallery = Array.isArray(project?.gallery) ? project.gallery.filter(Boolean) : [];
+        const base = project?.image ? [project.image] : [];
+        if (gallery.length > 0) {
+            return [...new Set([...gallery, ...base])];
+        }
+        const fallbacks = categoryFallback[project?.category] || [];
+        const merged = [...gallery, ...base, ...fallbacks];
+        return [...new Set(merged)];
+    }
+
     const revealByCategory = useMemo(() => {
-        const uiux = normalizedProjectsData.find((p) => p.category === "uiux" && p.image)?.image || "/projects/saas-dashboard.png";
-        const graphicPool = normalizedProjectsData
-            .filter((p) => p.category === "graphic")
-            .flatMap((p) => {
-                const gallery = Array.isArray(p.gallery) ? p.gallery.filter(Boolean) : [];
-                const cover = p.image ? [p.image] : [];
-                return [...gallery, ...cover];
-            });
-        const uniqueGraphicPool = [...new Set(graphicPool)];
-        const graphic = uniqueGraphicPool.length > 0
-            ? uniqueGraphicPool[Math.floor(Math.random() * uniqueGraphicPool.length)]
-            : "/projects/social-media.png";
-        const motion = normalizedProjectsData.find((p) => p.category === "motion" && p.image)?.image || "/projects/mobile-app.png";
+        const pickRandomCategoryImage = (category, fallback) => {
+            const categoryProjects = normalizedProjectsData.filter((project) => project.category === category);
+
+            if (categoryProjects.length === 0) {
+                return fallback;
+            }
+
+            const randomProject = pickRandomItem(categoryProjects);
+            const projectMedia = getProjectGallery(randomProject);
+
+            if (projectMedia.length === 0) {
+                return fallback;
+            }
+
+            return pickRandomItem(projectMedia);
+        };
+
+        const uiux = pickRandomCategoryImage("uiux", "/projects/saas-dashboard.png");
+        const graphic = pickRandomCategoryImage("graphic", "/projects/social-media.png");
+        const motion = pickRandomCategoryImage("motion", "/projects/mobile-app.png");
 
         return {
             uiux,
@@ -153,23 +179,6 @@ export default function ProjectsPage() {
         { id: "graphic", label: "Graphic", image: revealByCategory.graphic },
         { id: "motion", label: "Motion", image: revealByCategory.motion },
     ];
-
-    const getProjectGallery = (project) => {
-        const categoryFallback = {
-            uiux: ["/projects/saas-dashboard.png", "/projects/mobile-app.png"],
-            graphic: ["/projects/social-media.png", "/projects/saas-dashboard.png"],
-            motion: ["/projects/mobile-app.png", "/projects/social-media.png"],
-        };
-
-        const gallery = Array.isArray(project?.gallery) ? project.gallery.filter(Boolean) : [];
-        const base = project?.image ? [project.image] : [];
-        if (gallery.length > 0) {
-            return [...new Set([...gallery, ...base])];
-        }
-        const fallbacks = categoryFallback[project?.category] || [];
-        const merged = [...gallery, ...base, ...fallbacks];
-        return [...new Set(merged)];
-    };
 
     const normalizedSelectedProjectLink = selectedProject?.link
         ? (selectedProject.link.startsWith("http://") || selectedProject.link.startsWith("https://") || selectedProject.link.startsWith("/")
