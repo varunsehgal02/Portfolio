@@ -43,32 +43,27 @@ export default function ProjectsPage() {
         ],
         []
     );
-    const requiredCollegeEventGallery = useMemo(
-        () => [
-            "/projects/project-3-college-event/project-3-placeholder.svg",
-            "/projects/project-3-college-event/p3-01.png",
-            "/projects/project-3-college-event/p3-02.png",
-            "/projects/project-3-college-event/p3-03.png",
-            "/projects/project-3-college-event/p3-04.png",
-            "/projects/project-3-college-event/p3-05.png",
-            "/projects/project-3-college-event/p3-06.png",
-            "/projects/project-3-college-event/p3-07.png",
-            "/projects/project-3-college-event/p3-08.png",
-            "/projects/project-3-college-event/p3-09.png",
-            "/projects/project-3-college-event/p3-10.png",
-            "/projects/project-3-college-event/p3-11.png",
-            "/projects/project-3-college-event/p3-12.png",
-            "/projects/project-3-college-event/p3-13.png",
-            "/projects/project-3-college-event/p3-14.png",
-            "/projects/project-3-college-event/p3-15.png",
-            "/projects/project-3-college-event/p3-16.png",
-            "/projects/project-3-college-event/p3-17.png",
-            "/projects/project-3-college-event/p3-18.png",
-            "/projects/project-3-college-event/p3-19.png",
-            "/projects/project-3-college-event/p3-20.png",
-        ],
-        []
-    );
+    const [project3Gallery, setProject3Gallery] = useState([]);
+
+    useEffect(() => {
+        let mounted = true;
+
+        fetch("/api/project3-images", { cache: "no-store" })
+            .then((res) => (res.ok ? res.json() : { images: [] }))
+            .then((data) => {
+                if (!mounted) return;
+                const images = Array.isArray(data?.images) ? data.images.filter(Boolean) : [];
+                setProject3Gallery(images);
+            })
+            .catch(() => {
+                if (!mounted) return;
+                setProject3Gallery([]);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
     const normalizedProjectsData = useMemo(
         () => {
             const source = Array.isArray(projectsData) ? projectsData : [];
@@ -108,16 +103,12 @@ export default function ProjectsPage() {
                 }
 
                 if (project?.id === "college-event-merch") {
-                    const currentGallery = Array.isArray(project.gallery) ? project.gallery.filter(Boolean) : [];
-                    const sanitizedGallery = currentGallery.filter(
-                        (img) => !img.includes("/projects/club-member-id-") && !img.includes("/projects/xlnc-")
-                    );
-                    const gallery = [...new Set([...requiredCollegeEventGallery, ...sanitizedGallery])];
+                    const gallery = [...new Set(project3Gallery)];
 
                     return {
                         ...project,
                         coverFit: "contain",
-                        image: requiredCollegeEventGallery[0],
+                        image: gallery[0] || "",
                         gallery,
                     };
                 }
@@ -125,7 +116,7 @@ export default function ProjectsPage() {
                 return project;
             });
         },
-        [projectsData, requiredClubGallery, requiredGamingGallery, requiredCollegeEventGallery]
+        [projectsData, requiredClubGallery, requiredGamingGallery, project3Gallery]
     );
 
     const [activeCategory, setActiveCategory] = useState("all");
