@@ -94,7 +94,7 @@ export default function ProjectsPage() {
     const [activeModalImage, setActiveModalImage] = useState(0);
     const [slideDirection, setSlideDirection] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
-    const revealImgRef = useRef(null);
+    const revealMaskRef = useRef(null);
 
     useEffect(() => {
         const syncViewport = () => setIsMobile(window.innerWidth < 768);
@@ -258,14 +258,14 @@ export default function ProjectsPage() {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    const el = revealImgRef.current;
+                    const el = revealMaskRef.current;
                     if (el) {
                         el.style.setProperty("--mx", `${x}px`);
                         el.style.setProperty("--my", `${y}px`);
                     }
                 }}
                 onMouseLeave={() => {
-                    const el = revealImgRef.current;
+                    const el = revealMaskRef.current;
                     if (el) {
                         el.style.setProperty("--mx", "-9999px");
                         el.style.setProperty("--my", "-9999px");
@@ -331,24 +331,15 @@ export default function ProjectsPage() {
                     </motion.div>
                 </div>
 
-                <img
-                    ref={revealImgRef}
-                    src={revealImage}
-                    alt="Project reveal"
-                    className={revealMedia?.fit === "contain" ? "object-contain" : "object-cover"}
+                <div
+                    ref={revealMaskRef}
                     style={{
                         position: "absolute",
                         inset: 0,
-                        width: "100%",
-                        height: "100%",
                         zIndex: 5,
                         mixBlendMode: "lighten",
                         opacity: revealMedia?.fit === "contain" ? 0.32 : 0.22,
                         pointerEvents: "none",
-                        objectPosition: revealMedia?.position || "center",
-                        padding: revealMedia?.fit === "contain" ? "2rem 8vw" : 0,
-                        transform: revealMedia?.fit === "contain" ? "scale(1.04)" : "scale(1.08)",
-                        filter: revealMedia?.fit === "contain" ? "drop-shadow(0 24px 48px rgba(0,0,0,0.45))" : "saturate(0.95)",
                         "--mx": "-9999px",
                         "--my": "-9999px",
                         WebkitMaskImage:
@@ -358,7 +349,19 @@ export default function ProjectsPage() {
                         WebkitMaskRepeat: "no-repeat",
                         maskRepeat: "no-repeat",
                     }}
-                />
+                >
+                    <img
+                        src={revealImage}
+                        alt="Project reveal"
+                        className={revealMedia?.fit === "contain" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+                        style={{
+                            objectPosition: revealMedia?.position || "center",
+                            padding: revealMedia?.fit === "contain" ? "2rem 8vw" : 0,
+                            transform: revealMedia?.fit === "contain" ? "scale(1.04)" : "scale(1.08)",
+                            filter: revealMedia?.fit === "contain" ? "drop-shadow(0 24px 48px rgba(0,0,0,0.45))" : "saturate(0.95)",
+                        }}
+                    />
+                </div>
             </section>
 
             <section className="relative z-[1] max-w-7xl mx-auto px-6 mt-16 mb-10">
