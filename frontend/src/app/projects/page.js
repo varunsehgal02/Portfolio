@@ -261,7 +261,7 @@ export default function ProjectsPage() {
                     const el = revealImgRef.current;
                     if (el) {
                         el.style.setProperty("--mx", `${x}px`);
-                        el.style.setProperty("--my", `${y + rect.height * 0.42}px`);
+                        el.style.setProperty("--my", `${y}px`);
                     }
                 }}
                 onMouseLeave={() => {
