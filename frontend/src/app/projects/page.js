@@ -138,17 +138,29 @@ export default function ProjectsPage() {
             const categoryProjects = normalizedProjectsData.filter((project) => project.category === category);
 
             if (categoryProjects.length === 0) {
-                return fallback;
+                return {
+                    src: fallback,
+                    fit: category === "graphic" ? "contain" : "cover",
+                    position: "center",
+                };
             }
 
             const randomProject = pickRandomItem(categoryProjects);
             const projectMedia = getProjectGallery(randomProject);
 
             if (projectMedia.length === 0) {
-                return fallback;
+                return {
+                    src: fallback,
+                    fit: category === "graphic" ? "contain" : "cover",
+                    position: "center",
+                };
             }
 
-            return pickRandomItem(projectMedia);
+            return {
+                src: pickRandomItem(projectMedia),
+                fit: randomProject?.coverFit === "contain" || category === "graphic" ? "contain" : "cover",
+                position: randomProject?.coverFit === "contain" ? "center top" : "center",
+            };
         };
 
         const uiux = pickRandomCategoryImage("uiux", "/projects/saas-dashboard.png");
@@ -162,7 +174,8 @@ export default function ProjectsPage() {
         };
     }, [normalizedProjectsData]);
 
-    const revealImage = revealByCategory[activeRevealCategory];
+    const revealMedia = revealByCategory[activeRevealCategory];
+    const revealImage = revealMedia?.src;
     const bestByCategory = useMemo(
         () => ({
             uiux: normalizedProjectsData.find((p) => p.category === "uiux") || normalizedProjectsData[0],
@@ -175,9 +188,9 @@ export default function ProjectsPage() {
     const featuredImageFit = featuredProject?.coverFit === "contain" ? "object-contain bg-black/55 p-3" : "object-cover";
 
     const revealThumbs = [
-        { id: "uiux", label: "UI/UX", image: revealByCategory.uiux },
-        { id: "graphic", label: "Graphic", image: revealByCategory.graphic },
-        { id: "motion", label: "Motion", image: revealByCategory.motion },
+        { id: "uiux", label: "UI/UX", image: revealByCategory.uiux.src },
+        { id: "graphic", label: "Graphic", image: revealByCategory.graphic.src },
+        { id: "motion", label: "Motion", image: revealByCategory.motion.src },
     ];
 
     const normalizedSelectedProjectLink = selectedProject?.link
@@ -194,8 +207,8 @@ export default function ProjectsPage() {
 
     const modalGallery = selectedProject ? getProjectGallery(selectedProject) : [];
     const modalImageClass = selectedProject?.coverFit === "contain"
-        ? "w-full h-full object-contain bg-black p-2"
-        : "w-full h-full object-cover";
+        ? "block w-full h-full object-contain bg-black/40 p-4"
+        : "block w-full h-full object-cover";
 
     const navigateModalImage = useCallback(
         (direction) => {
@@ -322,14 +335,20 @@ export default function ProjectsPage() {
                     ref={revealImgRef}
                     src={revealImage}
                     alt="Project reveal"
+                    className={revealMedia?.fit === "contain" ? "object-contain" : "object-cover"}
                     style={{
                         position: "absolute",
+                        inset: 0,
                         width: "100%",
-                        top: "-50%",
+                        height: "100%",
                         zIndex: 5,
                         mixBlendMode: "lighten",
-                        opacity: 0.24,
+                        opacity: revealMedia?.fit === "contain" ? 0.32 : 0.22,
                         pointerEvents: "none",
+                        objectPosition: revealMedia?.position || "center",
+                        padding: revealMedia?.fit === "contain" ? "2rem 8vw" : 0,
+                        transform: revealMedia?.fit === "contain" ? "scale(1.04)" : "scale(1.08)",
+                        filter: revealMedia?.fit === "contain" ? "drop-shadow(0 24px 48px rgba(0,0,0,0.45))" : "saturate(0.95)",
                         "--mx": "-9999px",
                         "--my": "-9999px",
                         WebkitMaskImage:
@@ -466,7 +485,7 @@ export default function ProjectsPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm p-4 sm:p-8"
+                            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8"
                             onClick={() => setSelectedProject(null)}
                         >
                             <motion.div
@@ -474,11 +493,11 @@ export default function ProjectsPage() {
                                 animate={{ y: 0, opacity: 1, scale: 1 }}
                                 exit={{ y: 24, opacity: 0, scale: 0.98 }}
                                 transition={{ duration: 0.25 }}
-                                className="max-w-5xl mx-auto h-full max-h-[90vh] rounded-2xl border border-primary/20 overflow-hidden bg-[#111111] shadow-[0_28px_80px_rgba(0,0,0,0.5)]"
+                                className="w-full max-w-6xl h-[min(88vh,760px)] rounded-2xl border border-primary/20 overflow-hidden bg-[#111111] shadow-[0_28px_80px_rgba(0,0,0,0.5)]"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="h-full grid grid-cols-1 lg:grid-cols-2">
-                                    <div className="relative bg-[#0c0c0c] min-h-[260px] border-r border-border/80">
+                                <div className="h-full grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+                                    <div className="relative flex items-center justify-center bg-[#0c0c0c] min-h-[320px] lg:min-h-0 border-b lg:border-b-0 lg:border-r border-border/80 overflow-hidden">
                                         {modalGallery[activeModalImage] ? (
                                             <AnimatePresence mode="wait" initial={false}>
                                                 <motion.img
@@ -526,7 +545,7 @@ export default function ProjectsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="p-5 sm:p-6 overflow-y-auto bg-[linear-gradient(180deg,#151515_0%,#101010_100%)]">
+                                    <div className="p-5 sm:p-6 overflow-y-auto bg-[linear-gradient(180deg,#151515_0%,#101010_100%)] min-h-0">
                                         <div className="flex items-start justify-between gap-4 mb-3">
                                             <h3 className="text-2xl sm:text-3xl font-display text-text-primary font-bold">{selectedProject.title}</h3>
                                             <button
