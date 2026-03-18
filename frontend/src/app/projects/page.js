@@ -145,10 +145,18 @@ export default function ProjectsPage() {
     }, [activeCategory]);
 
     const safeCategoriesData = Array.isArray(categoriesData) ? categoriesData : categories;
+    const categoryPriority = { uiux: 0, graphic: 1, motion: 2 };
+    const sortedProjects = [...normalizedProjectsData].sort((a, b) => {
+        const aPriority = categoryPriority[a?.category] ?? 99;
+        const bPriority = categoryPriority[b?.category] ?? 99;
+        if (aPriority !== bPriority) return aPriority - bPriority;
+        return (a?.title || "").localeCompare(b?.title || "");
+    });
+
     const filteredProjects =
         activeCategory === "all"
-            ? normalizedProjectsData
-            : normalizedProjectsData.filter((p) => p.category === activeCategory);
+            ? sortedProjects
+            : sortedProjects.filter((p) => p.category === activeCategory);
 
     const pickRandomItem = (items) => items[Math.floor(Math.random() * items.length)];
 
