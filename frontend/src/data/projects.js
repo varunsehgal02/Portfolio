@@ -113,7 +113,7 @@ export const projects = [
         tools: ["Next.js 14", "Tailwind CSS", "Framer Motion", "OpenAI API", "Pinecone"],
         gradient: "from-violet-600 via-violet-500 to-slate-900",
         icon: "🤖",
-        link: "",
+        link: "https://www.figma.com/design/ezDh2NmBto6iv7xaQNs3Ha/MInoe-2?node-id=11-1842&t=D0d6g1PNWQj98hFH-1",
         image: "/projects/interviewai-cover.png",
         coverFit: "cover",
         gallery: [
