@@ -101,7 +101,7 @@ export const projects = [
     {
         id: "interviewai",
         title: "InterviewAI",
-        category: "web",
+        category: "uiux",
         description: "AI-powered platform for interview preparation combining real-time mock interviews with performance analytics and personalized learning paths.",
         highlights: [
             "AI Mock Interviewer",
@@ -147,7 +147,7 @@ export const projects = [
 
 export const categories = [
     { id: "all", label: "All Projects" },
+    { id: "uiux", label: "UI/UX Design" },
     { id: "graphic", label: "Graphic Design" },
     { id: "motion", label: "Motion Graphics" },
-    { id: "web", label: "Web & Full-Stack" },
 ];
