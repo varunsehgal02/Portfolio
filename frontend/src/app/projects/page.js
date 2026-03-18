@@ -489,7 +489,17 @@ export default function ProjectsPage() {
                         </div>
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
-                            {featuredProject.image ? (
+                            {featuredProject.video ? (
+                                <video
+                                    src={featuredProject.video}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
+                                    poster={featuredProject.image || undefined}
+                                />
+                            ) : featuredProject.image ? (
                                 <img
                                     src={featuredProject.image}
                                     alt={featuredProject.title}
@@ -619,6 +629,19 @@ export default function ProjectsPage() {
                                             </button>
                                         </div>
                                         <p className="text-text-secondary mb-4">{selectedProject.description}</p>
+
+                                        {selectedProject.image ? (
+                                            <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
+                                                <img
+                                                    src={selectedProject.image}
+                                                    alt={`${selectedProject.title} cover`}
+                                                    className={selectedProject?.coverFit === "contain" ? "w-full h-[180px] object-contain bg-black/45" : "w-full h-[180px] object-cover"}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    fetchPriority="low"
+                                                />
+                                            </div>
+                                        ) : null}
 
                                         {selectedProject.video ? (
                                             <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">

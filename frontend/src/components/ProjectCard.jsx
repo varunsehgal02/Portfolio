@@ -47,16 +47,7 @@ export default function ProjectCard({ project, index, onOpen }) {
                         <span className="text-5xl mb-3">🎬</span>
                         <span className="text-primary-light text-sm font-semibold tracking-widest uppercase">Coming Soon</span>
                     </div>
-                ) : hasVideo ? (
-                    <video
-                        src={project.video}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-56 object-cover"
-                    />
-                ) : (
+                ) : hasImage ? (
                     <TiltedCard
                         imageSrc={hasImage ? project.image : ""}
                         altText={project.title}
@@ -77,6 +68,18 @@ export default function ProjectCard({ project, index, onOpen }) {
                             </div>
                         }
                     />
+                ) : hasVideo ? (
+                    <video
+                        src={project.video}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-56 object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-6xl">{project.icon}</span>
+                    </div>
                 )}
 
                 {/* Overlay gradient on media */}
