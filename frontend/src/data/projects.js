@@ -102,7 +102,7 @@ export const projects = [
         id: "interviewai",
         title: "InterviewAI",
         category: "uiux",
-        description: "AI-powered platform for interview preparation combining real-time mock interviews with performance analytics and personalized learning paths.",
+        description: "UI/UX case study for an AI-powered interview preparation platform that combines adaptive mock interviews, performance insights, and personalized preparation paths.",
         highlights: [
             "AI Mock Interviewer",
             "Real-time Voice/Text Simulation",
@@ -110,22 +110,23 @@ export const projects = [
             "Personalized Roadmap",
             "Resource Vault",
         ],
-        tools: ["Next.js 14", "Tailwind CSS", "Framer Motion", "OpenAI API", "Pinecone"],
+        tools: ["Figma", "Design System", "User Flows", "Wireframing", "Interactive Prototyping"],
         gradient: "from-violet-600 via-violet-500 to-slate-900",
         icon: "🤖",
         link: "https://www.figma.com/design/ezDh2NmBto6iv7xaQNs3Ha/MInoe-2?node-id=11-1842&t=D0d6g1PNWQj98hFH-1",
-        image: "/projects/interviewai-cover.png",
+        image: "/projects/interviewai-cover-1.png",
         coverFit: "cover",
         gallery: [
-            "/projects/interviewai-cover.png",
+            "/projects/interviewai-cover-1.png",
+            "/projects/interviewai-cover-2.png",
         ],
         video: "/projects/interviewai-demo.mp4",
         caseStudy: {
-            vision: "Bridge the gap between candidate skills and recruiter expectations through AI-driven mock interviews and real-time feedback.",
+            vision: "Bridge the gap between candidate skills and recruiter expectations through AI-powered simulation and actionable feedback.",
             challenges: [
-                "Simplified Onboarding: Designed login and profile setup to be completed in under 60 seconds to reduce user drop-off.",
-                "Data Visualization: Condensed complex performance data into clean, digestible cards to prevent information overload.",
-                "Mobile-First: Ensured interview interface is fully responsive for on-the-go practice.",
+                "Simplified Onboarding: Streamlined login and profile setup to be completed within 60 seconds to reduce early drop-off.",
+                "Data Visualization: Condensed dense performance metrics into clear scorecards and heatmaps to avoid information overload.",
+                "Mobile-First Experience: Kept core interview and tracking flows fully responsive for practice on the go.",
             ],
             designSystem: {
                 colors: {
