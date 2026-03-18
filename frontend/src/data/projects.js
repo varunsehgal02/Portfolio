@@ -118,7 +118,6 @@ export const projects = [
         coverFit: "cover",
         gallery: [
             "/projects/interviewai-cover-1.png",
-            "/projects/interviewai-cover-2.png",
         ],
         video: "/projects/interviewai-demo.mp4",
         caseStudy: {

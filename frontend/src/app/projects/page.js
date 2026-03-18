@@ -127,6 +127,9 @@ export default function ProjectsPage() {
     const [slideDirection, setSlideDirection] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
     const revealMaskRef = useRef(null);
+    const safeContent = content && typeof content === "object"
+        ? { ...projectsPageContent, ...content }
+        : projectsPageContent;
 
     useEffect(() => {
         const syncViewport = () => setIsMobile(window.innerWidth < 768);
@@ -141,6 +144,7 @@ export default function ProjectsPage() {
         }
     }, [activeCategory]);
 
+    const safeCategoriesData = Array.isArray(categoriesData) ? categoriesData : categories;
     const filteredProjects =
         activeCategory === "all"
             ? normalizedProjectsData
@@ -220,10 +224,11 @@ export default function ProjectsPage() {
     const featuredImageFit = featuredProject?.coverFit === "contain" ? "object-contain bg-black/55 p-3" : "object-cover";
 
     const revealThumbs = [
-        { id: "uiux", label: "UI/UX", image: revealByCategory.uiux.src },
-        { id: "graphic", label: "Graphic", image: revealByCategory.graphic.src },
-        { id: "motion", label: "Motion", image: revealByCategory.motion.src },
+        { id: "uiux", label: "UI/UX", image: revealByCategory?.uiux?.src || "/projects/saas-dashboard.png" },
+        { id: "graphic", label: "Graphic", image: revealByCategory?.graphic?.src || "/projects/social-media.png" },
+        { id: "motion", label: "Motion", image: revealByCategory?.motion?.src || "/projects/mobile-app.png" },
     ];
+    const featuredTools = Array.isArray(featuredProject?.tools) ? featuredProject.tools : [];
 
     const normalizedSelectedProjectLink = selectedProject?.link
         ? (selectedProject.link.startsWith("http://") || selectedProject.link.startsWith("https://") || selectedProject.link.startsWith("/")
@@ -328,7 +333,7 @@ export default function ProjectsPage() {
                         className="font-display font-bold text-5xl sm:text-6xl md:text-7xl text-text-primary mb-4"
                         style={{ textShadow: "0 8px 24px rgba(0, 0, 0, 0.65)" }}
                     >
-                        {content.heroTitlePrefix} <span className="gradient-text">{content.heroTitleHighlight}</span>
+                        {safeContent.heroTitlePrefix} <span className="gradient-text">{safeContent.heroTitleHighlight}</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -336,7 +341,7 @@ export default function ProjectsPage() {
                         transition={{ duration: 0.6, delay: 0.6 }}
                         className="text-text-secondary text-lg md:text-xl max-w-2xl"
                     >
-                        {content.heroSubtitle}
+                        {safeContent.heroSubtitle}
                     </motion.p>
 
                     <motion.div
@@ -408,7 +413,7 @@ export default function ProjectsPage() {
 
             <section className="relative z-[1] max-w-7xl mx-auto px-6 mt-16 mb-10">
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                    {categoriesData.map((cat) => (
+                    {safeCategoriesData.map((cat) => (
                         <motion.button
                             key={cat.id}
                             onClick={() => setActiveCategory(cat.id)}
@@ -476,11 +481,11 @@ export default function ProjectsPage() {
                                 ))}
                             </div>
                             <h2 className="font-display text-3xl sm:text-4xl text-text-primary font-bold mb-4">
-                                {featuredProject.title}
+                                {featuredProject?.title || "Featured Project"}
                             </h2>
-                            <p className="text-text-secondary leading-relaxed mb-5">{featuredProject.description}</p>
+                            <p className="text-text-secondary leading-relaxed mb-5">{featuredProject?.description || "Explore selected work and detailed case study insights."}</p>
                             <div className="flex flex-wrap gap-2">
-                                {featuredProject.tools.map((tool) => (
+                                {featuredTools.map((tool) => (
                                     <span key={tool} className="px-3 py-1 text-xs rounded-lg border border-primary/20 bg-primary/10 text-primary-light">
                                         {tool}
                                     </span>
@@ -489,7 +494,7 @@ export default function ProjectsPage() {
                         </div>
                         <div className="relative rounded-xl overflow-hidden border border-primary/20 h-80 bg-background/80 backdrop-blur-md group shadow-[0_18px_40px_rgba(0,0,0,0.32)]">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,255,0,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(196,219,0,0.18),transparent_45%)]" />
-                            {featuredProject.video ? (
+                            {featuredProject?.video ? (
                                 <video
                                     src={featuredProject.video}
                                     autoPlay
@@ -499,7 +504,7 @@ export default function ProjectsPage() {
                                     className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
                                     poster={featuredProject.image || undefined}
                                 />
-                            ) : featuredProject.image ? (
+                            ) : featuredProject?.image ? (
                                 <img
                                     src={featuredProject.image}
                                     alt={featuredProject.title}
@@ -509,11 +514,11 @@ export default function ProjectsPage() {
                                     fetchPriority="high"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject.icon}</div>
+                                <div className="w-full h-full flex items-center justify-center text-7xl">{featuredProject?.icon || "✨"}</div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
                             <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs bg-black/45 border border-primary/30 text-primary-light">
-                                {content.featuredPrefix} {activeBestCategory === "uiux" ? "UI/UX" : activeBestCategory === "graphic" ? "Graphic" : "Motion"}
+                                {safeContent.featuredPrefix} {activeBestCategory === "uiux" ? "UI/UX" : activeBestCategory === "graphic" ? "Graphic" : "Motion"}
                             </div>
                         </div>
                     </div>
@@ -632,7 +637,7 @@ export default function ProjectsPage() {
                                         </div>
 
                                         {selectedProject.video ? (
-                                            <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
+                                                <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
                                                 <video
                                                     src={selectedProject.video}
                                                     controls
@@ -642,7 +647,7 @@ export default function ProjectsPage() {
                                         ) : null}
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {selectedProject.highlights.map((h) => (
+                                            {(Array.isArray(selectedProject.highlights) ? selectedProject.highlights : []).map((h) => (
                                                 <div key={h} className="text-sm text-text-secondary bg-surface-light/70 border border-primary/15 rounded-lg px-3 py-2">
                                                     {h}
                                                 </div>
@@ -650,7 +655,7 @@ export default function ProjectsPage() {
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
-                                            {selectedProject.tools.map((tool) => (
+                                            {(Array.isArray(selectedProject.tools) ? selectedProject.tools : []).map((tool) => (
                                                 <span key={tool} className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary-light border border-primary/20">
                                                     {tool}
                                                 </span>
@@ -728,7 +733,7 @@ export default function ProjectsPage() {
                         animate={{ opacity: 1 }}
                         className="text-center py-20"
                     >
-                        <p className="text-text-muted text-lg">{content.emptyCategoryText}</p>
+                        <p className="text-text-muted text-lg">{safeContent.emptyCategoryText}</p>
                     </motion.div>
                 )}
             </section>
