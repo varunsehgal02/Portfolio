@@ -558,7 +558,7 @@ export default function ProjectsPage() {
                                 className="w-full max-w-6xl h-[min(88vh,760px)] rounded-2xl border border-primary/20 overflow-hidden bg-[#111111] shadow-[0_28px_80px_rgba(0,0,0,0.5)]"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="h-full grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+                                <div className="h-full grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
                                     <div className="relative flex items-center justify-center bg-[#0c0c0c] min-h-[320px] lg:min-h-0 border-b lg:border-b-0 lg:border-r border-border/80 overflow-hidden">
                                         {modalGallery[activeModalImage] ? (
                                             <AnimatePresence mode="wait" initial={false}>
@@ -617,31 +617,19 @@ export default function ProjectsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="p-5 sm:p-6 overflow-y-auto bg-[linear-gradient(180deg,#151515_0%,#101010_100%)] min-h-0">
-                                        <div className="flex items-start justify-between gap-4 mb-3">
-                                            <h3 className="text-2xl sm:text-3xl font-display text-text-primary font-bold">{selectedProject.title}</h3>
-                                            <button
-                                                onClick={() => setSelectedProject(null)}
-                                                className="w-9 h-9 rounded-lg border border-primary/20 bg-surface-light/60 text-text-primary hover:bg-primary/10 hover:border-primary/40 transition-colors"
-                                                aria-label="Close"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                        <p className="text-text-secondary mb-4">{selectedProject.description}</p>
+                                    <div className="relative p-5 sm:p-6 overflow-y-auto bg-[linear-gradient(180deg,#151515_0%,#101010_100%)] min-h-0">
+                                        <button
+                                            onClick={() => setSelectedProject(null)}
+                                            className="absolute top-5 right-5 w-9 h-9 rounded-lg border border-primary/20 bg-surface-light/60 text-text-primary hover:bg-primary/10 hover:border-primary/40 transition-colors"
+                                            aria-label="Close"
+                                        >
+                                            ×
+                                        </button>
 
-                                        {selectedProject.image ? (
-                                            <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
-                                                <img
-                                                    src={selectedProject.image}
-                                                    alt={`${selectedProject.title} cover`}
-                                                    className={selectedProject?.coverFit === "contain" ? "w-full h-[180px] object-contain bg-black/45" : "w-full h-[180px] object-cover"}
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                    fetchPriority="low"
-                                                />
-                                            </div>
-                                        ) : null}
+                                        <div className="pr-12">
+                                            <h3 className="text-2xl sm:text-3xl font-display text-text-primary font-bold mb-2">{selectedProject.title}</h3>
+                                            <p className="text-text-secondary mb-4 leading-relaxed">{selectedProject.description}</p>
+                                        </div>
 
                                         {selectedProject.video ? (
                                             <div className="rounded-xl overflow-hidden border border-primary/20 bg-background mb-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
@@ -653,7 +641,7 @@ export default function ProjectsPage() {
                                             </div>
                                         ) : null}
 
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             {selectedProject.highlights.map((h) => (
                                                 <div key={h} className="text-sm text-text-secondary bg-surface-light/70 border border-primary/15 rounded-lg px-3 py-2">
                                                     {h}
@@ -670,24 +658,34 @@ export default function ProjectsPage() {
                                         </div>
 
                                         {selectedProject.caseStudy && (
-                                            <div className="mt-5 pt-5 border-t border-primary/15">
-                                                <h4 className="text-sm font-semibold text-primary-light mb-3">UX Design Challenges</h4>
-                                                {selectedProject.caseStudy.challenges && (
-                                                    <div className="space-y-2 mb-4">
-                                                        {selectedProject.caseStudy.challenges.map((challenge, idx) => (
-                                                            <p key={idx} className="text-xs text-text-secondary leading-relaxed">{challenge}</p>
-                                                        ))}
+                                            <div className="mt-5 pt-5 border-t border-primary/15 space-y-4">
+                                                {selectedProject.caseStudy.vision && (
+                                                    <div>
+                                                        <h4 className="text-sm font-semibold text-primary-light mb-2">Project Vision</h4>
+                                                        <p className="text-xs text-text-secondary leading-relaxed">{selectedProject.caseStudy.vision}</p>
                                                     </div>
                                                 )}
+
+                                                {selectedProject.caseStudy.challenges && (
+                                                    <div>
+                                                        <h4 className="text-sm font-semibold text-primary-light mb-2">UX Design Challenges</h4>
+                                                        <div className="space-y-2">
+                                                            {selectedProject.caseStudy.challenges.map((challenge, idx) => (
+                                                                <p key={idx} className="text-xs text-text-secondary leading-relaxed">• {challenge}</p>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {selectedProject.caseStudy.features && (
-                                                    <>
-                                                        <h4 className="text-sm font-semibold text-primary-light mb-2 mt-3">Key Features</h4>
+                                                    <div>
+                                                        <h4 className="text-sm font-semibold text-primary-light mb-2">Key Features</h4>
                                                         <div className="space-y-1">
                                                             {selectedProject.caseStudy.features.map((feature, idx) => (
                                                                 <p key={idx} className="text-xs text-text-secondary">• {feature}</p>
                                                             ))}
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}
