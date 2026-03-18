@@ -305,7 +305,8 @@ const MagicBento = ({
             )}
             <div className="card-grid bento-section" ref={gridRef}>
                 {cards.map((card, index) => {
-                    const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${enableBorderGlow ? 'magic-bento-card--border-glow' : ''}`;
+                    const hasMedia = (card.mediaType === 'image' || card.mediaType === 'video') && !!card.mediaUrl;
+                    const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${enableBorderGlow ? 'magic-bento-card--border-glow' : ''} ${hasMedia ? 'magic-bento-card--with-media' : 'magic-bento-card--no-media'}`;
                     const cardProps = {
                         className: baseClassName,
                         style: {
@@ -348,7 +349,7 @@ const MagicBento = ({
                                     />
                                 </div>
                             ) : null}
-                            <div className="magic-bento-card__media-shade" aria-hidden="true" />
+                            {hasMedia ? <div className="magic-bento-card__media-shade" aria-hidden="true" /> : null}
                             <div className="magic-bento-card__header">
                                 <div className="magic-bento-card__label">{card.label}</div>
                             </div>
