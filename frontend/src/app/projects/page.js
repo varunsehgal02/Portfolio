@@ -646,6 +646,29 @@ export default function ProjectsPage() {
                                             ))}
                                         </div>
 
+                                        {selectedProject.caseStudy && (
+                                            <div className="mt-5 pt-5 border-t border-primary/15">
+                                                <h4 className="text-sm font-semibold text-primary-light mb-3">UX Design Challenges</h4>
+                                                {selectedProject.caseStudy.challenges && (
+                                                    <div className="space-y-2 mb-4">
+                                                        {selectedProject.caseStudy.challenges.map((challenge, idx) => (
+                                                            <p key={idx} className="text-xs text-text-secondary leading-relaxed">{challenge}</p>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {selectedProject.caseStudy.features && (
+                                                    <>
+                                                        <h4 className="text-sm font-semibold text-primary-light mb-2 mt-3">Key Features</h4>
+                                                        <div className="space-y-1">
+                                                            {selectedProject.caseStudy.features.map((feature, idx) => (
+                                                                <p key={idx} className="text-xs text-text-secondary">• {feature}</p>
+                                                            ))}
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {normalizedSelectedProjectLink && (
                                             <div className="mt-5">
                                                 <a

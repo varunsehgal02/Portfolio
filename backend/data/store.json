@@ -1,7 +1,44 @@
 {
   "content": {},
+  "contacts": [],
   "analytics": {
-    "pageViews": [],
-    "aboutPopupOpens": []
+    "pageViews": [
+      {
+        "id": 1773692404894,
+        "page": "/",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1718,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-16T20:20:04.894Z"
+      },
+      {
+        "id": 1773692461942,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1718,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-16T20:21:01.942Z"
+      },
+      {
+        "id": 1773692473861,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/project",
+        "screenWidth": 1718,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-16T20:21:13.861Z"
+      }
+    ],
+    "aboutPopupOpens": [],
+    "outboundClicks": [],
+    "ipGeoCache": {}
   }
 }

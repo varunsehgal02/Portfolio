@@ -98,10 +98,56 @@ export const projects = [
         video: "",
         comingSoon: true,
     },
+    {
+        id: "interviewai",
+        title: "InterviewAI",
+        category: "web",
+        description: "AI-powered platform for interview preparation combining real-time mock interviews with performance analytics and personalized learning paths.",
+        highlights: [
+            "AI Mock Interviewer",
+            "Real-time Voice/Text Simulation",
+            "Performance Analytics & Heatmaps",
+            "Personalized Roadmap",
+            "Resource Vault",
+        ],
+        tools: ["Next.js 14", "Tailwind CSS", "Framer Motion", "OpenAI API", "Pinecone"],
+        gradient: "from-violet-600 via-violet-500 to-slate-900",
+        icon: "🤖",
+        link: "",
+        image: "/projects/interviewai-cover.png",
+        coverFit: "cover",
+        gallery: [
+            "/projects/interviewai-cover.png",
+        ],
+        video: "",
+        caseStudy: {
+            vision: "Bridge the gap between candidate skills and recruiter expectations through AI-driven mock interviews and real-time feedback.",
+            challenges: [
+                "Simplified Onboarding: Designed login and profile setup to be completed in under 60 seconds to reduce user drop-off.",
+                "Data Visualization: Condensed complex performance data into clean, digestible cards to prevent information overload.",
+                "Mobile-First: Ensured interview interface is fully responsive for on-the-go practice.",
+            ],
+            designSystem: {
+                colors: {
+                    primary: "#7C3AED",
+                    secondary: "#0F172A",
+                },
+                typography: "Inter / Geist Sans",
+                style: "Glassmorphism with subtle glows and dark-mode-first approach",
+            },
+            features: [
+                "Real-time adaptive interview difficulty",
+                "Soft skill vs technical gap identification",
+                "Custom learning paths based on job descriptions",
+                "Community-voted answer library",
+            ],
+        },
+    },
 ];
 
 export const categories = [
     { id: "all", label: "All Projects" },
     { id: "graphic", label: "Graphic Design" },
     { id: "motion", label: "Motion Graphics" },
+    { id: "web", label: "Web & Full-Stack" },
 ];
