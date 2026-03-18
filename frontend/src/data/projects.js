@@ -60,9 +60,9 @@ export const projects = [
     },
     {
         id: "college-event-merch",
-        title: "College Event Merch Design (Project 3)",
+        title: "ID Cards & Merchandise Design",
         category: "graphic",
-        description: "Dedicated Project 3 for college event merchandise, including custom member ID card concepts and T-shirt/hoodie artwork drafts.",
+        description: "Comprehensive design project for event merchandise, featuring custom member ID card concepts and apparel artwork including T-shirts and hoodies.",
         highlights: [
             "Member ID Card Concepts",
             "T-shirt Front and Back Designs",
