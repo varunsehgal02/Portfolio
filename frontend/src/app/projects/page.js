@@ -243,9 +243,7 @@ export default function ProjectsPage() {
     };
 
     const modalGallery = selectedProject ? getProjectGallery(selectedProject) : [];
-    const modalImageClass = selectedProject?.coverFit === "contain"
-        ? "block w-full h-full object-contain bg-black/40 p-4"
-        : "block w-full h-full object-cover";
+    const modalImageClass = "block w-full h-full object-contain bg-black/40 p-4";
 
     const navigateModalImage = useCallback(
         (direction) => {

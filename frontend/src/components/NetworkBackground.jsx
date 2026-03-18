@@ -9,9 +9,12 @@ export default function NetworkBackground({ className = "" }) {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
+        if (!ctx) return;
 
         const pointer = { x: -1000, y: -1000, active: false };
-        const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        const isTouchDevice = typeof window.matchMedia === "function"
+            ? window.matchMedia("(hover: none) and (pointer: coarse)").matches
+            : false;
 
         let width = 0;
         let height = 0;
@@ -22,9 +25,9 @@ export default function NetworkBackground({ className = "" }) {
         const MAX_LINK_DISTANCE = 160;
 
         const resize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = Math.max(window.innerWidth || 0, 1);
+            height = Math.max(window.innerHeight || 0, 1);
+            const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
             canvas.width = Math.floor(width * dpr);
             canvas.height = Math.floor(height * dpr);
             canvas.style.width = `${width}px`;
@@ -55,6 +58,11 @@ export default function NetworkBackground({ className = "" }) {
         };
 
         const animate = () => {
+            if (!width || !height) {
+                rafId = requestAnimationFrame(animate);
+                return;
+            }
+
             ctx.clearRect(0, 0, width, height);
 
             ctx.fillStyle = "rgba(10, 10, 10, 0.58)";
