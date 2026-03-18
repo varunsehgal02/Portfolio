@@ -119,7 +119,7 @@ export const projects = [
         gallery: [
             "/projects/interviewai-cover.png",
         ],
-        video: "",
+        video: "/projects/interviewai-demo.mp4",
         caseStudy: {
             vision: "Bridge the gap between candidate skills and recruiter expectations through AI-driven mock interviews and real-time feedback.",
             challenges: [
