@@ -237,6 +237,52 @@ export const projects = [
             ],
         },
     },
+    {
+        id: "expensify",
+        title: "Expensify",
+        category: "uiux",
+        description: "UI/UX case study for a personal finance manager focused on rapid expense logging, card management, and long-term savings analytics.",
+        highlights: [
+            "Sunset Dark Mode Visual System",
+            "Speed-first Expense Entry Flow",
+            "Digital Wallet and Card Management",
+            "Savings Insights with Rich Data Visualization",
+        ],
+        tools: ["Figma", "Mobile UX", "Design System", "Information Architecture", "Prototyping"],
+        gradient: "from-orange-500 via-purple-700 to-slate-950",
+        icon: "💸",
+        link: "https://www.figma.com/design/3mw8XBHEZ3b8HKNNqcs6U2/Expensify---Budget-Tracker-App?node-id=0-1&t=VDOuL3PJYvuUk1PE-1",
+        image: "/projects/expensify-cover.png",
+        coverFit: "contain",
+        gallery: [
+            "/projects/expensify-cover.png",
+        ],
+        video: "/projects/expensify-demo.mp4",
+        caseStudy: {
+            vision: "Create a personal-finance experience that feels premium and motivating, so users can track spending consistently without feeling overwhelmed.",
+            challenges: [
+                "Reduce friction in repetitive daily input while keeping data accurate and categorized.",
+                "Present complex financial trends in a visual language that remains readable in dark mode.",
+                "Unify security, dashboard, wallet, analytics, and profile screens into one coherent mobile flow.",
+            ],
+            designSystem: {
+                colors: {
+                    background: "#121212",
+                    accents: "Sunset Orange, Deep Purple, Gold",
+                },
+                typography: "Modern high-readability sans-serif",
+                style: "Sunset dark mode with glassmorphism cards, rounded interactive controls, and high-contrast gradients",
+            },
+            features: [
+                "Secure onboarding with PIN or biometric-friendly entry flow",
+                "Dashboard with circular budget trackers and recent transaction stream",
+                "Custom numpad and category tagging for rapid expense logging",
+                "Digital wallet module for linked card management",
+                "Area-chart analytics and savings-goal progress views",
+                "Profile and settings module for account personalization",
+            ],
+        },
+    },
 ];
 
 export const categories = [
