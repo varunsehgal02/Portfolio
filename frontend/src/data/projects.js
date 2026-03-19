@@ -190,6 +190,53 @@ export const projects = [
             ],
         },
     },
+    {
+        id: "cinepass",
+        title: "CinePass",
+        category: "uiux",
+        description: "UI/UX case study for a premium mobile movie-ticketing experience that streamlines discovery, seat selection, and digital ticket management.",
+        highlights: [
+            "Cyber-Neon Dark Mode UI",
+            "4-Tap Booking Lifecycle",
+            "Interactive Seat Selection",
+            "Wallet-style Digital Ticketing",
+        ],
+        tools: ["Figma", "Mobile UX", "Wireframing", "Design System", "Prototyping"],
+        gradient: "from-fuchsia-700 via-indigo-700 to-slate-950",
+        icon: "🎟️",
+        link: "https://www.figma.com/design/0cJQWX8qYssPfK4hmPtdVj/Movie-Ticket-Booking-App-Design?node-id=43-1320&t=JOk84eUC98r5Lpnf-1",
+        image: "/projects/mobile-app.png",
+        coverFit: "contain",
+        gallery: [
+            "/projects/mobile-app.png",
+        ],
+        video: "/projects/cinepass-demo.mp4",
+        caseStudy: {
+            vision: "Design a cinematic booking flow that feels exciting and premium while reducing user friction from movie discovery to ticket entry.",
+            challenges: [
+                "Make dense booking steps feel lightweight and intuitive on small mobile screens.",
+                "Create spatial clarity during seat selection with visual orientation and clear state feedback.",
+                "Maintain consistency across discovery, checkout, and ticket-wallet experiences.",
+            ],
+            designSystem: {
+                colors: {
+                    primary: "#0A0B1E",
+                    accent: "#FF007A",
+                    secondary: "#2D1B4E",
+                },
+                typography: "Poppins / SF Pro",
+                style: "Cyber-neon dark mode with glassmorphism overlays and rounded high-contrast components",
+            },
+            features: [
+                "Home discovery grid with now playing, coming soon, and top movies",
+                "Movie detail flow with dynamic date and time selectors",
+                "Interactive seat map with available, reserved, and selected states",
+                "Curved screen indicator for spatial seat orientation",
+                "Wallet-style digital tickets with barcode or QR entry",
+                "Bottom navigation for fast switching between core actions",
+            ],
+        },
+    },
 ];
 
 export const categories = [
