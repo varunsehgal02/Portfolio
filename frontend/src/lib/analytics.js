@@ -35,7 +35,8 @@ export async function trackPageView(page) {
 
 export async function getVisitHistory() {
   try {
-    return ensureRecordArray(await apiRequest("/analytics/history"));
+    const stamp = Date.now();
+    return ensureRecordArray(await apiRequest(`/analytics/history?ts=${stamp}`, { cache: "no-store" }));
   } catch {
     return [];
   }

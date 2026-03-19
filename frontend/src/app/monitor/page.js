@@ -139,6 +139,7 @@ export default function MonitorPage() {
         if (!confirmed) return;
         try {
             await clearVisitHistory();
+            setHistory([]);
             await loadData();
         } catch (error) {
             window.alert(error?.message || "Failed to clear visit log.");

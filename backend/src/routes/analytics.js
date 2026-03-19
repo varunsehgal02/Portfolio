@@ -6,6 +6,11 @@ const { lookupGeoByIp } = require("../lib/geoip");
 
 const router = express.Router();
 
+router.use((_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 function getClientIp(req) {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.length > 0) {
