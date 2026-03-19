@@ -21,6 +21,7 @@ import {
     resetPageAnalytics,
     deletePageViewById,
     clearAllAnalytics,
+    clearVisitHistory,
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
@@ -130,6 +131,13 @@ export default function MonitorPage() {
         const confirmed = window.confirm("Delete ALL analytics data? This action cannot be undone.");
         if (!confirmed) return;
         await clearAllAnalytics();
+        await loadData();
+    };
+
+    const handleClearVisitLog = async () => {
+        const confirmed = window.confirm("Clear all entries in Visit Log? This will remove visit history data only.");
+        if (!confirmed) return;
+        await clearVisitHistory();
         await loadData();
     };
 
@@ -828,7 +836,7 @@ export default function MonitorPage() {
                                     {groupedHistory.length} IP folders
                                 </span>
                                 <button
-                                    onClick={() => handleDeleteAllAnalytics().catch(() => {})}
+                                    onClick={() => handleClearVisitLog().catch(() => {})}
                                     className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20 transition-colors"
                                 >
                                     Clear All

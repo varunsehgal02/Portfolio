@@ -116,6 +116,12 @@ export async function clearAllAnalytics() {
   });
 }
 
+export async function clearVisitHistory() {
+  await apiRequest("/analytics/history", {
+    method: "DELETE",
+  });
+}
+
 export async function resetPageAnalytics(page) {
   if (!page) return { ok: false };
   return apiRequest(`/analytics/page/${encodeURIComponent(page)}`, {

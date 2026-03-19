@@ -264,6 +264,17 @@ router.delete("/all", requireAuth, async (_req, res) => {
   return res.json({ ok: true });
 });
 
+router.delete("/history", requireAuth, async (_req, res) => {
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.pageViews = [];
+    analytics.timeOnPage = [];
+    analytics.scrollDepths = [];
+  });
+
+  return res.json({ ok: true });
+});
+
 router.get("/history", requireAuth, async (_req, res) => {
   const store = await readStore();
   const analytics = ensureAnalytics(store);
