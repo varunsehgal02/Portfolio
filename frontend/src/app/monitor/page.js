@@ -25,6 +25,8 @@ import {
 } from "@/lib/analytics";
 import { getContactMessages } from "@/lib/contact";
 
+const VISIT_LOG_CLEAR_KEY = "monitor_visit_log_cleared_before";
+
 export default function MonitorPage() {
     const ensureRecordArray = (value) => (Array.isArray(value) ? value.filter((item) => item && typeof item === "object") : []);
     const toSafeDate = (value) => {
@@ -50,6 +52,7 @@ export default function MonitorPage() {
     const [editingLinkedin, setEditingLinkedin] = useState(false);
     const [editingBehance, setEditingBehance] = useState(false);
     const [liveTime, setLiveTime] = useState(new Date());
+    const [visitLogClearedBefore, setVisitLogClearedBefore] = useState(0);
 
     const safeStats = stats && typeof stats === "object"
         ? {
@@ -94,6 +97,15 @@ export default function MonitorPage() {
         }
     }, [loadData]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const raw = window.localStorage.getItem(VISIT_LOG_CLEAR_KEY) || "0";
+        const value = Number(raw);
+        if (Number.isFinite(value) && value > 0) {
+            setVisitLogClearedBefore(value);
+        }
+    }, []);
+
     // Live clock
     useEffect(() => {
         const timer = setInterval(() => setLiveTime(new Date()), 1000);
@@ -137,8 +149,14 @@ export default function MonitorPage() {
     const handleClearVisitLog = async () => {
         const confirmed = window.confirm("Clear all entries in Visit Log? This will remove visit history data only.");
         if (!confirmed) return;
+
+        const clearedAt = Date.now();
+        setVisitLogClearedBefore(clearedAt);
+        if (typeof window !== "undefined") {
+            window.localStorage.setItem(VISIT_LOG_CLEAR_KEY, String(clearedAt));
+        }
+
         try {
-            setHistory([]);
             const result = await clearVisitHistory();
             const remaining = Array.isArray(result?.remaining) ? result.remaining : [];
             setHistory(remaining);
@@ -151,6 +169,17 @@ export default function MonitorPage() {
             window.alert(error?.message || "Failed to clear visit log.");
         }
     };
+
+    const filteredHistory = useMemo(() => {
+        const records = ensureRecordArray(history);
+        if (!visitLogClearedBefore) return records;
+
+        return records.filter((visit) => {
+            const at = new Date(visit?.at || 0).getTime();
+            if (!Number.isFinite(at) || at <= 0) return false;
+            return at >= visitLogClearedBefore;
+        });
+    }, [history, visitLogClearedBefore]);
 
     const socialTrend = useMemo(() => {
         const formatKey = (date) => {
@@ -276,7 +305,7 @@ export default function MonitorPage() {
     const groupedHistory = useMemo(() => {
         const grouped = {};
 
-        ensureRecordArray(history).forEach((visit) => {
+        ensureRecordArray(filteredHistory).forEach((visit) => {
             const ip = visit.ip || "Unknown";
             if (!grouped[ip]) grouped[ip] = [];
             grouped[ip].push(visit);
@@ -297,7 +326,7 @@ export default function MonitorPage() {
                 };
             })
             .sort((a, b) => new Date(b.lastVisitAt).getTime() - new Date(a.lastVisitAt).getTime());
-    }, [history]);
+    }, [filteredHistory]);
 
     const toggleIpFolder = (ip) => {
         loadIpLocation(ip).catch(() => {});
