@@ -137,8 +137,12 @@ export default function MonitorPage() {
     const handleClearVisitLog = async () => {
         const confirmed = window.confirm("Clear all entries in Visit Log? This will remove visit history data only.");
         if (!confirmed) return;
-        await clearVisitHistory();
-        await loadData();
+        try {
+            await clearVisitHistory();
+            await loadData();
+        } catch (error) {
+            window.alert(error?.message || "Failed to clear visit log.");
+        }
     };
 
     const socialTrend = useMemo(() => {
@@ -836,7 +840,7 @@ export default function MonitorPage() {
                                     {groupedHistory.length} IP folders
                                 </span>
                                 <button
-                                    onClick={() => handleClearVisitLog().catch(() => {})}
+                                    onClick={handleClearVisitLog}
                                     className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20 transition-colors"
                                 >
                                     Clear All

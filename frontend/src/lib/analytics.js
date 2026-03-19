@@ -117,9 +117,20 @@ export async function clearAllAnalytics() {
 }
 
 export async function clearVisitHistory() {
-  await apiRequest("/analytics/history", {
-    method: "DELETE",
-  });
+  try {
+    await apiRequest("/analytics/history", {
+      method: "DELETE",
+    });
+  } catch (error) {
+    const message = String(error?.message || "").toLowerCase();
+    if (message.includes("not found") || message.includes("request failed")) {
+      await apiRequest("/analytics/all", {
+        method: "DELETE",
+      });
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function resetPageAnalytics(page) {
