@@ -138,9 +138,15 @@ export default function MonitorPage() {
         const confirmed = window.confirm("Clear all entries in Visit Log? This will remove visit history data only.");
         if (!confirmed) return;
         try {
-            await clearVisitHistory();
             setHistory([]);
+            const result = await clearVisitHistory();
+            const remaining = Array.isArray(result?.remaining) ? result.remaining : [];
+            setHistory(remaining);
             await loadData();
+
+            if ((result?.remainingCount || 0) > 0) {
+                window.alert(`Visit Log was cleared, but ${result.remainingCount} new visit records were received immediately.`);
+            }
         } catch (error) {
             window.alert(error?.message || "Failed to clear visit log.");
         }

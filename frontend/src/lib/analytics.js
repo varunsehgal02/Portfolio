@@ -128,10 +128,30 @@ export async function clearVisitHistory() {
       await apiRequest("/analytics/all", {
         method: "DELETE",
       });
-      return;
+    } else {
+      throw error;
     }
-    throw error;
   }
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const stamp = Date.now();
+    const remaining = ensureRecordArray(
+      await apiRequest(`/analytics/history?ts=${stamp}`, { cache: "no-store" })
+    );
+
+    if (remaining.length === 0) {
+      return { remainingCount: 0, remaining };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  const stamp = Date.now();
+  const remaining = ensureRecordArray(
+    await apiRequest(`/analytics/history?ts=${stamp}`, { cache: "no-store" })
+  );
+
+  return { remainingCount: remaining.length, remaining };
 }
 
 export async function resetPageAnalytics(page) {
