@@ -143,6 +143,53 @@ export const projects = [
             ],
         },
     },
+    {
+        id: "visitrack",
+        title: "VisiTrack",
+        category: "uiux",
+        description: "UI/UX design case study for a SaaS brand-monitoring platform focused on AI-driven analytics, visibility tracking, and actionable performance insights.",
+        highlights: [
+            "Track Your Brand's Digital Footprint",
+            "AI-driven Brand Monitoring Dashboard",
+            "High-converting B2B SaaS Landing Page",
+            "Atomic Design Component System",
+        ],
+        tools: ["Figma", "UX Research", "Wireframing", "Design System", "Component Architecture"],
+        gradient: "from-blue-700 via-cyan-600 to-slate-900",
+        icon: "📈",
+        link: "",
+        image: "/projects/saas-dashboard.png",
+        coverFit: "cover",
+        gallery: [
+            "/projects/saas-dashboard.png",
+        ],
+        video: "/projects/visitrack-demo.mp4",
+        caseStudy: {
+            vision: "Provide complete visibility into brand performance, mentions, and digital presence through a trustworthy, enterprise-grade analytics experience.",
+            challenges: [
+                "Balance information density with clarity in hero and dashboard preview sections for first-time B2B visitors.",
+                "Guide users from awareness to conversion across social proof, feature grid, testimonials, and pricing sections.",
+                "Keep each landing-page module reusable through an atomic design system and component-first structure.",
+            ],
+            designSystem: {
+                colors: {
+                    primary: "Royal Blue",
+                    secondary: "Neutral Whites and Slate Grays",
+                },
+                typography: "Inter / Plus Jakarta Sans",
+                style: "Clean enterprise SaaS aesthetic with generous whitespace and data-first hierarchy",
+            },
+            features: [
+                "Hero section with CTA and product dashboard mockup",
+                "Trusted-by social proof with credibility metrics",
+                "Problem-solution narrative for brand visibility",
+                "Feature grid: real-time monitoring, sentiment analysis, and custom reports",
+                "Interactive preview module with product demo video",
+                "3-step onboarding flow and conversion-oriented pricing tiers",
+                "FAQ module and structured footer for objection handling",
+            ],
+        },
+    },
 ];
 
 export const categories = [
