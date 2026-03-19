@@ -118,19 +118,31 @@ export async function clearAllAnalytics() {
 }
 
 export async function clearVisitHistory() {
-  try {
-    await apiRequest("/analytics/history", {
-      method: "DELETE",
-    });
-  } catch (error) {
-    const message = String(error?.message || "").toLowerCase();
-    if (message.includes("not found") || message.includes("request failed")) {
-      await apiRequest("/analytics/all", {
-        method: "DELETE",
-      });
-    } else {
-      throw error;
+  const clearAttempts = [
+    { path: "/analytics/history/clear", method: "POST" },
+    { path: "/analytics/history", method: "DELETE" },
+    { path: "/analytics/all/clear", method: "POST" },
+    { path: "/analytics/all", method: "DELETE" },
+  ];
+
+  let lastError = null;
+
+  for (const attempt of clearAttempts) {
+    try {
+      await apiRequest(attempt.path, { method: attempt.method });
+      lastError = null;
+      break;
+    } catch (error) {
+      lastError = error;
+      const message = String(error?.message || "").toLowerCase();
+      if (message.includes("missing auth token") || message.includes("invalid or expired token")) {
+        throw error;
+      }
     }
+  }
+
+  if (lastError) {
+    throw lastError;
   }
 
   for (let attempt = 0; attempt < 3; attempt += 1) {

@@ -269,7 +269,34 @@ router.delete("/all", requireAuth, async (_req, res) => {
   return res.json({ ok: true });
 });
 
+router.post("/all/clear", requireAuth, async (_req, res) => {
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.pageViews = [];
+    analytics.aboutPopupOpens = [];
+    analytics.outboundClicks = [];
+    analytics.timeOnPage = [];
+    analytics.scrollDepths = [];
+    analytics.projectClicks = [];
+    analytics.resumeDownloads = [];
+    analytics.ipGeoCache = {};
+  });
+
+  return res.json({ ok: true });
+});
+
 router.delete("/history", requireAuth, async (_req, res) => {
+  await updateStore((store) => {
+    const analytics = ensureAnalytics(store);
+    analytics.pageViews = [];
+    analytics.timeOnPage = [];
+    analytics.scrollDepths = [];
+  });
+
+  return res.json({ ok: true });
+});
+
+router.post("/history/clear", requireAuth, async (_req, res) => {
   await updateStore((store) => {
     const analytics = ensureAnalytics(store);
     analytics.pageViews = [];
