@@ -827,6 +827,12 @@ export default function MonitorPage() {
                                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary-light text-xs font-medium">
                                     {groupedHistory.length} IP folders
                                 </span>
+                                <button
+                                    onClick={() => handleDeleteAllAnalytics().catch(() => {})}
+                                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20 transition-colors"
+                                >
+                                    Clear All
+                                </button>
                             </div>
                         </div>
                         <div className="p-4 sm:p-6 space-y-4">
