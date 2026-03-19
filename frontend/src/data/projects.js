@@ -205,10 +205,10 @@ export const projects = [
         gradient: "from-fuchsia-700 via-indigo-700 to-slate-950",
         icon: "🎟️",
         link: "https://www.figma.com/design/0cJQWX8qYssPfK4hmPtdVj/Movie-Ticket-Booking-App-Design?node-id=43-1320&t=JOk84eUC98r5Lpnf-1",
-        image: "/projects/mobile-app.png",
+        image: "/projects/cinepass-cover.png",
         coverFit: "contain",
         gallery: [
-            "/projects/mobile-app.png",
+            "/projects/cinepass-cover.png",
         ],
         video: "/projects/cinepass-demo.mp4",
         caseStudy: {
