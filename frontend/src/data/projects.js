@@ -157,9 +157,9 @@ export const projects = [
         tools: ["Figma", "UX Research", "Wireframing", "Design System", "Component Architecture"],
         gradient: "from-blue-700 via-cyan-600 to-slate-900",
         icon: "📈",
-        link: "",
+        link: "https://www.figma.com/design/nUSocVTfQLC21SOntsIwWk/Varun_Sehgal_UIUX_8mLabs_Assessment?node-id=0-1&t=2WDOF3oNYKg0K5jO-1",
         image: "/projects/saas-dashboard.png",
-        coverFit: "cover",
+        coverFit: "contain",
         gallery: [
             "/projects/saas-dashboard.png",
         ],
