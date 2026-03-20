@@ -330,7 +330,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     const ang = new THREE.Vector3();
     const rot = new THREE.Vector3();
     const dir = new THREE.Vector3();
-    const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 10, linearDamping: 10 };
+    const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
 
     const { nodes, materials } = useGLTF('/card.glb');
     const texture = useTexture('/lanyard.png');
@@ -370,17 +370,20 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
             vec.add(dir.multiplyScalar(state.camera.position.length()));
             [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
             
-            let nextPos = new THREE.Vector3(vec.x - dragged.x, vec.y - dragged.y, vec.z - dragged.z);
+            let targetPos = new THREE.Vector3(vec.x - dragged.x, vec.y - dragged.y, vec.z - dragged.z);
             if (fixed.current) {
                 const origin = fixed.current.translation();
                 const originVec = new THREE.Vector3(origin.x, origin.y, origin.z);
-                const anchorWorld = nextPos.clone().add(new THREE.Vector3(0, 2.0, 0));
-                if (anchorWorld.distanceTo(originVec) > 3.0) {
-                   anchorWorld.sub(originVec).normalize().multiplyScalar(3.0).add(originVec);
-                   nextPos = anchorWorld.sub(new THREE.Vector3(0, 2.0, 0));
+                const anchorWorld = targetPos.clone().add(new THREE.Vector3(0, 2.0, 0));
+                if (anchorWorld.distanceTo(originVec) > 5.0) {
+                   anchorWorld.sub(originVec).normalize().multiplyScalar(5.0).add(originVec);
+                   targetPos = anchorWorld.sub(new THREE.Vector3(0, 2.0, 0));
                 }
             }
-            card.current?.setNextKinematicTranslation({ x: nextPos.x, y: nextPos.y, z: nextPos.z });
+            const currentPos = card.current.translation();
+            const smoothedPos = new THREE.Vector3(currentPos.x, currentPos.y, currentPos.z);
+            smoothedPos.lerp(targetPos, delta * 15); // Smooth drag interpolation
+            card.current?.setNextKinematicTranslation({ x: smoothedPos.x, y: smoothedPos.y, z: smoothedPos.z });
         }
 
         const fixedPos = fixed.current.translation();
