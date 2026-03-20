@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, extend, useFrame } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
@@ -322,7 +322,6 @@ function useCustomCardTexture() {
 }
 
 function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
-    const { size } = useThree();
     const band = useRef();
     const fixed = useRef();
     const j1 = useRef();
@@ -342,7 +341,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     const [curve] = useState(
         () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
     );
-    const safePointsRef = useRef(curve.getPoints(isMobile ? 16 : 32));
+    const safePointsRef = useRef([]);
+    const hasSafePointsRef = useRef(false);
     const [dragged, drag] = useState(false);
     const [hovered, hover] = useState(false);
 
@@ -385,14 +385,36 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
         curve.points[3].copy(fixed.current.translation());
 
         const nextPoints = curve.getPoints(isMobile ? 16 : 32);
+        const cardPos = card.current.translation();
+        const fixedPos = fixed.current.translation();
+
         const hasInvalidPoint = nextPoints.some(
-            (p) => !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.z) || Math.abs(p.x) > 100 || Math.abs(p.y) > 100 || Math.abs(p.z) > 100
+            (p) =>
+                !Number.isFinite(p.x) ||
+                !Number.isFinite(p.y) ||
+                !Number.isFinite(p.z) ||
+                Math.abs(p.x) > 20 ||
+                Math.abs(p.y) > 20 ||
+                Math.abs(p.z) > 20 ||
+                (p.distanceTo(cardPos) > 8 && p.distanceTo(fixedPos) > 8)
         );
 
-        if (hasInvalidPoint) {
+        let hasBrokenSegment = false;
+        for (let i = 1; i < nextPoints.length; i += 1) {
+            if (nextPoints[i].distanceTo(nextPoints[i - 1]) > 3.5) {
+                hasBrokenSegment = true;
+                break;
+            }
+        }
+
+        if (hasInvalidPoint || hasBrokenSegment) {
+            if (!hasSafePointsRef.current) {
+                return;
+            }
             band.current.geometry.setPoints(safePointsRef.current);
         } else {
             safePointsRef.current = nextPoints;
+            hasSafePointsRef.current = true;
             band.current.geometry.setPoints(nextPoints);
         }
 
@@ -450,16 +472,13 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
             <mesh ref={band}>
                 <meshLineGeometry />
                 <meshLineMaterial
-                    color="#d6ef5b"
-                    depthTest
-                    depthWrite={false}
-                    transparent
-                    opacity={0.95}
-                    resolution={[Math.max(1, size.width), Math.max(1, size.height)]}
-                    useMap={Boolean(texture?.image)}
-                    map={texture?.image ? texture : null}
+                    color="white"
+                    depthTest={false}
+                    resolution={isMobile ? [1000, 2000] : [1000, 1000]}
+                    useMap
+                    map={texture}
                     repeat={[-4, 1]}
-                    lineWidth={isMobile ? 0.28 : 0.2}
+                    lineWidth={1}
                 />
             </mesh>
         </>
