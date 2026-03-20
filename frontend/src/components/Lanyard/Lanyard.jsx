@@ -23,7 +23,6 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
         <div className="lanyard-wrapper">
             <Canvas
                 camera={{ position: position, fov: fov }}
-                dpr={[1, isMobile ? 1.5 : 2]}
                 gl={{ alpha: transparent }}
                 onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
             >
@@ -70,8 +69,6 @@ function useCustomCardTexture() {
             bgGr.addColorStop(1, '#040610');
             ctx.fillStyle = bgGr;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Subtle grid
             ctx.strokeStyle = 'rgba(230, 255, 0, 0.03)';
             ctx.lineWidth = 1;
             for (let x = 0; x < canvas.width; x += 80) {
@@ -333,7 +330,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     const ang = new THREE.Vector3();
     const rot = new THREE.Vector3();
     const dir = new THREE.Vector3();
-    const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+    const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 10, linearDamping: 10 };
 
     const { nodes, materials } = useGLTF('/card.glb');
     const texture = useTexture('/lanyard.png');
@@ -352,7 +349,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
     useSphericalJoint(j3, card, [
         [0, 0, 0],
-        [0, 1.5, 0],
+        [0, 2.0, 0],
     ]);
 
     useEffect(() => {
@@ -372,49 +369,55 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
             dir.copy(vec).sub(state.camera.position).normalize();
             vec.add(dir.multiplyScalar(state.camera.position.length()));
             [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
-            card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
+            
+            let nextPos = new THREE.Vector3(vec.x - dragged.x, vec.y - dragged.y, vec.z - dragged.z);
+            if (fixed.current) {
+                const origin = fixed.current.translation();
+                const originVec = new THREE.Vector3(origin.x, origin.y, origin.z);
+                const anchorWorld = nextPos.clone().add(new THREE.Vector3(0, 2.0, 0));
+                if (anchorWorld.distanceTo(originVec) > 3.0) {
+                   anchorWorld.sub(originVec).normalize().multiplyScalar(3.0).add(originVec);
+                   nextPos = anchorWorld.sub(new THREE.Vector3(0, 2.0, 0));
+                }
+            }
+            card.current?.setNextKinematicTranslation({ x: nextPos.x, y: nextPos.y, z: nextPos.z });
         }
 
+        const fixedPos = fixed.current.translation();
         [j1, j2].forEach((ref) => {
             if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-            const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
-            ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+            const trans = ref.current.translation();
+            if (Number.isFinite(trans.x) && Number.isFinite(trans.y) && Number.isFinite(trans.z)) {
+                const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(trans)));
+                ref.current.lerped.lerp(trans, delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+            }
         });
-        curve.points[0].copy(j3.current.translation());
+
+        const t3 = j3.current.translation();
+        if (Number.isFinite(t3.x) && Number.isFinite(t3.y) && Number.isFinite(t3.z)) {
+            curve.points[0].copy(t3);
+        }
         curve.points[1].copy(j2.current.lerped);
         curve.points[2].copy(j1.current.lerped);
-        curve.points[3].copy(fixed.current.translation());
+        curve.points[3].copy(fixedPos);
 
         const nextPoints = curve.getPoints(isMobile ? 16 : 32);
-        const cardPos = card.current.translation();
-        const fixedPos = fixed.current.translation();
-        const minAllowedY = cardPos.y - 0.2;
-
-        const hasInvalidPoint = nextPoints.some(
-            (p) =>
-                !Number.isFinite(p.x) ||
-                !Number.isFinite(p.y) ||
-                !Number.isFinite(p.z) ||
-            p.y < minAllowedY ||
-                Math.abs(p.x) > 20 ||
-                Math.abs(p.y) > 20 ||
-                Math.abs(p.z) > 20 ||
-                (p.distanceTo(cardPos) > 8 && p.distanceTo(fixedPos) > 8)
-        );
-
-        let hasBrokenSegment = false;
-        for (let i = 1; i < nextPoints.length; i += 1) {
-            if (nextPoints[i].distanceTo(nextPoints[i - 1]) > 3.5) {
-                hasBrokenSegment = true;
-                break;
+        const hasInvalidPoint = nextPoints.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.z));
+        if (hasInvalidPoint) {
+            if (j1.current && j2.current && j3.current) {
+                j1.current.setTranslation({ x: fixedPos.x, y: fixedPos.y - 1, z: fixedPos.z }, true);
+                j2.current.setTranslation({ x: fixedPos.x, y: fixedPos.y - 2, z: fixedPos.z }, true);
+                j3.current.setTranslation({ x: fixedPos.x, y: fixedPos.y - 3, z: fixedPos.z }, true);
+                j1.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+                j2.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+                j3.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+                if (j1.current.lerped) j1.current.lerped.set(fixedPos.x, fixedPos.y - 1, fixedPos.z);
+                if (j2.current.lerped) j2.current.lerped.set(fixedPos.x, fixedPos.y - 2, fixedPos.z);
+                curve.points[0].set(fixedPos.x, fixedPos.y - 3, fixedPos.z);
             }
-        }
-
-        if (hasInvalidPoint || hasBrokenSegment) {
-            if (!hasSafePointsRef.current) {
-                return;
+            if (hasSafePointsRef.current && safePointsRef.current.length > 0) {
+                band.current.geometry.setPoints(safePointsRef.current);
             }
-            band.current.geometry.setPoints(safePointsRef.current);
         } else {
             safePointsRef.current = nextPoints;
             hasSafePointsRef.current = true;
@@ -435,16 +438,16 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
         <>
             <group position={[0, 4, 0]}>
                 <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-                <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
-                    <BallCollider args={[0.1]} />
+                <RigidBody position={[0, -1, 0]} ref={j1} {...segmentProps}>
+                    <BallCollider args={[0.1]} mass={0.1} sensor />
                 </RigidBody>
-                <RigidBody position={[1, 0, 0]} ref={j2} {...segmentProps}>
-                    <BallCollider args={[0.1]} />
+                <RigidBody position={[0, -2, 0]} ref={j2} {...segmentProps}>
+                    <BallCollider args={[0.1]} mass={0.1} sensor />
                 </RigidBody>
-                <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
-                    <BallCollider args={[0.1]} />
+                <RigidBody position={[0, -3, 0]} ref={j3} {...segmentProps}>
+                    <BallCollider args={[0.1]} mass={0.1} sensor />
                 </RigidBody>
-                <RigidBody position={[2, -0.58, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+                <RigidBody position={[0, -5.0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
                     <CuboidCollider args={[1.1, 1.52, 0.01]} />
                     <group
                         scale={2.9}
@@ -456,6 +459,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                             e.target.setPointerCapture(e.pointerId),
                             drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
                         )}
+                        // Add card cut effect class for CSS
+                        className="lanyard-card-cut"
                     >
                         <mesh geometry={nodes.card.geometry}>
                             <meshPhysicalMaterial
