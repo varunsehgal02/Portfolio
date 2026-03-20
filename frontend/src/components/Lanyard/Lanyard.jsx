@@ -388,12 +388,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
         const nextPoints = curve.getPoints(isMobile ? 16 : 32);
         const cardPos = card.current.translation();
         const fixedPos = fixed.current.translation();
+        const minAllowedY = cardPos.y - 0.2;
 
         const hasInvalidPoint = nextPoints.some(
             (p) =>
                 !Number.isFinite(p.x) ||
                 !Number.isFinite(p.y) ||
                 !Number.isFinite(p.z) ||
+            p.y < minAllowedY ||
                 Math.abs(p.x) > 20 ||
                 Math.abs(p.y) > 20 ||
                 Math.abs(p.z) > 20 ||
