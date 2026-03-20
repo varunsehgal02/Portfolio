@@ -485,7 +485,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     useMap={Boolean(texture?.image)}
                     map={texture?.image ? texture : null}
                     repeat={[-4, 1]}
-                    lineWidth={isMobile ? 0.28 : 0.2}
+                    lineWidth={isMobile ? 1.6 : 1.2}
                 />
             </mesh>
         </>
