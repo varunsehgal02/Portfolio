@@ -445,9 +445,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     <BallCollider args={[0.1]} />
                 </RigidBody>
                 <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
-                    <CuboidCollider args={[0.9, 1.25, 0.01]} />
+                    <CuboidCollider args={[1.05, 1.45, 0.01]} />
                     <group
-                        scale={2.45}
+                        scale={2.8}
                         position={[0, -1.3, -0.05]}
                         onPointerOver={() => hover(true)}
                         onPointerOut={() => hover(false)}
@@ -484,7 +484,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     useMap={Boolean(texture?.image)}
                     map={texture?.image ? texture : null}
                     repeat={[-4, 1]}
-                    lineWidth={1}
+                    lineWidth={1.3}
                 />
             </mesh>
         </>
