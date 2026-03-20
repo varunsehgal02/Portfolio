@@ -444,11 +444,11 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                 <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
                     <BallCollider args={[0.1]} />
                 </RigidBody>
-                <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
-                    <CuboidCollider args={[0.98, 1.34, 0.01]} />
+                <RigidBody position={[2, -0.35, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+                    <CuboidCollider args={[1.1, 1.52, 0.01]} />
                     <group
-                        scale={2.62}
-                        position={[0, -1.3, -0.05]}
+                        scale={2.9}
+                        position={[0, -1.36, -0.05]}
                         onPointerOver={() => hover(true)}
                         onPointerOut={() => hover(false)}
                         onPointerUp={(e) => (e.target.releasePointerCapture(e.pointerId), drag(false))}
