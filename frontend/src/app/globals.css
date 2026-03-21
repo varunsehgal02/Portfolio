@@ -27,6 +27,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--background);
 }
 
 body {
@@ -38,6 +39,7 @@ body {
     linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
   color: var(--text-primary);
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 h1,
