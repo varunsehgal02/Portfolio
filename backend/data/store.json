@@ -123,9 +123,133 @@
         "deviceType": "Desktop",
         "ip": "::1",
         "at": "2026-03-20T05:57:53.816Z"
+      },
+      {
+        "id": 1774010245147,
+        "page": "/about",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3002/",
+        "screenWidth": 1718,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-20T12:37:25.147Z"
+      },
+      {
+        "id": 1774123102194,
+        "page": "/about",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 3440,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-21T19:58:22.194Z"
+      },
+      {
+        "id": 1774123112591,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 3440,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-21T19:58:32.591Z"
+      },
+      {
+        "id": 1774123117175,
+        "page": "/about",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 3440,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-21T19:58:37.175Z"
+      },
+      {
+        "id": 1774124599400,
+        "page": "/",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 3440,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-03-21T20:23:19.400Z"
       }
     ],
-    "aboutPopupOpens": [],
+    "aboutPopupOpens": [
+      {
+        "cardTitle": "Adobe Suite Expert",
+        "at": "2026-03-21T19:58:27.655Z"
+      },
+      {
+        "cardTitle": "5+ UI/UX Projects",
+        "at": "2026-03-21T20:00:37.936Z"
+      },
+      {
+        "cardTitle": "5+ UI/UX Projects",
+        "at": "2026-03-21T20:11:13.949Z"
+      },
+      {
+        "cardTitle": "Adobe Suite Expert",
+        "at": "2026-03-21T20:14:34.604Z"
+      },
+      {
+        "cardTitle": "95% Client Satisfaction",
+        "at": "2026-03-21T20:14:38.223Z"
+      },
+      {
+        "cardTitle": "5+ UI/UX Projects",
+        "at": "2026-03-21T20:14:40.876Z"
+      },
+      {
+        "cardTitle": "Coming Soon",
+        "at": "2026-03-21T20:14:42.952Z"
+      },
+      {
+        "cardTitle": "Adobe Suite Expert",
+        "at": "2026-03-21T20:14:46.858Z"
+      },
+      {
+        "cardTitle": "B.Tech CSE (2023-27)",
+        "at": "2026-03-21T20:14:56.852Z"
+      },
+      {
+        "cardTitle": "Brand Visibility +35%",
+        "at": "2026-03-21T20:14:58.667Z"
+      },
+      {
+        "cardTitle": "95% Client Satisfaction",
+        "at": "2026-03-21T20:15:00.964Z"
+      },
+      {
+        "cardTitle": "Coming Soon",
+        "at": "2026-03-21T20:22:54.089Z"
+      },
+      {
+        "cardTitle": "Adobe Suite Expert",
+        "at": "2026-03-21T20:23:00.823Z"
+      },
+      {
+        "cardTitle": "5+ UI/UX Projects",
+        "at": "2026-03-21T20:23:09.148Z"
+      },
+      {
+        "cardTitle": "95% Client Satisfaction",
+        "at": "2026-03-21T20:23:10.906Z"
+      },
+      {
+        "cardTitle": "Brand Visibility +35%",
+        "at": "2026-03-21T20:23:13.607Z"
+      },
+      {
+        "cardTitle": "B.Tech CSE (2023-27)",
+        "at": "2026-03-21T20:23:15.389Z"
+      }
+    ],
     "outboundClicks": [],
     "ipGeoCache": {}
   }

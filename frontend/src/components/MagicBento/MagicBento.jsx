@@ -275,6 +275,19 @@ const MagicBento = ({
     const gridRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
     const [selectedCard, setSelectedCard] = useState(null);
+    const [processedCards, setProcessedCards] = useState(cards);
+
+    useEffect(() => {
+        setProcessedCards(cards.map(card => {
+            if (Array.isArray(card.mediaUrl) && card.mediaUrl.length > 0) {
+                return {
+                    ...card,
+                    mediaUrl: card.mediaUrl[Math.floor(Math.random() * card.mediaUrl.length)]
+                };
+            }
+            return card;
+        }));
+    }, [cards]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
@@ -304,7 +317,7 @@ const MagicBento = ({
                 <GlobalSpotlight gridRef={gridRef} disableAnimations={shouldDisableAnimations} enabled={enableSpotlight} spotlightRadius={spotlightRadius} glowColor={glowColor} />
             )}
             <div className="card-grid bento-section" ref={gridRef}>
-                {cards.map((card, index) => {
+                {processedCards.map((card, index) => {
                     const hasMedia = (card.mediaType === 'image' || card.mediaType === 'video') && !!card.mediaUrl;
                     const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${enableBorderGlow ? 'magic-bento-card--border-glow' : ''} ${hasMedia ? 'magic-bento-card--with-media' : 'magic-bento-card--no-media'}`;
                     const cardProps = {

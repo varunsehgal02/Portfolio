@@ -86,10 +86,21 @@ function useCustomCardTexture() {
             ctx.fillStyle = accentGr;
             ctx.fillRect(0, 0, canvas.width, 24);
 
+            // Increase size inside of ID card and shift left
+            ctx.save();
+            const shiftLeftAmount = 30; // Shift all things inside the ID card left
+            const globalScale = 1.1; // Increase everything by 10%
+            const centerY = 1050; // Approximate vertical center of content block
+            
+            ctx.translate(cx - shiftLeftAmount, centerY);
+            // Sqish X by 0.8 for UV mapping, but apply globalScale to both X and Y
+            ctx.scale(0.8 * globalScale, globalScale);
+            ctx.translate(-cx, -centerY);
+
             // ── 1. CIRCLE PHOTO (top center) ──
             const photoY = 500;
             const photoR = 220;
-            const photoRadiusX = photoR * 0.8;
+            const photoRadiusX = photoR;
             const photoRadiusY = photoR;
 
             // Glow behind photo
@@ -108,18 +119,21 @@ function useCustomCardTexture() {
                 const imgAspect = img.width / img.height;
                 const frameWidth = photoRadiusX * 2;
                 const frameHeight = photoRadiusY * 2;
+                const zoomScale = 1.15; // "zoom my img litt bit"
                 let dw, dh, dx, dy;
+                
                 if (imgAspect > 1) {
-                    dh = frameHeight;
-                    dw = frameHeight * imgAspect;
-                    dx = cx - dw / 2;
-                    dy = photoY - photoRadiusY;
+                    dh = frameHeight * zoomScale;
+                    dw = frameHeight * imgAspect * zoomScale;
                 } else {
-                    dw = frameWidth;
-                    dh = frameWidth / imgAspect;
-                    dx = cx - photoRadiusX;
-                    dy = photoY - dh / 2;
+                    dw = frameWidth * zoomScale;
+                    dh = (frameWidth / imgAspect) * zoomScale;
                 }
+                
+                // Center the zoomed image
+                dx = cx - dw / 2;
+                dy = photoY - dh / 2;
+                
                 ctx.drawImage(img, dx, dy, dw, dh);
                 ctx.restore();
             } else {
@@ -193,7 +207,7 @@ function useCustomCardTexture() {
             curY += 60;
             const stats = [
                 { value: '2+', label: 'YEARS' },
-                { value: '12+', label: 'PROJECTS' },
+                { value: '5+', label: 'PROJECTS' },
                 { value: '95%', label: 'RATING' },
             ];
             const statSpacing = contentW / (stats.length + 1);
@@ -273,6 +287,7 @@ function useCustomCardTexture() {
             });
 
             // ── Bottom accent bar ──
+            ctx.restore();
             ctx.fillStyle = accentGr;
             ctx.fillRect(0, canvas.height - 18, canvas.width, 18);
 
