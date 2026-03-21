@@ -402,18 +402,25 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
         }
 
         const fixedPos = fixed.current.translation();
+        const maxDist = 20.0;
         [j1, j2].forEach((ref) => {
             if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
             const trans = ref.current.translation();
             if (Number.isFinite(trans.x) && Number.isFinite(trans.y) && Number.isFinite(trans.z)) {
-                const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(trans)));
-                ref.current.lerped.lerp(trans, delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+                const transVec = new THREE.Vector3(trans.x, trans.y, trans.z);
+                if (transVec.distanceTo(fixedPos) < maxDist) {
+                    const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(trans)));
+                    ref.current.lerped.lerp(trans, delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+                }
             }
         });
 
         const t3 = j3.current.translation();
         if (Number.isFinite(t3.x) && Number.isFinite(t3.y) && Number.isFinite(t3.z)) {
-            curve.points[0].copy(t3);
+            const t3Vec = new THREE.Vector3(t3.x, t3.y, t3.z);
+            if (t3Vec.distanceTo(fixedPos) < maxDist) {
+                curve.points[0].copy(t3);
+            }
         }
         curve.points[1].copy(j2.current.lerped);
         curve.points[2].copy(j1.current.lerped);
@@ -447,7 +454,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
         card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
     });
 
-    curve.curveType = 'chordal';
+    curve.curveType = 'centripetal';
     if (texture) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     }
