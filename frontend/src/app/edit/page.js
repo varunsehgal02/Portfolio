@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -894,6 +894,7 @@ export default function EditPage() {
                                                         id: `project-${Date.now()}`,
                                                         title: "New Project",
                                                         category: "graphic",
+                                                        subCategory: "",
                                                         description: "Project description",
                                                         highlights: ["New highlight"],
                                                         tools: ["Photoshop"],
@@ -943,6 +944,11 @@ export default function EditPage() {
                                                         <option value="motion">Motion</option>
                                                     </select>
                                                 </div>
+                                                <Field label="Sub Category" value={project.subCategory || ""} onChange={(v) => {
+                                                    const next = [...projectsData];
+                                                    next[index] = { ...next[index], subCategory: v };
+                                                    setProjectsData(next);
+                                                }} />
                                                 <Field label="Icon" value={project.icon} onChange={(v) => {
                                                     const next = [...projectsData];
                                                     next[index] = { ...next[index], icon: v };

@@ -10,7 +10,7 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], fov = 20, transparent = true }) {
+export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], fov = 14, transparent = true, frontSrc = null, backSrc = null }) {
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
             >
                 <ambientLight intensity={Math.PI} />
                 <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-                    <Band isMobile={isMobile} />
+                    <Band isMobile={isMobile} frontSrc={frontSrc} backSrc={backSrc} />
                 </Physics>
                 <Environment blur={0.75}>
                     <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
@@ -41,286 +41,102 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
     );
 }
 
-function useCustomCardTexture() {
+function useCustomCardTexture(frontSrc, backSrc) {
     const [texture, setTexture] = useState(null);
 
     useEffect(() => {
-        const buildTexture = (img) => {
+        if (!frontSrc) return;
+
+        const buildTexture = (imgFront, imgBack) => {
             const canvas = document.createElement('canvas');
             canvas.width = 2048;
-            canvas.height = 3072;
+            canvas.height = 1024;
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-
-            // Card center X — shifted left for GLB UV mapping
-            const cx = canvas.width * 0.27;
-            const contentW = canvas.width * 0.48;
-            const leftEdge = cx - contentW / 2;
-            const rightEdge = cx + contentW / 2;
-
-            // ── Background gradient ──
-            const bgGr = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            bgGr.addColorStop(0, '#05070d');
-            bgGr.addColorStop(0.2, '#080c1e');
-            bgGr.addColorStop(0.5, '#0b0f28');
-            bgGr.addColorStop(0.8, '#080b1a');
-            bgGr.addColorStop(1, '#040610');
-            ctx.fillStyle = bgGr;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(230, 255, 0, 0.03)';
-            ctx.lineWidth = 1;
-            for (let x = 0; x < canvas.width; x += 80) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-            for (let y = 0; y < canvas.height; y += 80) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
-
-            // ── Top accent bar ──
-            const accentGr = ctx.createLinearGradient(0, 0, canvas.width * 0.55, 0);
-            accentGr.addColorStop(0, '#C4DB00');
-            accentGr.addColorStop(0.5, '#E6FF00');
-            accentGr.addColorStop(1, '#F2FF73');
-            ctx.fillStyle = accentGr;
-            ctx.fillRect(0, 0, canvas.width, 24);
-
-            // Increase size inside of ID card and shift left
-            ctx.save();
-            const shiftLeftAmount = 30; // Shift all things inside the ID card left
-            const globalScale = 1.1; // Increase everything by 10%
-            const centerY = 1050; // Approximate vertical center of content block
             
-            ctx.translate(cx - shiftLeftAmount, centerY);
-            // Sqish X by 0.8 for UV mapping, but apply globalScale to both X and Y
-            ctx.scale(0.8 * globalScale, globalScale);
-            ctx.translate(-cx, -centerY);
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, 2048, 1024);
 
-            // ── 1. CIRCLE PHOTO (top center) ──
-            const photoY = 500;
-            const photoR = 220;
-            const photoRadiusX = photoR;
-            const photoRadiusY = photoR;
+            // The 3D ID card model has an aspect ratio of roughly 1.1 / 1.52 = 0.723
+            const targetRatio = 1.1 / 1.52;
+            
+            const drawContain = (img, offsetX) => {
+                if (!img) return;
+                const imgRatio = img.width / img.height;
+                let drawW = 1024;
+                let drawH = 1024;
+                let drawX = offsetX;
+                let drawY = 0;
 
-            // Glow behind photo
-            const glow = ctx.createRadialGradient(cx, photoY, photoR * 0.3, cx, photoY, photoR * 2.2);
-            glow.addColorStop(0, 'rgba(230, 255, 0, 0.28)');
-            glow.addColorStop(0.5, 'rgba(196, 219, 0, 0.12)');
-            glow.addColorStop(1, 'rgba(196, 219, 0, 0)');
-            ctx.fillStyle = glow;
-            ctx.fillRect(0, photoY - photoR * 3, canvas.width, photoR * 6);
-
-            if (img) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.ellipse(cx, photoY, photoRadiusX, photoRadiusY, 0, 0, Math.PI * 2);
-                ctx.clip();
-                const imgAspect = img.width / img.height;
-                const frameWidth = photoRadiusX * 2;
-                const frameHeight = photoRadiusY * 2;
-                const zoomScale = 1.15; // "zoom my img litt bit"
-                let dw, dh, dx, dy;
-                
-                if (imgAspect > 1) {
-                    dh = frameHeight * zoomScale;
-                    dw = frameHeight * imgAspect * zoomScale;
+                if (imgRatio > targetRatio) {
+                    // Image is wider than target ratio
+                    // Fit width, letterbox height
+                    drawW = 1024;
+                    drawH = 1024 * (targetRatio / imgRatio);
+                    drawY = (1024 - drawH) / 2;
                 } else {
-                    dw = frameWidth * zoomScale;
-                    dh = (frameWidth / imgAspect) * zoomScale;
+                    // Image is taller than target ratio
+                    // Fit height, pillarbox width
+                    drawH = 1024;
+                    drawW = 1024 * (imgRatio / targetRatio);
+                    drawX = offsetX + (1024 - drawW) / 2;
                 }
                 
-                // Center the zoomed image
-                dx = cx - dw / 2;
-                dy = photoY - dh / 2;
+                // User requested to shift all images a little bit UP on the ID card.
+                // Subtracting from drawY physically shifts the drawn image closer to the top edge. 
+                const shiftUpAmount = 95; 
+                drawY -= shiftUpAmount;
                 
-                ctx.drawImage(img, dx, dy, dw, dh);
-                ctx.restore();
-            } else {
-                ctx.beginPath();
-                ctx.ellipse(cx, photoY, photoRadiusX, photoRadiusY, 0, 0, Math.PI * 2);
-                ctx.fillStyle = '#151515';
-                ctx.fill();
-                ctx.fillStyle = '#E6FF00';
-                ctx.font = `bold 120px "Satoshi", "Inter", system-ui, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('VS', cx, photoY);
+                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            };
+
+            // Front image on left half
+            drawContain(imgFront, 0);
+            
+            // Back image on right half
+            if (imgBack) {
+                drawContain(imgBack, 1024);
+            } else if (imgFront) {
+                drawContain(imgFront, 1024);
             }
-
-            // Photo ring — outer
-            ctx.beginPath();
-            ctx.ellipse(cx, photoY, photoRadiusX + 14, photoRadiusY + 14, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(230, 255, 0, 0.12)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Photo ring — main
-            ctx.beginPath();
-            ctx.ellipse(cx, photoY, photoRadiusX + 6, photoRadiusY + 6, 0, 0, Math.PI * 2);
-            const ringGr = ctx.createLinearGradient(cx - photoRadiusY, photoY - photoRadiusY, cx + photoRadiusY, photoY + photoRadiusY);
-            ringGr.addColorStop(0, '#C4DB00');
-            ringGr.addColorStop(0.5, '#E6FF00');
-            ringGr.addColorStop(1, '#F2FF73');
-            ctx.strokeStyle = ringGr;
-            ctx.lineWidth = 7;
-            ctx.stroke();
-
-            // ── 2. NAME ──
-            let curY = 900;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = `bold 110px "Satoshi", "Inter", system-ui, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'alphabetic';
-            ctx.shadowColor = 'rgba(230, 255, 0, 0.25)';
-            ctx.shadowBlur = 24;
-            ctx.fillText('VARUN SEHGAL', cx, curY);
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-
-            // ── 3. TITLES ──
-            curY += 100;
-            ctx.fillStyle = '#a1a1aa';
-            ctx.font = `600 54px "Inter", system-ui, sans-serif`;
-            ctx.fillText('UI/UX Designer', cx, curY);
-
-            curY += 75;
-            ctx.fillText('Graphic Designer', cx, curY);
-
-            curY += 75;
-            ctx.fillStyle = '#71717a';
-            ctx.font = `500 48px "Inter", system-ui, sans-serif`;
-            ctx.fillText('Motion Graphics Artist', cx, curY);
-
-            // ── Divider 1 ──
-            curY += 70;
-            const divGr = ctx.createLinearGradient(leftEdge, 0, rightEdge, 0);
-            divGr.addColorStop(0, 'rgba(230, 255, 0, 0)');
-            divGr.addColorStop(0.15, 'rgba(230, 255, 0, 0.45)');
-            divGr.addColorStop(0.85, 'rgba(230, 255, 0, 0.45)');
-            divGr.addColorStop(1, 'rgba(230, 255, 0, 0)');
-            ctx.strokeStyle = divGr;
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(leftEdge + 10, curY); ctx.lineTo(rightEdge - 10, curY); ctx.stroke();
-
-            // ── 4. STATS ROW ──
-            curY += 60;
-            const stats = [
-                { value: '2+', label: 'YEARS' },
-                { value: '5+', label: 'PROJECTS' },
-                { value: '95%', label: 'RATING' },
-            ];
-            const statSpacing = contentW / (stats.length + 1);
-            stats.forEach((stat, i) => {
-                const sx = leftEdge + statSpacing * (i + 1);
-                ctx.fillStyle = '#E6FF00';
-                ctx.font = `bold 96px "Satoshi", "Inter", system-ui, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(230, 255, 0, 0.22)';
-                ctx.shadowBlur = 12;
-                ctx.fillText(stat.value, sx, curY + 70);
-                ctx.shadowColor = 'transparent';
-                ctx.shadowBlur = 0;
-
-                ctx.fillStyle = '#71717a';
-                ctx.font = `600 36px "Inter", system-ui, sans-serif`;
-                ctx.fillText(stat.label, sx, curY + 120);
-            });
-
-            // ── Divider 2 ──
-            curY += 190;
-            ctx.strokeStyle = divGr;
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(leftEdge + 30, curY); ctx.lineTo(rightEdge - 30, curY); ctx.stroke();
-
-            // ── 5. EMAIL ──
-            curY += 80;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `600 56px "Inter", system-ui, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText('varun.sehgal02@gmail.com', cx, curY);
-
-            // ── 6. LOCATION ──
-            curY += 65;
-            ctx.fillStyle = '#a1a1aa';
-            ctx.font = `500 46px "Inter", system-ui, sans-serif`;
-            ctx.fillText('📍 Gwalior, MP, India', cx, curY);
-
-            // ── Divider 3 ──
-            curY += 60;
-            ctx.strokeStyle = divGr;
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(leftEdge + 50, curY); ctx.lineTo(rightEdge - 50, curY); ctx.stroke();
-
-            // ── 7. TOOL BADGES ──
-            curY += 55;
-            const badges = ['Figma', 'Ps', 'AE', 'Ai'];
-            const badgeW = 190;
-            const badgeH = 82;
-            const badgeGap = 16;
-            const totalBW = badges.length * badgeW + (badges.length - 1) * badgeGap;
-            let bx = cx - totalBW / 2;
-            const badgeY = curY;
-            badges.forEach((badge) => {
-                ctx.fillStyle = 'rgba(230, 255, 0, 0.1)';
-                const r = 18;
-                ctx.beginPath();
-                ctx.moveTo(bx + r, badgeY);
-                ctx.lineTo(bx + badgeW - r, badgeY);
-                ctx.quadraticCurveTo(bx + badgeW, badgeY, bx + badgeW, badgeY + r);
-                ctx.lineTo(bx + badgeW, badgeY + badgeH - r);
-                ctx.quadraticCurveTo(bx + badgeW, badgeY + badgeH, bx + badgeW - r, badgeY + badgeH);
-                ctx.lineTo(bx + r, badgeY + badgeH);
-                ctx.quadraticCurveTo(bx, badgeY + badgeH, bx, badgeY + badgeH - r);
-                ctx.lineTo(bx, badgeY + r);
-                ctx.quadraticCurveTo(bx, badgeY, bx + r, badgeY);
-                ctx.fill();
-
-                ctx.strokeStyle = 'rgba(230, 255, 0, 0.22)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                ctx.fillStyle = '#E6FF00';
-                ctx.font = `bold 42px "Satoshi", "Inter", system-ui, sans-serif`;
-                ctx.fillText(badge, bx + badgeW / 2, badgeY + badgeH / 2 + 14);
-                bx += badgeW + badgeGap;
-            });
-
-            // ── Bottom accent bar ──
-            ctx.restore();
-            ctx.fillStyle = accentGr;
-            ctx.fillRect(0, canvas.height - 18, canvas.width, 18);
-
-            // ── Corner decorations ──
-            ctx.strokeStyle = 'rgba(230, 255, 0, 0.12)';
-            ctx.lineWidth = 3;
-            const cs = 44; const cm = 50;
-            ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(canvas.width - cm - cs, cm); ctx.lineTo(canvas.width - cm, cm); ctx.lineTo(canvas.width - cm, cm + cs); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cm, canvas.height - cm - cs); ctx.lineTo(cm, canvas.height - cm); ctx.lineTo(cm + cs, canvas.height - cm); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(canvas.width - cm - cs, canvas.height - cm); ctx.lineTo(canvas.width - cm, canvas.height - cm); ctx.lineTo(canvas.width - cm, canvas.height - cm - cs); ctx.stroke();
 
             const tex = new THREE.CanvasTexture(canvas);
             tex.flipY = false;
             tex.anisotropy = 16;
             tex.minFilter = THREE.LinearMipmapLinearFilter;
             tex.magFilter = THREE.LinearFilter;
+            tex.colorSpace = THREE.SRGBColorSpace;
             tex.needsUpdate = true;
+            
             setTexture((prev) => {
                 prev?.dispose?.();
                 return tex;
             });
         };
 
-        // Draw instantly with the "VS" fallback so text is visible immediately.
-        buildTexture(null);
+        const loadImages = async () => {
+            try {
+                const loadImage = (src) => new Promise((resolve) => {
+                    if (!src) return resolve(null);
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                    img.src = src;
+                });
 
-        // Then load the real photo and redraw.
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => buildTexture(img);
-        img.onerror = () => { /* fallback already set */ };
-        img.src = '/varun.jpg';
+                const [front, back] = await Promise.all([
+                    loadImage(frontSrc),
+                    loadImage(backSrc)
+                ]);
+                
+                buildTexture(front, back);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        loadImages();
 
         return () => {
             setTexture((prev) => {
@@ -328,12 +144,12 @@ function useCustomCardTexture() {
                 return null;
             });
         };
-    }, []);
+    }, [frontSrc, backSrc]);
 
     return texture;
 }
 
-function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
+function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, frontSrc = null, backSrc = null }) {
     const { size } = useThree();
     const band = useRef();
     const fixed = useRef();
@@ -349,7 +165,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
 
     const { nodes, materials } = useGLTF('/card.glb');
     const texture = useTexture('/lanyard.png');
-    const customCardTexture = useCustomCardTexture();
+    const customCardTexture = useCustomCardTexture(frontSrc, backSrc);
 
     const [curve] = useState(
         () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
@@ -358,6 +174,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     const hasSafePointsRef = useRef(false);
     const [dragged, drag] = useState(false);
     const [hovered, hover] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
 
     useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
     useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -451,7 +268,15 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
 
         ang.copy(card.current.angvel());
         rot.copy(card.current.rotation());
-        card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
+        
+        let targetRotY = 0;
+        if (!dragged) {
+            targetRotY = isFlipped ? Math.PI / 2 : 0;
+        }
+        
+        // Use a spring system to rotate the card. Adding damping so it stops perfectly at target
+        const diffY = ((targetRotY - rot.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        card.current.setAngvel({ x: ang.x, y: ang.y * 0.8 + diffY * 0.25, z: ang.z });
     });
 
     curve.curveType = 'centripetal';
@@ -479,6 +304,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                         position={[0, -1.46, -0.05]}
                         onPointerOver={() => hover(true)}
                         onPointerOut={() => hover(false)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsFlipped((f) => !f);
+                        }}
                         onPointerUp={(e) => (e.target.releasePointerCapture(e.pointerId), drag(false))}
                         onPointerDown={(e) => (
                             e.target.setPointerCapture(e.pointerId),
