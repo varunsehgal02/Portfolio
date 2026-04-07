@@ -14,7 +14,7 @@ export const personalInfo = {
         instagram: "",
     },
     summary:
-        "UI/UX Designer and Graphic Designer with 2+ years of experience creating user-centered web and mobile interfaces, motion graphics, and branding assets. Skilled in Figma, Adobe Creative Suite, wireframing, prototyping, usability testing, and responsive design. Proven ability to improve engagement, conversion rates, and user satisfaction through data-driven design solutions. Seeking UI/UX and Product Design roles.",
+        "UI/UX Designer, Graphic Designer, and Motion Graphics Artist with 2+ years of experience creating user-centered web and mobile interfaces, immersive motion graphics, and branding assets. Skilled in Figma, Adobe Creative Suite, wireframing, prototyping, usability testing, and responsive design. Proven ability to improve engagement, conversion rates, and user satisfaction through data-driven design solutions. Seeking UI/UX and Product Design roles.",
     stats: [
         { label: "Years Experience", value: "2+" },
         { label: "UI/UX Interfaces", value: "5+" },
