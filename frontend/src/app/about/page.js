@@ -142,31 +142,28 @@ export default function AboutPage() {
     const aboutBentoCards = useEditableData("aboutBentoCards", defaultAboutBentoCards);
 
     const [idCardDataUrl, setIdCardDataUrl] = useState(null);
+    const [backCardDataUrl, setBackCardDataUrl] = useState(null);
 
     useEffect(() => {
         const generateIDCard = async () => {
             if (typeof window === "undefined") return;
             const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 1448; // ID Card ratio
+            const cardW = 1000;
+            const cardH = 1414; // ID Card ratio
+            canvas.width = cardW;
+            canvas.height = cardH;
             const ctx = canvas.getContext('2d');
             
-            // Base background
-            ctx.fillStyle = '#0a0a0a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Base background (sleek dark)
+            ctx.fillStyle = '#121212';
+            ctx.fillRect(0, 0, cardW, cardH);
             
-            // Neon accent border
-            ctx.strokeStyle = '#E6FF00';
-            ctx.lineWidth = 16;
-            ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
-
-            // Header Banner
-            ctx.fillStyle = '#E6FF00';
-            ctx.fillRect(32, 32, canvas.width - 64, 150);
-            ctx.fillStyle = '#0a0a0a';
-            ctx.font = '900 70px "Inter", Arial, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('PORTFOLIO ID', canvas.width / 2, 135);
+            // Subtle top gradient highlight
+            const grad = ctx.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, '#2a2a2a');
+            grad.addColorStop(1, '#121212');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, cardW, 300);
 
             // Fetch and draw user image
             try {
@@ -181,57 +178,85 @@ export default function AboutPage() {
 
                 if (loaded) {
                     ctx.save();
-                    // Outer neon circle
-                    ctx.beginPath();
-                    ctx.arc(canvas.width / 2, 480, 280, 0, Math.PI * 2);
-                    ctx.fillStyle = '#E6FF00';
-                    ctx.fill();
-                    
+                    const arcX = cardW / 2;
+                    const arcY = 480;
+                    const radius = 250;
+
                     // Image clipping mask
                     ctx.beginPath();
-                    ctx.arc(canvas.width / 2, 480, 265, 0, Math.PI * 2);
+                    ctx.arc(arcX, arcY, radius, 0, Math.PI * 2);
                     ctx.closePath();
                     ctx.clip();
                     
                     const size = Math.min(img.width, img.height);
                     const sx = (img.width - size) / 2;
                     const sy = (img.height - size) / 2;
-                    ctx.drawImage(img, sx, sy, size, size, canvas.width / 2 - 265, 480 - 265, 530, 530);
+                    ctx.drawImage(img, sx, sy, size, size, arcX - radius, arcY - radius, radius * 2, radius * 2);
                     ctx.restore();
+
+                    // Subtle ring border
+                    ctx.beginPath();
+                    ctx.arc(arcX, arcY, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 6;
+                    ctx.stroke();
                 }
             } catch (err) {}
 
             // User Info
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 80px "Inter", Arial, sans-serif';
-            ctx.fillText(personal.name.toUpperCase(), canvas.width / 2, 920);
+            ctx.font = '800 70px "Inter", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(personal.name.toUpperCase(), cardW / 2, 880);
 
             let role = 'UI/UX | GRAPHIC DESIGNER';
             if (personal.title) {
                 const parts = personal.title.split('|').map(s => s.trim());
                 role = (parts[0] + (parts[1] ? ' | ' + parts[1] : '')).toUpperCase();
             }
-            ctx.fillStyle = '#E6FF00';
-            ctx.font = '700 45px "Inter", Arial, sans-serif';
-            ctx.fillText(role, canvas.width / 2, 1010);
+            ctx.fillStyle = '#a0a0a0';
+            ctx.font = '600 35px "Inter", Arial, sans-serif';
+            ctx.fillText(role, cardW / 2, 950);
 
             // Skills
-            ctx.fillStyle = '#aaaaaa';
-            ctx.font = '600 35px "Inter", Arial, sans-serif';
+            ctx.fillStyle = '#777777';
+            ctx.font = '400 28px "Inter", Arial, sans-serif';
             const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
-            ctx.fillText(allSkills.slice(0, 4).join(' • '), canvas.width / 2, 1100);
-            if (allSkills.length > 4) {
-                ctx.fillText(allSkills.slice(4, 7).join(' • '), canvas.width / 2, 1160);
+            
+            // Format skills to save space
+            const formatSkills = (skillsArray) => {
+                return skillsArray.map(s => s.replace('Adobe', '').trim()).filter(s => s);
+            };
+            const formatted = formatSkills(allSkills);
+            
+            // Render 3 items per row to prevent clipping out of bounds
+            const chunks = [];
+            for (let i = 0; i < formatted.length; i += 3) {
+                 chunks.push(formatted.slice(i, i + 3).join(' • '));
+            }
+            
+            let skillY = 1080;
+            for (let i = 0; i < Math.min(chunks.length, 3); i++) {
+                 ctx.fillText(chunks[i], cardW / 2, skillY);
+                 skillY += 50;
             }
 
-            // Bottom Barcode Area
-            ctx.fillStyle = '#ffffff';
-            for (let i = 0; i < 36; i++) {
-                const w = Math.random() * 12 + 3;
-                ctx.fillRect(150 + i * 20, canvas.height - 200, w, 100);
-            }
+            // Generate plain back card
+            const backCanvas = document.createElement('canvas');
+            backCanvas.width = 1000;
+            backCanvas.height = 1414;
+            const bctx = backCanvas.getContext('2d');
+            bctx.fillStyle = '#121212';
+            bctx.fillRect(0, 0, 1000, 1414);
+            
+            // Subtle logo on back
+            bctx.fillStyle = '#1a1a1a';
+            bctx.textAlign = 'center';
+            bctx.font = '800 50px "Inter", Arial, sans-serif';
+            bctx.fillText('PORTFOLIO', 500, 707);
 
             setIdCardDataUrl(canvas.toDataURL('image/png'));
+            setBackCardDataUrl(backCanvas.toDataURL('image/png'));
         };
 
         generateIDCard();
@@ -263,7 +288,7 @@ export default function AboutPage() {
 
             {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
-                <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc={idCardDataUrl} backSrc={idCardDataUrl} />
+                <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc={idCardDataUrl} backSrc={backCardDataUrl} />
                 <div
                     className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     style={{ zIndex: 10 }}
