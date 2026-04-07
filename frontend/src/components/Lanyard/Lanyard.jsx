@@ -119,7 +119,9 @@ function useCustomCardTexture(frontSrc, backSrc) {
                 const loadImage = (src) => new Promise((resolve) => {
                     if (!src) return resolve(null);
                     const img = new Image();
-                    img.crossOrigin = 'anonymous';
+                    if (src.startsWith('http') || src.startsWith('https')) {
+                        img.crossOrigin = 'anonymous';
+                    }
                     img.onload = () => resolve(img);
                     img.onerror = () => resolve(null);
                     img.src = src;
