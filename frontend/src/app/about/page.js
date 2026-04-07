@@ -141,6 +141,102 @@ export default function AboutPage() {
     const content = useEditableData("aboutContent", aboutPageContent);
     const aboutBentoCards = useEditableData("aboutBentoCards", defaultAboutBentoCards);
 
+    const [idCardDataUrl, setIdCardDataUrl] = useState(null);
+
+    useEffect(() => {
+        const generateIDCard = async () => {
+            if (typeof window === "undefined") return;
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1448; // ID Card ratio
+            const ctx = canvas.getContext('2d');
+            
+            // Base background
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Neon accent border
+            ctx.strokeStyle = '#E6FF00';
+            ctx.lineWidth = 16;
+            ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
+
+            // Header Banner
+            ctx.fillStyle = '#E6FF00';
+            ctx.fillRect(32, 32, canvas.width - 64, 150);
+            ctx.fillStyle = '#0a0a0a';
+            ctx.font = '900 70px "Inter", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('PORTFOLIO ID', canvas.width / 2, 135);
+
+            // Fetch and draw user image
+            try {
+                const img = new Image();
+                img.src = '/varun.jpg';
+                img.crossOrigin = 'anonymous';
+                
+                const loaded = await new Promise((resolve) => {
+                    img.onload = () => resolve(true);
+                    img.onerror = () => resolve(false);
+                });
+
+                if (loaded) {
+                    ctx.save();
+                    // Outer neon circle
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2, 480, 280, 0, Math.PI * 2);
+                    ctx.fillStyle = '#E6FF00';
+                    ctx.fill();
+                    
+                    // Image clipping mask
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2, 480, 265, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                    
+                    const size = Math.min(img.width, img.height);
+                    const sx = (img.width - size) / 2;
+                    const sy = (img.height - size) / 2;
+                    ctx.drawImage(img, sx, sy, size, size, canvas.width / 2 - 265, 480 - 265, 530, 530);
+                    ctx.restore();
+                }
+            } catch (err) {}
+
+            // User Info
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 80px "Inter", Arial, sans-serif';
+            ctx.fillText(personal.name.toUpperCase(), canvas.width / 2, 920);
+
+            let role = 'UI/UX | GRAPHIC DESIGNER';
+            if (personal.title) {
+                const parts = personal.title.split('|').map(s => s.trim());
+                role = (parts[0] + (parts[1] ? ' | ' + parts[1] : '')).toUpperCase();
+            }
+            ctx.fillStyle = '#E6FF00';
+            ctx.font = '700 45px "Inter", Arial, sans-serif';
+            ctx.fillText(role, canvas.width / 2, 1010);
+
+            // Skills
+            ctx.fillStyle = '#aaaaaa';
+            ctx.font = '600 35px "Inter", Arial, sans-serif';
+            const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
+            ctx.fillText(allSkills.slice(0, 4).join(' • '), canvas.width / 2, 1100);
+            if (allSkills.length > 4) {
+                ctx.fillText(allSkills.slice(4, 7).join(' • '), canvas.width / 2, 1160);
+            }
+
+            // Bottom Barcode Area
+            ctx.fillStyle = '#ffffff';
+            for (let i = 0; i < 36; i++) {
+                const w = Math.random() * 12 + 3;
+                ctx.fillRect(150 + i * 20, canvas.height - 200, w, 100);
+            }
+
+            setIdCardDataUrl(canvas.toDataURL('image/png'));
+        };
+
+        generateIDCard();
+    }, [personal, skillsData]);
+
     return (
         <div className="relative" style={{ background: "#0a0a0a" }}>
             {/* ═══════ LIGHT PILLAR BACKGROUND ═══════ */}
@@ -167,7 +263,7 @@ export default function AboutPage() {
 
             {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
-                <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc="/projects/club-member-id-1.png" backSrc="/projects/club-member-id-1.png" />
+                <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc={idCardDataUrl} backSrc={idCardDataUrl} />
                 <div
                     className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     style={{ zIndex: 10 }}
