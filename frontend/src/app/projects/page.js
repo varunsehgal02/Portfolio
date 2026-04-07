@@ -54,7 +54,11 @@ export default function ProjectsPage() {
         const cats = projectsData
             .filter((p) => p.category === mainCategory && p.subCategory)
             .map((p) => p.subCategory);
-        return ["All", ...new Set(cats)];
+        const uniqueCats = ["All", ...new Set(cats)];
+        if (mainCategory === "graphic") {
+            uniqueCats.push("Logo (Coming Soon)");
+        }
+        return uniqueCats;
     }, [mainCategory, projectsData]);
 
     const filteredProjects = useMemo(() => {

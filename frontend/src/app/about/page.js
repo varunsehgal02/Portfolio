@@ -154,16 +154,16 @@ export default function AboutPage() {
             canvas.height = cardH;
             const ctx = canvas.getContext('2d');
             
-            // Base background (sleek dark)
-            ctx.fillStyle = '#111111';
+            // Base background (sleek dark matte finish)
+            ctx.fillStyle = '#0f0f11';
             ctx.fillRect(0, 0, cardW, cardH);
             
-            // Sleek glowing top gradient
-            const grad = ctx.createLinearGradient(0, 0, 0, 400);
-            grad.addColorStop(0, '#222222');
-            grad.addColorStop(1, '#111111');
+            // Premium glowing top gradient using brand primary
+            const grad = ctx.createLinearGradient(0, 0, 0, 500);
+            grad.addColorStop(0, 'rgba(230, 255, 0, 0.12)'); // Subtle neon glow
+            grad.addColorStop(1, 'rgba(15, 15, 17, 0)');
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, cardW, 400);
+            ctx.fillRect(0, 0, cardW, 500);
 
             // Fetch and draw user image
             try {
@@ -179,11 +179,17 @@ export default function AboutPage() {
                 if (loaded) {
                     ctx.save();
                     const arcX = cardW / 2;
-                    const arcY = 460;
+                    const arcY = 400; // Shifted up
                     
                     // Elliptical mask to actively counter the 3D model's vertical stretch UV projection
-                    const radiusX = 290;
-                    const radiusY = 210;
+                    const radiusX = 270;
+                    const radiusY = 195;
+
+                    // Delicate outer glow/ring for profile picture
+                    ctx.beginPath();
+                    ctx.ellipse(arcX, arcY, radiusX + 10, radiusY + 7, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                    ctx.fill();
 
                     // Image clipping mask
                     ctx.beginPath();
@@ -200,40 +206,64 @@ export default function AboutPage() {
                     ctx.drawImage(img, sx, sy, size, size, arcX - radiusX, arcY - radiusY, radiusX * 2, radiusY * 2);
                     ctx.restore();
 
-                    // Vibrant ring border
+                    // Professional sleek ring border
                     ctx.beginPath();
                     ctx.ellipse(arcX, arcY, radiusX, radiusY, 0, 0, Math.PI * 2);
                     ctx.strokeStyle = '#E6FF00';
-                    ctx.lineWidth = 10;
+                    ctx.lineWidth = 6; // Thinner for elegance
                     ctx.stroke();
                 }
             } catch (err) {}
 
-            // User Info
+            // Professional Divider Line under profile
+            ctx.beginPath();
+            ctx.moveTo(cardW / 2 - 120, 650);
+            ctx.lineTo(cardW / 2 + 120, 650);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Name
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 75px "Inter", Arial, sans-serif';
+            ctx.font = '900 64px "Inter", Arial, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(personal.name.toUpperCase(), cardW / 2, 840);
+            ctx.letterSpacing = "4px";
+            ctx.fillText(personal.name.toUpperCase(), cardW / 2, 740);
 
-            // Vibrant multi-colored roles!
-            const roles = ['UI/UX DESIGNER', 'GRAPHIC DESIGNER', 'MOTION GRAPHICS ARTIST'];
-            let currentY = 930;
-            ctx.font = '800 36px "Inter", Arial, sans-serif';
-            ctx.letterSpacing = "2px";
-            
-            ctx.fillStyle = '#E6FF00'; // Neon Lime
-            ctx.fillText(roles[0], cardW / 2, currentY);
-            
-            ctx.fillStyle = '#FF0055'; // Neon Pink
-            ctx.fillText(roles[1], cardW / 2, currentY + 50);
-            
-            ctx.fillStyle = '#00F0FF'; // Neon Cyan
-            ctx.fillText(roles[2], cardW / 2, currentY + 100);
+            // Premium ID BADGE TAG
+            ctx.fillStyle = '#18181b';
+            ctx.fillRect(cardW / 2 - 140, 780, 280, 42);
+            ctx.fillStyle = '#E6FF00';
+            ctx.font = '800 18px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "6px";
+            ctx.fillText("PORTFOLIO ID", cardW / 2, 808);
 
-            // Skills
-            ctx.fillStyle = '#999999';
-            ctx.font = '400 28px "Inter", Arial, sans-serif';
-            ctx.letterSpacing = "0px";
+            // Roles split into two vibrant and large rows (White color)
+            ctx.font = '800 34px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "3px";
+            ctx.fillStyle = '#ffffff';
+            
+            // Row 1
+            ctx.fillText('UI/UX DESIGNER  •  GRAPHIC DESIGNER', cardW / 2, 880);
+            
+            // Row 2
+            ctx.font = '800 30px "Inter", Arial, sans-serif'; // slightly smaller for longer title
+            ctx.letterSpacing = "4px";
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('MOTION GRAPHICS ARTIST', cardW / 2, 935);
+
+            // Professional Divider Line above skills
+            ctx.beginPath();
+            ctx.moveTo(cardW / 2 - 250, 1050);
+            ctx.lineTo(cardW / 2 + 250, 1050);
+            ctx.strokeStyle = 'rgba(230, 255, 0, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Skills (Safely moved up to avoid bottom-edge UV cutoff!)
+            ctx.fillStyle = '#a1a1aa';
+            ctx.font = '500 24px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "1px";
             const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
             
             // Format skills to save space and remove redundant words
@@ -248,10 +278,10 @@ export default function AboutPage() {
                  chunks.push(formatted.slice(i, i + 3).join('  •  '));
             }
             
-            let skillY = 1180;
-            for (let i = 0; i < Math.min(chunks.length, 3); i++) {
+            let skillY = 1110;
+            for (let i = 0; i < Math.min(chunks.length, 2); i++) {
                  ctx.fillText(chunks[i], cardW / 2, skillY);
-                 skillY += 45;
+                 skillY += 40;
             }
 
             // Generate plain back card
@@ -259,11 +289,11 @@ export default function AboutPage() {
             backCanvas.width = 1000;
             backCanvas.height = 1414;
             const bctx = backCanvas.getContext('2d');
-            bctx.fillStyle = '#111111';
+            bctx.fillStyle = '#0f0f11';
             bctx.fillRect(0, 0, 1000, 1414);
             
             // Subtle logo on back
-            bctx.fillStyle = '#1a1a1a';
+            bctx.fillStyle = '#1a1a1c';
             bctx.textAlign = 'center';
             bctx.font = '800 50px "Inter", Arial, sans-serif';
             bctx.fillText('PORTFOLIO', 500, 707);
