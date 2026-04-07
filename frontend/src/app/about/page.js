@@ -155,15 +155,15 @@ export default function AboutPage() {
             const ctx = canvas.getContext('2d');
             
             // Base background (sleek dark)
-            ctx.fillStyle = '#121212';
+            ctx.fillStyle = '#111111';
             ctx.fillRect(0, 0, cardW, cardH);
             
-            // Subtle top gradient highlight
-            const grad = ctx.createLinearGradient(0, 0, 0, 300);
-            grad.addColorStop(0, '#2a2a2a');
-            grad.addColorStop(1, '#121212');
+            // Sleek glowing top gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, 400);
+            grad.addColorStop(0, '#222222');
+            grad.addColorStop(1, '#111111');
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, cardW, 300);
+            ctx.fillRect(0, 0, cardW, 400);
 
             // Fetch and draw user image
             try {
@@ -179,66 +179,79 @@ export default function AboutPage() {
                 if (loaded) {
                     ctx.save();
                     const arcX = cardW / 2;
-                    const arcY = 480;
-                    const radius = 250;
+                    const arcY = 460;
+                    
+                    // Elliptical mask to actively counter the 3D model's vertical stretch UV projection
+                    const radiusX = 290;
+                    const radiusY = 210;
 
                     // Image clipping mask
                     ctx.beginPath();
-                    ctx.arc(arcX, arcY, radius, 0, Math.PI * 2);
+                    ctx.ellipse(arcX, arcY, radiusX, radiusY, 0, 0, Math.PI * 2);
                     ctx.closePath();
                     ctx.clip();
                     
-                    const size = Math.min(img.width, img.height);
-                    const sx = (img.width - size) / 2;
-                    const sy = (img.height - size) / 2;
-                    ctx.drawImage(img, sx, sy, size, size, arcX - radius, arcY - radius, radius * 2, radius * 2);
+                    const srcW = img.width;
+                    const srcH = img.height;
+                    const size = Math.min(srcW, srcH);
+                    const sx = (srcW - size) / 2;
+                    const sy = (srcH - size) / 2;
+                    
+                    ctx.drawImage(img, sx, sy, size, size, arcX - radiusX, arcY - radiusY, radiusX * 2, radiusY * 2);
                     ctx.restore();
 
-                    // Subtle ring border
+                    // Vibrant ring border
                     ctx.beginPath();
-                    ctx.arc(arcX, arcY, radius, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 6;
+                    ctx.ellipse(arcX, arcY, radiusX, radiusY, 0, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#E6FF00';
+                    ctx.lineWidth = 10;
                     ctx.stroke();
                 }
             } catch (err) {}
 
             // User Info
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 70px "Inter", Arial, sans-serif';
+            ctx.font = '900 75px "Inter", Arial, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(personal.name.toUpperCase(), cardW / 2, 880);
+            ctx.fillText(personal.name.toUpperCase(), cardW / 2, 840);
 
-            let role = 'UI/UX | GRAPHIC DESIGNER';
-            if (personal.title) {
-                const parts = personal.title.split('|').map(s => s.trim());
-                role = (parts[0] + (parts[1] ? ' | ' + parts[1] : '')).toUpperCase();
-            }
-            ctx.fillStyle = '#a0a0a0';
-            ctx.font = '600 35px "Inter", Arial, sans-serif';
-            ctx.fillText(role, cardW / 2, 950);
+            // Vibrant multi-colored roles!
+            const roles = ['UI/UX DESIGNER', 'GRAPHIC DESIGNER', 'MOTION GRAPHICS ARTIST'];
+            let currentY = 930;
+            ctx.font = '800 36px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "2px";
+            
+            ctx.fillStyle = '#E6FF00'; // Neon Lime
+            ctx.fillText(roles[0], cardW / 2, currentY);
+            
+            ctx.fillStyle = '#FF0055'; // Neon Pink
+            ctx.fillText(roles[1], cardW / 2, currentY + 50);
+            
+            ctx.fillStyle = '#00F0FF'; // Neon Cyan
+            ctx.fillText(roles[2], cardW / 2, currentY + 100);
 
             // Skills
-            ctx.fillStyle = '#777777';
+            ctx.fillStyle = '#999999';
             ctx.font = '400 28px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "0px";
             const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
             
-            // Format skills to save space
+            // Format skills to save space and remove redundant words
             const formatSkills = (skillsArray) => {
-                return skillsArray.map(s => s.replace('Adobe', '').trim()).filter(s => s);
+                return Array.from(new Set(skillsArray.map(s => s.replace('Adobe', '').trim()).filter(s => s)));
             };
             const formatted = formatSkills(allSkills);
             
-            // Render 3 items per row to prevent clipping out of bounds
+            // Render 3 items per row
             const chunks = [];
             for (let i = 0; i < formatted.length; i += 3) {
-                 chunks.push(formatted.slice(i, i + 3).join(' • '));
+                 chunks.push(formatted.slice(i, i + 3).join('  •  '));
             }
             
-            let skillY = 1080;
+            let skillY = 1180;
             for (let i = 0; i < Math.min(chunks.length, 3); i++) {
                  ctx.fillText(chunks[i], cardW / 2, skillY);
-                 skillY += 50;
+                 skillY += 45;
             }
 
             // Generate plain back card
@@ -246,7 +259,7 @@ export default function AboutPage() {
             backCanvas.width = 1000;
             backCanvas.height = 1414;
             const bctx = backCanvas.getContext('2d');
-            bctx.fillStyle = '#121212';
+            bctx.fillStyle = '#111111';
             bctx.fillRect(0, 0, 1000, 1414);
             
             // Subtle logo on back
