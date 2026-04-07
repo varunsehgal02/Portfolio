@@ -254,15 +254,15 @@ export default function AboutPage() {
 
             // Professional Divider Line above skills
             ctx.beginPath();
-            ctx.moveTo(cardW / 2 - 250, 1050);
-            ctx.lineTo(cardW / 2 + 250, 1050);
+            ctx.moveTo(cardW / 2 - 250, 1020);
+            ctx.lineTo(cardW / 2 + 250, 1020);
             ctx.strokeStyle = 'rgba(230, 255, 0, 0.2)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
             // Skills (Safely moved up to avoid bottom-edge UV cutoff!)
             ctx.fillStyle = '#a1a1aa';
-            ctx.font = '500 24px "Inter", Arial, sans-serif';
+            ctx.font = '500 32px "Inter", Arial, sans-serif';
             ctx.letterSpacing = "1px";
             const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
             
@@ -278,10 +278,10 @@ export default function AboutPage() {
                  chunks.push(formatted.slice(i, i + 3).join('  •  '));
             }
             
-            let skillY = 1110;
+            let skillY = 1070;
             for (let i = 0; i < Math.min(chunks.length, 2); i++) {
                  ctx.fillText(chunks[i], cardW / 2, skillY);
-                 skillY += 40;
+                 skillY += 48;
             }
 
             // Generate plain back card
@@ -333,7 +333,7 @@ export default function AboutPage() {
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
                 <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc={idCardDataUrl} backSrc={backCardDataUrl} />
                 <div
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     style={{ zIndex: 10 }}
                 >
                     <span className="text-text-secondary text-sm font-medium animate-pulse">
