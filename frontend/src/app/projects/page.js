@@ -66,9 +66,26 @@ export default function ProjectsPage() {
         return pList;
     }, [mainCategory, subCategory, projectsData]);
 
+    const [uiuxBg, setUiuxBg] = useState("/projects/saas-dashboard.png");
+    const [graphicBg, setGraphicBg] = useState("/projects/social-media.png");
+
+    useEffect(() => {
+        if (projectsData && projectsData.length > 0) {
+            const uiuxProjs = projectsData.filter(p => p.category === 'uiux' && p.image);
+            const graphicProjs = projectsData.filter(p => p.category === 'graphic' && p.image);
+            
+            if (uiuxProjs.length > 0) {
+                setUiuxBg(uiuxProjs[Math.floor(Math.random() * uiuxProjs.length)].image);
+            }
+            if (graphicProjs.length > 0) {
+                setGraphicBg(graphicProjs[Math.floor(Math.random() * graphicProjs.length)].image);
+            }
+        }
+    }, [projectsData]);
+
     const categoryOptions = [
-        { id: "uiux", title: "UI/UX", desc: "Digital Experiences & Interfaces", bg: "/projects/saas-dashboard.png", icon: "🌐" },
-        { id: "graphic", title: "Graphic Designer", desc: "Branding, Posters & ID Cards", bg: "/projects/social-media.png", icon: "🎨" },
+        { id: "uiux", title: "UI/UX", desc: "Digital Experiences & Interfaces", bg: uiuxBg, icon: "🌐" },
+        { id: "graphic", title: "Graphic Designer", desc: "Branding, Posters & ID Cards", bg: graphicBg, icon: "🎨" },
         { id: "motion", title: "Motion Graphic Artist", desc: "Animations & VFX", bg: "/projects/mobile-app.png", icon: "🎬", comingSoon: true }
     ];
 
