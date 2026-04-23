@@ -23,12 +23,7 @@ const defaultCardData = [
         description: 'Photoshop, Illustrator, After Effects',
         label: '🛠️ Tools'
     },
-    {
-        color: '#060a1a',
-        title: 'Motion Graphics',
-        description: 'Animated videos, social media content & brand materials',
-        label: '🎬 Animation'
-    },
+
     {
         color: '#060a1a',
         title: '95% Client Satisfaction',

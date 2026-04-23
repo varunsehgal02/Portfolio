@@ -82,7 +82,7 @@ export default function LoadingScreen() {
                                 transition={{ delay: 0.2, duration: 0.45, ease: "easeOut" }}
                                 className="overflow-hidden whitespace-nowrap text-text-secondary text-sm font-medium"
                             >
-                                UI/UX Designer · Graphic Designer · Motion Artist
+                                UI/UX Designer · Graphic Designer
                             </motion.p>
                             <motion.span
                                 animate={{ opacity: [1, 0, 1] }}

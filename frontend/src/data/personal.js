@@ -1,12 +1,12 @@
 export const personalInfo = {
     name: "Varun Sehgal",
-    title: "UI/UX Designer | Graphic Designer | Motion Graphics Artist",
+    title: "UI/UX Designer | Graphic Designer",
     tagline: "Crafting user-centered digital experiences that blend aesthetics with functionality",
     email: "varun.sehgal02@gmail.com",
     phone: "+91-9399361193",
     location: "Gwalior, Madhya Pradesh, India",
     resumeUrl: "/resume/Varun_Sehgal.pdf",
-    rotatingRoles: ["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"],
+    rotatingRoles: ["UI/UX Designer", "Graphic Designer"],
     socials: {
         behance: "https://behance.net/varunsehgal3",
         linkedin: "https://linkedin.com/in/varunsehgal02",
@@ -14,7 +14,7 @@ export const personalInfo = {
         instagram: "",
     },
     summary:
-        "UI/UX Designer, Graphic Designer, and Motion Graphics Artist with 2+ years of experience creating user-centered web and mobile interfaces, immersive motion graphics, and branding assets. Skilled in Figma, Adobe Creative Suite, wireframing, prototyping, usability testing, and responsive design. Proven ability to improve engagement, conversion rates, and user satisfaction through data-driven design solutions. Seeking UI/UX and Product Design roles.",
+        "UI/UX Designer and Graphic Designer with 2+ years of experience creating user-centered web and mobile interfaces and branding assets. Skilled in Figma, Adobe Creative Suite, wireframing, prototyping, usability testing, and responsive design. Proven ability to improve engagement, conversion rates, and user satisfaction through data-driven design solutions. Seeking UI/UX and Product Design roles.",
     stats: [
         { label: "Years Experience", value: "2+" },
         { label: "UI/UX Interfaces", value: "5+" },
@@ -43,7 +43,6 @@ export const skills = {
         "Mobile App Design",
         "Web Design",
         "Social Media Graphics",
-        "Motion Graphics",
         "Marketing Creatives",
         "Product Design",
     ],
@@ -57,18 +56,18 @@ export const experience = [
         period: "Jun 2025 – Aug 2025",
         highlights: [
             "Spearheaded development of 5+ UI/UX interfaces for web and mobile platforms using Figma, creating wireframes, mockups, and interactive prototypes that elevated user satisfaction by 40%.",
-            "Produced 7+ graphic assets and motion graphics including social posts, animated videos, marketing collateral, and brand materials leveraging Photoshop, Illustrator, and After Effects.",
-            "Launched engaging social media visuals and animations that amplified brand visibility by 35% and accelerated user engagement by 45% across multiple digital channels.",
+            "Produced 7+ graphic assets including social posts, marketing collateral, and brand materials leveraging Photoshop and Illustrator.",
+            "Launched engaging social media visuals that amplified brand visibility by 35% and accelerated user engagement by 45% across multiple digital channels.",
         ],
     },
     {
-        role: "Freelance UI/UX Designer, Graphic Designer & Motion Graphics Artist",
+        role: "Freelance UI/UX Designer & Graphic Designer",
         company: "Self-Employed",
         location: "Remote",
         period: "Jan 2023 – Present",
         highlights: [
-            "Executed 5+ design initiatives encompassing web applications, mobile interfaces, animated content, and social media campaigns for diverse clients in e-commerce, technology, and healthcare sectors.",
-            "Applied user-centered methodologies and human centered design principles to craft intuitive, visually compelling digital experiences with motion graphics, securing 95% client satisfaction and 80% repeat business rate.",
+            "Executed 5+ design initiatives encompassing web applications, mobile interfaces, and social media campaigns for diverse clients in e-commerce, technology, and healthcare sectors.",
+            "Applied user-centered methodologies and human centered design principles to craft intuitive, visually compelling digital experiences, securing 95% client satisfaction and 80% repeat business rate.",
         ],
     },
 ];

@@ -11,12 +11,19 @@ import NetworkBackground from "@/components/NetworkBackground";
 
 const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
 
-// Using some of the club ID images from default data for the 3 lanyards
 const ID_CARDS_GALLERY = [
-    { front: "/projects/real-id-cards/1-front.png", back: "/projects/real-id-cards/1-back.png" },
-    { front: "/projects/real-id-cards/2-front.png", back: "/projects/real-id-cards/2-back.png" },
-    { front: "/projects/real-id-cards/3-front.png", back: "/projects/real-id-cards/3-back.png" },
-    { front: "/projects/real-id-cards/4-front.png", back: "/projects/real-id-cards/4-back.png" },
+    { front: "/projects/real-id-cards/1-front.png?v=2", back: "/projects/real-id-cards/1-back.png?v=2" },
+    { front: "/projects/real-id-cards/2-front.png?v=2", back: "/projects/real-id-cards/2-back.png?v=2" },
+    { front: "/projects/real-id-cards/3-front.png?v=2", back: "/projects/real-id-cards/3-back.png?v=2" },
+    { front: "/projects/real-id-cards/4-front.png?v=2", back: "/projects/real-id-cards/4-back.png?v=2" },
+    { front: "/projects/omesh/1v.png?v=2", back: "/projects/omesh/2v.png?v=2" },
+    { front: "/projects/omesh/3v.png?v=2", back: "/projects/omesh/4v.png?v=2" },
+    { front: "/projects/omesh/5v.png?v=2", back: "/projects/omesh/6v.png?v=2" },
+    { front: "/projects/omesh/7v.png?v=2", back: "/projects/omesh/8v.png?v=2" },
+    { front: "/projects/omesh/9v.png?v=2", back: "/projects/omesh/10v.png?v=2" },
+    { front: "/projects/omesh/11v.png?v=2", back: "/projects/omesh/12v.png?v=2" },
+    { front: "/projects/omesh/13v.png?v=2", back: "/projects/omesh/14v.png?v=2" },
+    { front: "/projects/omesh/15v.png?v=2", back: "/projects/omesh/16v.png?v=2" },
 ];
 
 export default function ProjectsPage() {
@@ -89,8 +96,7 @@ export default function ProjectsPage() {
 
     const categoryOptions = [
         { id: "uiux", title: "UI/UX", desc: "Digital Experiences & Interfaces", bg: uiuxBg, icon: "🌐" },
-        { id: "graphic", title: "Graphic Designer", desc: "Branding, Posters & ID Cards", bg: graphicBg, icon: "🎨" },
-        { id: "motion", title: "Motion Graphic Artist", desc: "Animations & VFX", bg: "/projects/mobile-app.png", icon: "🎬", comingSoon: true }
+        { id: "graphic", title: "Graphic Designer", desc: "Branding, Posters & ID Cards", bg: graphicBg, icon: "🎨" }
     ];
 
     // ----- Modal Logic -----
@@ -161,7 +167,7 @@ export default function ProjectsPage() {
                                 Explore my specialized portfolios across different creative domains.
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
                                 {categoryOptions.map((opt, idx) => (
                                     <motion.button
                                         key={opt.id}
@@ -267,26 +273,14 @@ export default function ProjectsPage() {
                                         <p className="text-primary-light text-sm mt-2 font-medium">Interactive 3D Preview (Drag to swing)</p>
                                     </div>
                                     
-                                    <div className="w-full flex flex-col gap-12 md:gap-24 pointer-events-auto pb-24 px-8">
-                                        {/* Row 1: 3 Lanyards */}
-                                        <div className="relative w-full flex flex-col md:flex-row items-center justify-center pt-8">
-                                            <div className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
-                                                <div className="w-full max-w-[380px] h-full"><Lanyard frontSrc={ID_CARDS_GALLERY[0].front} backSrc={ID_CARDS_GALLERY[0].back} /></div>
+                                    <div className="w-full flex flex-wrap justify-center gap-y-12 md:gap-y-24 pointer-events-auto pb-24 px-8 pt-8">
+                                        {ID_CARDS_GALLERY.map((card, i) => (
+                                            <div key={i} className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
+                                                <div className="w-full max-w-[380px] h-full">
+                                                    <Lanyard frontSrc={card.front} backSrc={card.back} />
+                                                </div>
                                             </div>
-                                            <div className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
-                                                <div className="w-full max-w-[380px] h-full"><Lanyard frontSrc={ID_CARDS_GALLERY[1].front} backSrc={ID_CARDS_GALLERY[1].back} /></div>
-                                            </div>
-                                            <div className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
-                                                <div className="w-full max-w-[380px] h-full"><Lanyard frontSrc={ID_CARDS_GALLERY[2].front} backSrc={ID_CARDS_GALLERY[2].back} /></div>
-                                            </div>
-                                        </div>
-
-                                        {/* Row 2: 1 Lanyard */}
-                                        <div className="relative w-full flex flex-col md:flex-row items-center justify-center">
-                                            <div className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
-                                                <div className="w-full max-w-[380px] h-full"><Lanyard frontSrc={ID_CARDS_GALLERY[3].front} backSrc={ID_CARDS_GALLERY[3].back} /></div>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </motion.div>
                             ) : (

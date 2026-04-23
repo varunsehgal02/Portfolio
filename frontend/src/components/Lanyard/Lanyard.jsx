@@ -54,7 +54,7 @@ function useCustomCardTexture(frontSrc, backSrc) {
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
             
-            ctx.fillStyle = '#0a0a0a';
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, 2048, 1024);
 
             // The 3D ID card model has an aspect ratio of roughly 1.1 / 1.52 = 0.723
@@ -68,19 +68,24 @@ function useCustomCardTexture(frontSrc, backSrc) {
                 let drawX = offsetX;
                 let drawY = 0;
 
+                // Check if the current image is one of the original 4 ID cards
+                const isRealIdCard = img.src && img.src.includes('real-id-cards');
+                const scale = isRealIdCard ? 0.94 : 0.68;
+
                 if (imgRatio > targetRatio) {
                     // Image is wider than target ratio
                     // Fit width, letterbox height
-                    drawW = 1024;
-                    drawH = 1024 * (targetRatio / imgRatio);
-                    drawY = (1024 - drawH) / 2;
+                    drawW = 1024 * scale;
+                    drawH = (1024 * (targetRatio / imgRatio)) * scale;
                 } else {
                     // Image is taller than target ratio
                     // Fit height, pillarbox width
-                    drawH = 1024;
-                    drawW = 1024 * (imgRatio / targetRatio);
-                    drawX = offsetX + (1024 - drawW) / 2;
+                    drawH = 1024 * scale;
+                    drawW = (1024 * (imgRatio / targetRatio)) * scale;
                 }
+
+                drawX = offsetX + (1024 - drawW) / 2;
+                drawY = (1024 - drawH) / 2;
                 
                 // User requested to shift all images a little bit UP on the ID card.
                 // Subtracting from drawY physically shifts the drawn image closer to the top edge. 

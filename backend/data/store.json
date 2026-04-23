@@ -244,6 +244,116 @@
         "deviceType": "Desktop",
         "ip": "::1",
         "at": "2026-04-07T18:46:11.382Z"
+      },
+      {
+        "id": 1776985451521,
+        "page": "/about",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:04:11.521Z"
+      },
+      {
+        "id": 1776985465451,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "http://localhost:3000/",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:04:25.451Z"
+      },
+      {
+        "id": 1776986306682,
+        "page": "/",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:18:26.682Z"
+      },
+      {
+        "id": 1776986324537,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:18:44.537Z"
+      },
+      {
+        "id": 1776986400117,
+        "page": "/about",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:20:00.117Z"
+      },
+      {
+        "id": 1776986401180,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:20:01.181Z"
+      },
+      {
+        "id": 1776987461431,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:37:41.432Z"
+      },
+      {
+        "id": 1776988067907,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:47:47.907Z"
+      },
+      {
+        "id": 1776988523239,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:55:23.239Z"
+      },
+      {
+        "id": 1776988550595,
+        "page": "/projects",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "referrer": "",
+        "screenWidth": 1720,
+        "browser": "Chrome",
+        "deviceType": "Desktop",
+        "ip": "::1",
+        "at": "2026-04-23T23:55:50.595Z"
       }
     ],
     "aboutPopupOpens": [

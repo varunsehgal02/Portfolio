@@ -243,14 +243,8 @@ export default function AboutPage() {
             ctx.letterSpacing = "3px";
             ctx.fillStyle = '#ffffff';
             
-            // Row 1
-            ctx.fillText('UI/UX DESIGNER  •  GRAPHIC DESIGNER', cardW / 2, 880);
-            
-            // Row 2
-            ctx.font = '800 30px "Inter", Arial, sans-serif'; // slightly smaller for longer title
-            ctx.letterSpacing = "4px";
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText('MOTION GRAPHICS ARTIST', cardW / 2, 935);
+            // Role
+            ctx.fillText('UI/UX DESIGNER  •  GRAPHIC DESIGNER', cardW / 2, 914);
 
             // Professional Divider Line above skills
             ctx.beginPath();
@@ -378,7 +372,7 @@ export default function AboutPage() {
                         <div className="flex items-center justify-center gap-3 text-2xl sm:text-3xl md:text-4xl font-display font-semibold text-text-secondary">
                             <span>I&apos;m a</span>
                             <RotatingText
-                                texts={personal.rotatingRoles?.length ? personal.rotatingRoles : ["UI/UX Designer", "Graphic Designer", "Motion Graphics Artist"]}
+                                texts={personal.rotatingRoles?.length ? personal.rotatingRoles : ["UI/UX Designer", "Graphic Designer"]}
                                 mainClassName="px-3 py-1 bg-primary/20 text-primary-light overflow-hidden rounded-lg"
                                 staggerFrom="last"
                                 initial={{ y: "100%" }}

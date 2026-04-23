@@ -15,10 +15,10 @@ const navItems = [
 ];
 
 export const metadata = {
-    title: "Varun Sehgal — UI/UX & Motion Designer",
+    title: "Varun Sehgal — UI/UX & Graphic Designer",
     description:
-        "Portfolio of Varun Sehgal — UI/UX Designer, Graphic Designer & Motion Graphics Artist crafting user-centered digital experiences.",
-    keywords: ["UI/UX Designer", "Graphic Designer", "Motion Graphics", "Portfolio", "Varun Sehgal"],
+        "Portfolio of Varun Sehgal — UI/UX Designer & Graphic Designer crafting user-centered digital experiences.",
+    keywords: ["UI/UX Designer", "Graphic Designer", "Portfolio", "Varun Sehgal"],
 };
 
 export default function RootLayout({ children }) {
