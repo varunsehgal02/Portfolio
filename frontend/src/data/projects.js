@@ -125,7 +125,7 @@ export const projects = [
         id: "codesrijan-merch",
         title: "Codesrijan Hackathon Merch",
         category: "graphic",
-        subCategory: "Merchandise Design",
+        subCategory: "Merch and ID Card",
         description: "Comprehensive merchandise and identity design for the Codesrijan Hackathon, including an event T-shirt and custom ID cards for the organizing team, faculties, and participants.",
         highlights: [
             "Hackathon Apparel Design",

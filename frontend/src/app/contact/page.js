@@ -382,7 +382,7 @@ export default function ContactPage() {
                                     onBlur={() => handleFieldBlur("name")}
                                     aria-invalid={Boolean(showFieldError("name"))}
                                     className={`w-full px-4 py-3 rounded-xl bg-surface-light border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 ${showFieldError("name") ? "border-red-400/70" : "border-surface-light"}`}
-                                    placeholder="John Doe"
+                                    placeholder="Name"
                                 />
                                 {showFieldError("name") && <p className="text-red-400 text-xs mt-2">{fieldErrors.name}</p>}
                             </div>
@@ -399,7 +399,7 @@ export default function ContactPage() {
                                     onBlur={() => handleFieldBlur("email")}
                                     aria-invalid={Boolean(showFieldError("email"))}
                                     className={`w-full px-4 py-3 rounded-xl bg-surface-light border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all duration-300 ${showFieldError("email") ? "border-red-400/70" : "border-surface-light"}`}
-                                    placeholder="john@example.com"
+                                    placeholder="email.@example.com"
                                 />
                                 {showFieldError("email") && <p className="text-red-400 text-xs mt-2">{fieldErrors.email}</p>}
                             </div>

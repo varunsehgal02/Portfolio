@@ -10,7 +10,7 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], fov = 14, transparent = true, frontSrc = null, backSrc = null }) {
+export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], fov = 14, transparent = true, frontSrc = null, backSrc = null, fitMode = "stretch" }) {
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
     useEffect(() => {
@@ -22,13 +22,13 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
     return (
         <div className="lanyard-wrapper">
             <Canvas
-                camera={{ position: position, fov: fov }}
+                camera={{ position: position, fov: isMobile ? fov * 1.5 : fov }}
                 gl={{ alpha: transparent }}
                 onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
             >
                 <ambientLight intensity={Math.PI} />
                 <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-                    <Band isMobile={isMobile} frontSrc={frontSrc} backSrc={backSrc} />
+                    <Band isMobile={isMobile} frontSrc={frontSrc} backSrc={backSrc} fitMode={fitMode} />
                 </Physics>
                 <Environment blur={0.75}>
                     <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
@@ -41,7 +41,7 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
     );
 }
 
-function useCustomCardTexture(frontSrc, backSrc) {
+function useCustomCardTexture(frontSrc, backSrc, fitMode = "stretch") {
     const [texture, setTexture] = useState(null);
 
     useEffect(() => {
@@ -62,37 +62,49 @@ function useCustomCardTexture(frontSrc, backSrc) {
             
             const drawContain = (img, offsetX) => {
                 if (!img) return;
-                const imgRatio = img.width / img.height;
-                let drawW = 1024;
-                let drawH = 1024;
-                let drawX = offsetX;
-                let drawY = 0;
-
-                // Check if the current image is one of the original 4 ID cards
-                const isRealIdCard = img.src && img.src.includes('real-id-cards');
-                const scale = isRealIdCard ? 0.94 : 0.68;
-
-                if (imgRatio > targetRatio) {
-                    // Image is wider than target ratio
-                    // Fit width, letterbox height
-                    drawW = 1024 * scale;
-                    drawH = (1024 * (targetRatio / imgRatio)) * scale;
+                
+                if (fitMode === "stretch") {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(offsetX, 0, 1024, 1024);
+                    // Draw squished vertically to fit the 3D model's visible UV area
+                    ctx.drawImage(img, offsetX, 0, 1024, 850);
                 } else {
-                    // Image is taller than target ratio
-                    // Fit height, pillarbox width
-                    drawH = 1024 * scale;
-                    drawW = (1024 * (imgRatio / targetRatio)) * scale;
-                }
+                    // Sample the top-left pixel of the image for seamless padding
+                    let bgColor = '#000000'; // Fallback color
+                    try {
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = 1;
+                        tempCanvas.height = 1;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(img, 0, 0, 1, 1);
+                        const pixel = tempCtx.getImageData(0, 0, 1, 1).data;
+                        bgColor = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+                    } catch (e) {
+                        console.warn("Could not sample image pixel color, falling back to black.", e);
+                    }
+                    
+                    ctx.fillStyle = bgColor;
+                    ctx.fillRect(offsetX, 0, 1024, 1024);
 
-                drawX = offsetX + (1024 - drawW) / 2;
-                drawY = (1024 - drawH) / 2;
-                
-                // User requested to shift all images a little bit UP on the ID card.
-                // Subtracting from drawY physically shifts the drawn image closer to the top edge. 
-                const shiftUpAmount = 95; 
-                drawY -= shiftUpAmount;
-                
-                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+                    const imgRatio = img.width / img.height;
+                    let drawW = 1024;
+                    let drawH = 1024;
+                    
+                    const scale = 0.90; // Slightly smaller to ensure fit
+
+                    if (imgRatio > targetRatio) {
+                        drawW = 1024 * scale;
+                        drawH = (1024 * (targetRatio / imgRatio)) * scale;
+                    } else {
+                        drawH = 1024 * scale;
+                        drawW = (1024 * (imgRatio / targetRatio)) * scale;
+                    }
+
+                    const drawX = offsetX + (1024 - drawW) / 2;
+                    const drawY = (1024 - drawH) / 2 - 90; // Shift UP significantly to avoid bottom cutoff
+                    
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+                }
             };
 
             // Front image on left half
@@ -156,7 +168,7 @@ function useCustomCardTexture(frontSrc, backSrc) {
     return texture;
 }
 
-function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, frontSrc = null, backSrc = null }) {
+function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, frontSrc = null, backSrc = null, fitMode = "stretch" }) {
     const { size } = useThree();
     const band = useRef();
     const fixed = useRef();
@@ -172,7 +184,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, frontSrc = null, 
 
     const { nodes, materials } = useGLTF('/card.glb');
     const texture = useTexture('/lanyard.png');
-    const customCardTexture = useCustomCardTexture(frontSrc, backSrc);
+    const customCardTexture = useCustomCardTexture(frontSrc, backSrc, fitMode);
 
     const [curve] = useState(
         () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])

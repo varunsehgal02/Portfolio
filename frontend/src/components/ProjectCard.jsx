@@ -90,11 +90,11 @@ export default function ProjectCard({ project, index, onOpen }) {
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/40 backdrop-blur-sm text-primary-light border border-primary/20">
-                        {project.category === "uiux"
+                        {project.subCategory || (project.category === "uiux"
                             ? "UI/UX"
                             : project.category === "graphic"
                                 ? "Graphic"
-                                : "Motion"}
+                                : "Motion")}
                     </span>
                 </div>
             </div>
@@ -109,14 +109,14 @@ export default function ProjectCard({ project, index, onOpen }) {
                 </p>
 
                 {/* Highlights */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-2">
                     {project.highlights.map((highlight, i) => (
                         <div
                             key={i}
-                            className="flex items-center gap-2 text-xs text-text-secondary"
+                            className="flex items-start gap-2 text-xs text-text-secondary"
                         >
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                            {highlight}
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1" />
+                            <span className="leading-snug">{highlight}</span>
                         </div>
                     ))}
                 </div>

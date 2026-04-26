@@ -232,11 +232,11 @@ export default function AboutPage() {
 
             // Premium ID BADGE TAG
             ctx.fillStyle = '#18181b';
-            ctx.fillRect(cardW / 2 - 140, 780, 280, 42);
+            ctx.fillRect(cardW / 2 - 160, 780, 320, 50);
             ctx.fillStyle = '#E6FF00';
-            ctx.font = '800 18px "Inter", Arial, sans-serif';
+            ctx.font = '800 24px "Inter", Arial, sans-serif';
             ctx.letterSpacing = "6px";
-            ctx.fillText("PORTFOLIO ID", cardW / 2, 808);
+            ctx.fillText("PORTFOLIO ID", cardW / 2, 814);
 
             // Roles split into two vibrant and large rows (White color)
             ctx.font = '800 34px "Inter", Arial, sans-serif';
@@ -255,9 +255,9 @@ export default function AboutPage() {
             ctx.stroke();
 
             // Skills (Safely moved up to avoid bottom-edge UV cutoff!)
-            ctx.fillStyle = '#a1a1aa';
-            ctx.font = '500 32px "Inter", Arial, sans-serif';
-            ctx.letterSpacing = "1px";
+            ctx.fillStyle = '#e4e4e7';
+            ctx.font = '600 38px "Inter", Arial, sans-serif';
+            ctx.letterSpacing = "1.5px";
             const allSkills = [...(skillsData["Design Tools"] || []), ...(skillsData["UI/UX"] || [])];
             
             // Format skills to save space and remove redundant words
@@ -327,14 +327,14 @@ export default function AboutPage() {
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>
                 <Lanyard position={[0, 0, 13]} gravity={[0, -40, 0]} fov={21} frontSrc={idCardDataUrl} backSrc={backCardDataUrl} />
                 <div
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                     style={{ zIndex: 10 }}
                 >
-                    <span className="text-text-secondary text-sm font-medium animate-pulse">
+                    <span className="text-text-secondary text-base font-medium animate-pulse">
                         {content.lanyardHint}
                     </span>
                     <svg
-                        className="w-5 h-5 text-primary-light animate-bounce"
+                        className="w-6 h-6 text-primary-light animate-bounce"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"

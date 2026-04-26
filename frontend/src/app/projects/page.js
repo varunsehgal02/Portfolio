@@ -12,18 +12,18 @@ import NetworkBackground from "@/components/NetworkBackground";
 const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
 
 const ID_CARDS_GALLERY = [
-    { front: "/projects/real-id-cards/1-front.png?v=2", back: "/projects/real-id-cards/1-back.png?v=2" },
-    { front: "/projects/real-id-cards/2-front.png?v=2", back: "/projects/real-id-cards/2-back.png?v=2" },
-    { front: "/projects/real-id-cards/3-front.png?v=2", back: "/projects/real-id-cards/3-back.png?v=2" },
-    { front: "/projects/real-id-cards/4-front.png?v=2", back: "/projects/real-id-cards/4-back.png?v=2" },
-    { front: "/projects/omesh/1v.png?v=2", back: "/projects/omesh/2v.png?v=2" },
-    { front: "/projects/omesh/3v.png?v=2", back: "/projects/omesh/4v.png?v=2" },
-    { front: "/projects/omesh/5v.png?v=2", back: "/projects/omesh/6v.png?v=2" },
-    { front: "/projects/omesh/7v.png?v=2", back: "/projects/omesh/8v.png?v=2" },
-    { front: "/projects/omesh/9v.png?v=2", back: "/projects/omesh/10v.png?v=2" },
-    { front: "/projects/omesh/11v.png?v=2", back: "/projects/omesh/12v.png?v=2" },
-    { front: "/projects/omesh/13v.png?v=2", back: "/projects/omesh/14v.png?v=2" },
-    { front: "/projects/omesh/15v.png?v=2", back: "/projects/omesh/16v.png?v=2" },
+    { front: "/projects/real-id-cards/1-front.png?v=2", back: "/projects/real-id-cards/1-back.png?v=2", fitMode: "contain" },
+    { front: "/projects/real-id-cards/2-front.png?v=2", back: "/projects/real-id-cards/2-back.png?v=2", fitMode: "contain" },
+    { front: "/projects/real-id-cards/3-front.png?v=2", back: "/projects/real-id-cards/3-back.png?v=2", fitMode: "contain" },
+    { front: "/projects/real-id-cards/4-front.png?v=2", back: "/projects/real-id-cards/4-back.png?v=2", fitMode: "contain" },
+    { front: "/projects/omesh/1v.png?v=2", back: "/projects/omesh/2v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/3v.png?v=2", back: "/projects/omesh/4v.png?v=2", fitMode: "contain" },
+    { front: "/projects/omesh/5v.png?v=2", back: "/projects/omesh/6v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/7v.png?v=2", back: "/projects/omesh/8v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/9v.png?v=2", back: "/projects/omesh/10v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/11v.png?v=2", back: "/projects/omesh/12v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/13v.png?v=2", back: "/projects/omesh/14v.png?v=2", fitMode: "stretch" },
+    { front: "/projects/omesh/15v.png?v=2", back: "/projects/omesh/16v.png?v=2", fitMode: "stretch" },
 ];
 
 export default function ProjectsPage() {
@@ -277,7 +277,7 @@ export default function ProjectsPage() {
                                         {ID_CARDS_GALLERY.map((card, i) => (
                                             <div key={i} className="w-full md:w-1/3 h-[500px] md:h-[700px] flex justify-center z-10 relative">
                                                 <div className="w-full max-w-[380px] h-full">
-                                                    <Lanyard frontSrc={card.front} backSrc={card.back} />
+                                                    <Lanyard frontSrc={card.front} backSrc={card.back} fitMode={card.fitMode || "stretch"} />
                                                 </div>
                                             </div>
                                         ))}
@@ -335,60 +335,64 @@ export default function ProjectsPage() {
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="h-full grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
-                                    <div className="relative flex items-center justify-center bg-black min-h-[320px] lg:min-h-0 border-b lg:border-b-0 lg:border-r border-white/10 overflow-hidden">
-                                        {modalGallery[activeModalImage] ? (
-                                            <AnimatePresence mode="wait" initial={false}>
-                                                <motion.img
-                                                    key={`${modalGallery[activeModalImage]}-${activeModalImage}`}
-                                                    src={modalGallery[activeModalImage]}
-                                                    alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
-                                                    className={modalImageClass}
-                                                    loading="eager"
-                                                    decoding="async"
-                                                    fetchPriority="high"
-                                                    initial={{ opacity: 0, x: slideDirection * 40, scale: 0.98 }}
-                                                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                                                    exit={{ opacity: 0, x: slideDirection * -40, scale: 0.98 }}
-                                                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                                                />
-                                            </AnimatePresence>
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-7xl">{selectedProject.icon}</div>
-                                        )}
-                                        {modalGallery.length > 1 && (
-                                            <>
-                                                <button
-                                                    onClick={() => navigateModalImage(-1)}
-                                                    className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 hover:border-white/50 transition-all backdrop-blur-md"
-                                                    aria-label="Previous image"
-                                                >
-                                                    &lt;
-                                                </button>
-                                                <button
-                                                    onClick={() => navigateModalImage(1)}
-                                                    className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 hover:border-white/50 transition-all backdrop-blur-md"
-                                                    aria-label="Next image"
-                                                >
-                                                    &gt;
-                                                </button>
-                                            </>
-                                        )}
-                                        <div className="absolute bottom-4 left-4 right-4 flex gap-3 overflow-x-auto pb-2 pr-2 custom-scrollbar">
-                                            {modalGallery.map((item, i) => (
-                                                <button
-                                                    key={`${item}-${i}`}
-                                                    onClick={() => selectModalImage(i)}
-                                                    className={`w-20 h-14 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${activeModalImage === i ? "border-primary shadow-[0_0_15px_rgba(230,255,0,0.3)]" : "border-transparent opacity-60 hover:opacity-100"}`}
-                                                >
-                                                    <img
-                                                        src={item}
-                                                        alt={`thumb ${i + 1}`}
-                                                        className="w-full h-full object-cover"
-                                                        loading="lazy"
+                                    <div className="flex flex-col bg-black min-h-[320px] lg:min-h-0 border-b lg:border-b-0 lg:border-r border-white/10 overflow-hidden">
+                                        <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+                                            {modalGallery[activeModalImage] ? (
+                                                <AnimatePresence mode="wait" initial={false}>
+                                                    <motion.img
+                                                        key={`${modalGallery[activeModalImage]}-${activeModalImage}`}
+                                                        src={modalGallery[activeModalImage]}
+                                                        alt={`${selectedProject.title} preview ${activeModalImage + 1}`}
+                                                        className={modalImageClass}
+                                                        loading="eager"
+                                                        decoding="async"
+                                                        fetchPriority="high"
+                                                        initial={{ opacity: 0, x: slideDirection * 40, scale: 0.98 }}
+                                                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                                                        exit={{ opacity: 0, x: slideDirection * -40, scale: 0.98 }}
+                                                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                                     />
-                                                </button>
-                                            ))}
+                                                </AnimatePresence>
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-7xl">{selectedProject.icon}</div>
+                                            )}
+                                            {modalGallery.length > 1 && (
+                                                <>
+                                                    <button
+                                                        onClick={() => navigateModalImage(-1)}
+                                                        className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 hover:border-white/50 transition-all backdrop-blur-md"
+                                                        aria-label="Previous image"
+                                                    >
+                                                        &lt;
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigateModalImage(1)}
+                                                        className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 hover:border-white/50 transition-all backdrop-blur-md"
+                                                        aria-label="Next image"
+                                                    >
+                                                        &gt;
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
+                                        {modalGallery.length > 1 && (
+                                            <div className="flex-none p-4 flex gap-3 overflow-x-auto custom-scrollbar bg-[#080808] border-t border-white/10">
+                                                {modalGallery.map((item, i) => (
+                                                    <button
+                                                        key={`${item}-${i}`}
+                                                        onClick={() => selectModalImage(i)}
+                                                        className={`w-20 h-14 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${activeModalImage === i ? "border-primary shadow-[0_0_15px_rgba(230,255,0,0.3)]" : "border-transparent opacity-60 hover:opacity-100"}`}
+                                                    >
+                                                        <img
+                                                            src={item}
+                                                            alt={`thumb ${i + 1}`}
+                                                            className="w-full h-full object-cover"
+                                                            loading="lazy"
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="relative p-6 sm:p-8 overflow-y-auto custom-scrollbar bg-gradient-to-b from-[#111] to-[#080808] min-h-0">
@@ -434,6 +438,73 @@ export default function ProjectsPage() {
                                             ))}
                                         </div>
 
+                                        {selectedProject.caseStudy && (
+                                            <div className="mb-8 pt-8 border-t border-white/10">
+                                                <h4 className="text-2xl font-display text-white font-bold mb-6">Case Study</h4>
+                                                
+                                                {selectedProject.caseStudy.vision && (
+                                                    <div className="mb-6">
+                                                        <h5 className="text-primary font-medium mb-2 uppercase tracking-wider text-sm">Vision</h5>
+                                                        <p className="text-text-secondary leading-relaxed">{selectedProject.caseStudy.vision}</p>
+                                                    </div>
+                                                )}
+                                                
+                                                {selectedProject.caseStudy.challenges && selectedProject.caseStudy.challenges.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h5 className="text-primary font-medium mb-3 uppercase tracking-wider text-sm">Key Challenges</h5>
+                                                        <ul className="space-y-3">
+                                                            {selectedProject.caseStudy.challenges.map((challenge, idx) => (
+                                                                <li key={idx} className="flex items-start gap-3 text-text-secondary">
+                                                                    <span className="text-white/30 mt-1">▹</span>
+                                                                    <span className="leading-relaxed">{challenge}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {selectedProject.caseStudy.designSystem && (
+                                                    <div className="mb-6">
+                                                        <h5 className="text-primary font-medium mb-3 uppercase tracking-wider text-sm">Design System</h5>
+                                                        <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+                                                            {selectedProject.caseStudy.designSystem.colors && (
+                                                                <div className="flex flex-col sm:flex-row sm:gap-2">
+                                                                    <span className="text-white font-medium min-w-[100px]">Colors: </span>
+                                                                    <span className="text-text-secondary">{selectedProject.caseStudy.designSystem.colors.primary}, {selectedProject.caseStudy.designSystem.colors.secondary || selectedProject.caseStudy.designSystem.colors.accents}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedProject.caseStudy.designSystem.typography && (
+                                                                <div className="flex flex-col sm:flex-row sm:gap-2">
+                                                                    <span className="text-white font-medium min-w-[100px]">Typography: </span>
+                                                                    <span className="text-text-secondary">{selectedProject.caseStudy.designSystem.typography}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedProject.caseStudy.designSystem.style && (
+                                                                <div className="flex flex-col sm:flex-row sm:gap-2">
+                                                                    <span className="text-white font-medium min-w-[100px]">Style: </span>
+                                                                    <span className="text-text-secondary">{selectedProject.caseStudy.designSystem.style}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {selectedProject.caseStudy.features && selectedProject.caseStudy.features.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h5 className="text-primary font-medium mb-3 uppercase tracking-wider text-sm">Core Features</h5>
+                                                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            {selectedProject.caseStudy.features.map((feature, idx) => (
+                                                                <li key={idx} className="flex items-center gap-3 text-text-secondary bg-[#1a1a1a] rounded-lg p-3 border border-white/5">
+                                                                    <span className="text-primary">✓</span>
+                                                                    <span className="text-sm">{feature}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {(selectedProject.link !== "") && (
                                             <div className="mt-8 pt-6 border-t border-white/10">
                                                 <a
@@ -442,7 +513,7 @@ export default function ProjectsPage() {
                                                     rel="noopener noreferrer"
                                                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-black text-lg font-bold hover:shadow-[0_0_30px_rgba(230,255,0,0.3)] transition-all transform hover:-translate-y-1"
                                                 >
-                                                    View Live Project ↗
+                                                    View Project ↗
                                                 </a>
                                             </div>
                                         )}
