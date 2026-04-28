@@ -8,7 +8,7 @@ import { aboutPageContent, aboutBentoCards as defaultAboutBentoCards } from "@/d
 import { useEditableData } from "@/lib/useEditableData";
 
 const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
-const LightPillar = dynamic(() => import("@/components/LightPillar/LightPillar"), { ssr: false });
+import Squares from "@/components/Squares";
 const ShinyText = dynamic(() => import("@/components/ShinyText/ShinyText"), { ssr: false });
 const RotatingText = dynamic(() => import("@/components/RotatingText/RotatingText"), { ssr: false });
 const MagicBento = dynamic(() => import("@/components/MagicBento/MagicBento"), { ssr: false });
@@ -301,27 +301,16 @@ export default function AboutPage() {
 
     return (
         <div className="relative" style={{ background: "#0a0a0a" }}>
-            {/* ═══════ LIGHT PILLAR BACKGROUND ═══════ */}
-            <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-                <LightPillar
-                    topColor="#E6FF00"
-                    bottomColor="#5A6200"
-                    intensity={0.5}
-                    rotationSpeed={0.15}
-                    glowAmount={0.0015}
-                    pillarWidth={3}
-                    pillarHeight={0.4}
-                    noiseIntensity={0.4}
-                    pillarRotation={25}
-                    interactive={false}
-                    mixBlendMode="screen"
-                    quality="high"
+            {/* ═══════ FULL PAGE SQUARES BACKGROUND ═══════ */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <Squares
+                    speed={0.5}
+                    squareSize={40}
+                    direction="diagonal"
+                    borderColor="#222222"
+                    hoverFillColor="#E6FF0018"
                 />
             </div>
-            <div
-                className="fixed inset-0 pointer-events-none"
-                style={{ zIndex: 0, background: "rgba(10, 10, 10, 0.45)" }}
-            />
 
             {/* ═══════ SECTION 1 — LANYARD ID CARD ═══════ */}
             <section className="relative" style={{ minHeight: "100vh", zIndex: 1 }}>

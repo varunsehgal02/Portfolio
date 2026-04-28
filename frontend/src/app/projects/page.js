@@ -7,7 +7,7 @@ import { projects as defaultProjects } from "@/data/projects";
 import { projectsPageContent } from "@/data/pageContent";
 import { useEditableData } from "@/lib/useEditableData";
 import ProjectCard from "@/components/ProjectCard";
-import NetworkBackground from "@/components/NetworkBackground";
+import Squares from "@/components/Squares";
 
 const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
 
@@ -146,7 +146,13 @@ export default function ProjectsPage() {
     return (
         <div className="relative min-h-screen pt-28 pb-20">
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <NetworkBackground className="opacity-95" />
+                <Squares
+                    speed={0.5}
+                    squareSize={40}
+                    direction="diagonal"
+                    borderColor="#222222"
+                    hoverFillColor="#E6FF0018"
+                />
             </div>
 
             <div className="relative z-10 max-w-7xl mx-auto px-6">

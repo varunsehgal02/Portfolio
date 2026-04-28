@@ -10,7 +10,7 @@ export const projects = [
             "Identity Card Design",
             "Brand Representation",
         ],
-        tools: ["Photoshop", "Illustrator"],
+        tools: ["Photoshop", "Illustrator", "Canva"],
         gradient: "from-purple-700 via-red-700 to-zinc-900",
         icon: "🪪",
         link: "",
@@ -71,7 +71,7 @@ export const projects = [
             "Event Theming",
             "Typography Integration"
         ],
-        tools: ["Photoshop", "Illustrator"],
+        tools: ["Photoshop", "Illustrator", "Canva"],
         gradient: "from-blue-700 via-zinc-900 to-black",
         icon: "🖼️",
         link: "",
