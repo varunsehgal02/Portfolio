@@ -10,6 +10,7 @@ import ProjectCard from "@/components/ProjectCard";
 import Squares from "@/components/Squares";
 
 const Lanyard = dynamic(() => import("@/components/Lanyard/Lanyard"), { ssr: false });
+const DecryptedText = dynamic(() => import("@/components/DecryptedText"), { ssr: false });
 
 const ID_CARDS_GALLERY = [
     { front: "/projects/real-id-cards/1-front.png?v=2", back: "/projects/real-id-cards/1-back.png?v=2", fitMode: "contain" },
@@ -55,6 +56,29 @@ export default function ProjectsPage() {
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeModalImage, setActiveModalImage] = useState(0);
     const [slideDirection, setSlideDirection] = useState(1);
+
+    // Typing effect — types, deletes, then types again (loops)
+    const [typedText, setTypedText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const textToType = "Discipline";
+
+    useEffect(() => {
+        let timeout;
+        if (!isDeleting && typedText.length < textToType.length) {
+            timeout = setTimeout(() => {
+                setTypedText(textToType.slice(0, typedText.length + 1));
+            }, 150);
+        } else if (!isDeleting && typedText.length === textToType.length) {
+            timeout = setTimeout(() => setIsDeleting(true), 2000);
+        } else if (isDeleting && typedText.length > 0) {
+            timeout = setTimeout(() => {
+                setTypedText(textToType.slice(0, typedText.length - 1));
+            }, 80);
+        } else if (isDeleting && typedText.length === 0) {
+            timeout = setTimeout(() => setIsDeleting(false), 500);
+        }
+        return () => clearTimeout(timeout);
+    }, [typedText, isDeleting]);
 
     const availableSubCategories = useMemo(() => {
         if (!mainCategory) return ["All"];
@@ -145,6 +169,12 @@ export default function ProjectsPage() {
 
     return (
         <div className="relative min-h-screen pt-28 pb-20">
+            {/* Background glow similar to home page */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+                <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px]" />
+            </div>
+
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <Squares
                     speed={0.5}
@@ -167,11 +197,30 @@ export default function ProjectsPage() {
                             className="flex flex-col items-center justify-center min-h-[65vh]"
                         >
                             <h1 className="font-display font-bold text-4xl sm:text-5xl md:text-6xl text-text-primary mb-6 text-center">
-                                Choose a <span className="gradient-text">Discipline</span>
+                                Choose a <span className="gradient-text text-glow">
+                                    {typedText}
+                                    <motion.span
+                                        animate={{ opacity: [1, 0, 1] }}
+                                        transition={{ duration: 0.7, repeat: Infinity }}
+                                        className="inline-block w-1 h-[0.8em] bg-primary ml-1 align-middle"
+                                    />
+                                </span>
                             </h1>
-                            <p className="text-text-secondary text-lg mb-16 text-center max-w-2xl">
-                                Explore my specialized portfolios across different creative domains.
-                            </p>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.4, duration: 0.6 }}
+                                className="text-text-secondary text-lg mb-16 text-center max-w-2xl mx-auto"
+                            >
+                                <DecryptedText
+                                    text="Explore my specialized portfolios across different creative domains."
+                                    animateOn="view"
+                                    speed={40}
+                                    maxIterations={15}
+                                    sequential
+                                    revealDirection="start"
+                                />
+                            </motion.div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
                                 {categoryOptions.map((opt, idx) => (
